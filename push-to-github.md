@@ -33,9 +33,17 @@
 ```
 
 ```python
-!git commit -m"a"
+!git commit -m"revise readme"
 ```
 
 ```python
-!git remote add origin https://github.com/lyhue1991/easyeda
+!git remote add origin https://github.com/lyhue1991/torchkeras
+```
+
+```python
+!git push origin master 
+```
+
+```python
+
 ```

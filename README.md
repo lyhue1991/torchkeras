@@ -259,9 +259,6 @@ ax2.set_title("y_pred")
 ![](./data/training_result.png)
 
 
-
-
-
 ### (4) evaluate the model
 
 ```python
@@ -368,7 +365,7 @@ model_clone.load_state_dict(torch.load("model_parameter.pkl"))
 
 model_clone.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
              metrics_dict={"accuracy":accuracy})
-# 评估
+
 model_clone.evaluate(dl_valid)
 ```
 

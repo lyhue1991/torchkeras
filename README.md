@@ -101,7 +101,6 @@ class DNNModel(Model):  ### Attention here
         return y
         
 model = DNNModel()
-
 model.summary(input_shape =(2,))
 ```
 

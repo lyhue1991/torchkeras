@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import datetime
 import numpy as np 
@@ -129,21 +130,26 @@ class Model(torch.nn.Module):
     
 
     def compile(self, loss_func, 
-               optimizer=None, metrics_dict=None):
+               optimizer=None, metrics_dict=None,device = None):
         self.loss_func = loss_func
         self.optimizer = optimizer if optimizer else torch.optim.Adam(self.parameters(),lr = 0.001)
         self.metrics_dict = metrics_dict if metrics_dict else {}
         self.history = {}
+        self.device = device
+        if self.device:
+            self.to(device)
         
 
     def summary(self,input_shape,input_dtype = torch.FloatTensor, batch_size=-1 ):
         summary(self,input_shape,input_dtype,batch_size)
     
     def train_step(self, features, labels):  
-        
+           
         self.train()
-        
         self.optimizer.zero_grad()
+        if self.device:
+            features = features.to(device)
+            labels = labels.to(device)
 
         # forward
         predictions = self.forward(features)
@@ -167,6 +173,10 @@ class Model(torch.nn.Module):
         
         self.eval()
         
+        if self.device:
+            features = features.to(device)
+            labels = labels.to(device)
+            
         with torch.no_grad():
             predictions = self.forward(features)
             loss = self.loss_func(predictions,labels)
@@ -243,5 +253,8 @@ class Model(torch.nn.Module):
     
     def predict(self,dl):
         self.eval()
-        result = torch.cat([self.forward(t[0]) for t in dl])
+        if self.device:
+            result = torch.cat([self.forward(t[0]) for t.to(device) in dl])
+        else:
+            result = torch.cat([self.forward(t[0]) for t in dl])
         return(result.data)

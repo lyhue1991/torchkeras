@@ -134,8 +134,10 @@ def accuracy(y_pred,y_true):
     acc = torch.mean(1-torch.abs(y_true-y_pred))
     return acc
 
+#如果 gpu可用，使用gpu进行训练
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
-             metrics_dict={"accuracy":accuracy})
+             metrics_dict={"accuracy":accuracy},device = device)
 
 dfhistory = model.fit(30,dl_train = dl_train,dl_val = dl_valid,log_step_freq = 20)
 ```

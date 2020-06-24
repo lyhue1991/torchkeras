@@ -135,7 +135,7 @@ class Model(torch.nn.Module):
         self.optimizer = optimizer if optimizer else torch.optim.Adam(self.parameters(),lr = 0.001)
         self.metrics_dict = metrics_dict if metrics_dict else {}
         self.history = {}
-        self.device = device
+        self.device = device if torch.cuda.is_available() else None
         if self.device:
             self.to(device)
         
@@ -254,7 +254,7 @@ class Model(torch.nn.Module):
     def predict(self,dl):
         self.eval()
         if self.device:
-            result = torch.cat([self.forward(t[0]) for t.to(device) in dl])
+            result = torch.cat([self.forward(t[0].to(device)) for t in dl])
         else:
             result = torch.cat([self.forward(t[0]) for t in dl])
         return(result.data)

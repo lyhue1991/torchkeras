@@ -137,7 +137,7 @@ class Model(torch.nn.Module):
         self.history = {}
         self.device = device if torch.cuda.is_available() else None
         if self.device:
-            self.to(device)
+            self.to(self.device)
         
 
     def summary(self,input_shape,input_dtype = torch.FloatTensor, batch_size=-1 ):
@@ -148,8 +148,8 @@ class Model(torch.nn.Module):
         self.train()
         self.optimizer.zero_grad()
         if self.device:
-            features = features.to(device)
-            labels = labels.to(device)
+            features = features.to(self.device)
+            labels = labels.to(self.device)
 
         # forward
         predictions = self.forward(features)
@@ -174,8 +174,8 @@ class Model(torch.nn.Module):
         self.eval()
         
         if self.device:
-            features = features.to(device)
-            labels = labels.to(device)
+            features = features.to(self.device)
+            labels = labels.to(self.device)
             
         with torch.no_grad():
             predictions = self.forward(features)
@@ -254,7 +254,7 @@ class Model(torch.nn.Module):
     def predict(self,dl):
         self.eval()
         if self.device:
-            result = torch.cat([self.forward(t[0].to(device)) for t in dl])
+            result = torch.cat([self.forward(t[0].to(self.device)) for t in dl])
         else:
             result = torch.cat([self.forward(t[0]) for t in dl])
         return(result.data)

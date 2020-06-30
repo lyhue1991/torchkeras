@@ -121,14 +121,16 @@ class Model(torch.nn.Module):
         nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print("\n"+"="*80 + "%s"%nowtime)
         
-    def __init__(self):
+    def __init__(self,net = None):
         super(Model, self).__init__()
-
+        self.net = net
 
     def forward(self,x):
-        raise NotImplementedError
+        if self.net:
+            return self.net.forward(x)
+        else:
+            raise NotImplementedError
     
-
     def compile(self, loss_func, 
                optimizer=None, metrics_dict=None,device = None):
         self.loss_func = loss_func

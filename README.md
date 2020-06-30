@@ -7,7 +7,7 @@ With torchkeras, You need not to write your training loop with many lines of cod
 
 like this three steps as below:
 
-(i) create your model as a  subclass of `torchkeras.Model` rather than `torch.nn.Module`.
+(i) create your network and wrap it with torchkeras.Model like this: `model = torchkeras.Model(net)` 
 
 (ii) compile your model to 	bind the loss function, the optimizer and the metrics function.
 
@@ -38,7 +38,7 @@ from torch import nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset,DataLoader,TensorDataset
 
-from torchkeras import Model,summary #Attention this line!
+import torchkeras #Attention this line 
 ```
 
 ### (1) prepare data 
@@ -87,9 +87,9 @@ dl_valid = DataLoader(ds_valid,batch_size = 100,num_workers=2)
 ### (2) create the  model
 
 ```python
-class DNNModel(Model):  ### Attention here
+class Net(nn.Module):  
     def __init__(self):
-        super(DNNModel, self).__init__()
+        super().__init__()
         self.fc1 = nn.Linear(2,4)
         self.fc2 = nn.Linear(4,8) 
         self.fc3 = nn.Linear(8,1)
@@ -100,7 +100,10 @@ class DNNModel(Model):  ### Attention here
         y = nn.Sigmoid()(self.fc3(x))
         return y
         
-model = DNNModel()
+net = Net()
+
+### Attention here
+model = torchkeras.Model(net)
 model.summary(input_shape =(2,))
 ```
 
@@ -362,7 +365,7 @@ tensor([[0.9979],
 
 torch.save(model.state_dict(), "model_parameter.pkl")
 
-model_clone = DNNModel()
+model_clone = torchkeras.Model(Net())
 model_clone.load_state_dict(torch.load("model_parameter.pkl"))
 
 model_clone.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),

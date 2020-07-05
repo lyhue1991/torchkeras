@@ -127,7 +127,7 @@ Estimated Total Size (MB): 0.000340
 ```
 
 
-### (3) Train the model
+### (3) train the model
 
 ```python
 # define metric

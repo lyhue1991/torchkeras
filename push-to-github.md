@@ -33,7 +33,7 @@
 ```
 
 ```python
-!git commit -m"revise readme"
+!git commit -m"1.5.1"
 ```
 
 ```python

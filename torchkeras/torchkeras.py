@@ -7,6 +7,8 @@ import torch
 from collections import OrderedDict
 from prettytable import PrettyTable
 
+__version__ = "1.5.1"
+
 #On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" 
 

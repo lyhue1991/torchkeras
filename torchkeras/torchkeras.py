@@ -7,7 +7,7 @@ import torch
 from collections import OrderedDict
 from prettytable import PrettyTable
 
-__version__ = "1.5.1"
+__version__ = "1.5.2"
 
 #On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" 
@@ -147,6 +147,7 @@ class Model(torch.nn.Module):
     def summary(self,input_shape,input_dtype = torch.FloatTensor, batch_size=-1 ):
         summary(self,input_shape,input_dtype,batch_size)
     
+    @torch.no_grad()
     def train_step(self, features, labels):  
            
         self.train()
@@ -173,6 +174,7 @@ class Model(torch.nn.Module):
         
         return train_metrics
     
+    @torch.no_grad()
     def evaluate_step(self, features,labels):
         
         self.eval()

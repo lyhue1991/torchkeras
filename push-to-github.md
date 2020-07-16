@@ -33,7 +33,7 @@
 ```
 
 ```python
-!git commit -m"1.5.1"
+!git commit -m"1.5.2"
 ```
 
 ```python

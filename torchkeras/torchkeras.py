@@ -7,7 +7,7 @@ import torch
 from collections import OrderedDict
 from prettytable import PrettyTable
 
-__version__ = "1.5.2"
+__version__ = "1.5.3"
 
 #On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" 
@@ -147,7 +147,6 @@ class Model(torch.nn.Module):
     def summary(self,input_shape,input_dtype = torch.FloatTensor, batch_size=-1 ):
         summary(self,input_shape,input_dtype,batch_size)
     
-    @torch.no_grad()
     def train_step(self, features, labels):  
            
         self.train()
@@ -247,6 +246,7 @@ class Model(torch.nn.Module):
             
         return pd.DataFrame(self.history)
     
+    @torch.no_grad()
     def evaluate(self,dl_val):
         self.eval()
         val_metrics_list = {}
@@ -257,6 +257,7 @@ class Model(torch.nn.Module):
         
         return {name:np.mean(metric_list) for name,metric_list in val_metrics_list.items()}
     
+    @torch.no_grad()
     def predict(self,dl):
         self.eval()
         if self.device:

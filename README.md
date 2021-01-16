@@ -1,7 +1,7 @@
 # 1，Introduction
 
-
-The torchkeras library is a simple tool for training neural network in pytorch jusk like in a keras style.
+<!-- #region -->
+The torchkeras library is a simple tool for training neural network in pytorch jusk like in a keras style. 😋😋
 
 With torchkeras, You need not to write your training loop with many lines of code, all you need to do is just 
 
@@ -15,10 +15,26 @@ like this three steps as below:
 
 **This project seems somehow powerful, but the source code is very simple.**
 
-**Actually, less than 300 lines of Python code.**
+**Actually, less than 200 lines of Python code.**
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 
+
+<br/>
+
+🍉🍉 **new feature**🍉🍉: torchkeras.nightModel 😋😋
+
+it's more powerful than torchkeras.Model and with more flexibility and easier to use!
+
+the tutorial of torchkeras.nightModel is here
+
+**[Use Pytorch-Lightning Like Keras ](./Tutorial.md)**
+
+
+<br/>
+
+
+<!-- #endregion -->
 
 # 2,  Use example
 
@@ -39,6 +55,8 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset,DataLoader,TensorDataset
 
 import torchkeras #Attention this line 
+
+
 ```
 
 ### (1) prepare data 

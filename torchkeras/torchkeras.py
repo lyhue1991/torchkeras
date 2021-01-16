@@ -8,7 +8,7 @@ from collections import OrderedDict
 from prettytable import PrettyTable
 from torchkeras.summary import summary
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 
 #On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" 

@@ -22,11 +22,11 @@ like this three steps as below:
 
 <br/>
 
-🍉🍉 **new feature**🍉🍉: torchkeras.nightModel 😋😋
+🍉🍉 **new feature**🍉🍉: torchkeras.LightModel 😋😋
 
 it's more powerful than torchkeras.Model and with more flexibility and easier to use!
 
-the tutorial of torchkeras.nightModel is here
+the tutorial of torchkeras.LightModel is here:
 
 **[Use Pytorch-Lightning Like Keras ](./Tutorial.md)**
 

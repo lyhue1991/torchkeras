@@ -24,24 +24,23 @@ Once you do this, you can train on multiple-GPUs, TPUs, CPUs and even in 16-bit 
 
 What's more, we can use Pytorch-Lightning to implement the keras-style network trainning and evaluating.
 
-Below is an example, the class `torchkeras.nightModel` is  very similar to the class `torchkeras.Model`.
+Below is an example, the class `torchkeras.LightModel` is  very similar to the class `torchkeras.Model`.
 
-While torchkeras.nightModel borrows a lot of power from the Pytorch-Lightning Module, like:
+While `torchkeras.LightModel` borrows a lot of power from the Pytorch-Lightning Module, like:
 
 * train with multi-gpus 
 
-* train with tpu or tpus
+* train with tpus
 
-* use many callbacks such as ModelCheckpoint, EarlyStopping ......
+* many callbacks such as ModelCheckpoint, EarlyStopping ......
 
-* auto model and parameters save 
+* auto model structure and model parameters values saving 
 
 * use lr_schedule freely
 
-And what's more, it enables much more flexibility and easier to use.
+And what's more, `torchkeras.LightModel` enables much more flexibility and seems easier to use.
 
-All you need it to write a `shared_step` function and return the loss and metrics dict.
-
+All you need it to write a `shared_step` function and return a dict containing loss and metrics .
 
 
 ```python

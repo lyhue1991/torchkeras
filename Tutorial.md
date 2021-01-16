@@ -1,5 +1,7 @@
-### Use Pytorch-Lightning Like Keras 
+# Use Pytorch-Lightning Like Keras 
 
+
+## 1, Introduction 
 
 Lightning disentangles PyTorch code to decouple the science from the engineering.
 
@@ -252,7 +254,7 @@ summary(model,input_shape =(2,))
 
 ```
 
-### 3， train the model
+### (3)， train the model
 
 ```python
 
@@ -352,7 +354,7 @@ ax2.set_title("y_pred")
 
 ```
 
-### 4，evaluate model 
+### (4)，evaluate model 
 
 ```python
 import pandas as pd 
@@ -414,7 +416,7 @@ print(results[0])
 
 ```
 
-### 5，use the model 
+### (5)，use the model 
 
 ```python
 def predict(model,dl):
@@ -443,7 +445,7 @@ tensor([[0.9564],
 
 ```
 
-### 6，save the model 
+### (6)，save the model 
 
 
 The model's structure and parameters value is saved  int the lightning_logs path. 

@@ -51,8 +51,8 @@ class Model(torch.nn.Module):
 
         # evaluate metrics
         train_metrics = {"loss": loss.item()}
-        for name, metric_func in self.metrics_dict.items():
-            train_metrics[name] = metric_func(predictions, labels).item()
+        for metrics in self.metrics_dict:
+            train_metrics[metrics.__name__] = metrics(predictions, labels).item()
 
         # backward
         loss.backward()
@@ -77,8 +77,8 @@ class Model(torch.nn.Module):
             loss = self.loss_func(predictions, labels)
 
         val_metrics = {"val_loss": loss.item()}
-        for name, metric_func in self.metrics_dict.items():
-            val_metrics["val_" + name] = metric_func(predictions, labels).item()
+        for metrics in self.metrics_dict:
+            val_metrics["val_" + metrics.__name__] = metrics(predictions, labels).item()
 
         return val_metrics
 

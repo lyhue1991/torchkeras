@@ -93,13 +93,18 @@ class Model(torch.nn.Module):
             pb = ProgressBar(len(dl_train))
 
             # 1，training loop -------------------------------------------------
-            train_metrics_sum, step = {}, 0
+            train_metrics_sum, log, step = {}, {}, 0
             for features, labels in dl_train:
                 step += 1
                 train_metrics = self.train_step(features, labels)
 
                 for name, metric in train_metrics.items():
                     train_metrics_sum[name] = train_metrics_sum.get(name, 0.0) + metric
+
+                # Live Update ProgressBar
+                for name, metric_sum in train_metrics_sum.items():
+                    log[name] = metric_sum / step
+                pb.bar(step-1, log_to_message(log))
 
             for name, metric_sum in train_metrics_sum.items():
                 self.history[name] = self.history.get(name, []) + [metric_sum / step]

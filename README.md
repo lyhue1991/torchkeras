@@ -161,50 +161,43 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 model.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
              metrics_dict={"accuracy":accuracy},device = device)
 
-dfhistory = model.fit(epochs=10, dl_train=dl_train, dl_val=dl_valid)
+dfhistory=model.fit(epochs=10, dl_train=dl_train, dl_val=dl_valid, patience=5, monitor="val_loss", save_path="save_model.pkl")
 ```
 
 ```
 Epoch 1 / 10
-[========================================] 100%	loss: 0.6477    accuracy: 0.5818    val_loss: 0.6336    val_accuracy: 0.5500
+[========================================] 100%	loss: 0.1924    accuracy: 0.9225    val_loss: 0.2172    val_accuracy: 0.9167
 
-Validation loss decreased (inf --> 0.633563).  Saving model ...
+Validation loss decreased (inf --> 0.217185).  Saving model ...
 Epoch 2 / 10
-[========================================] 100%	loss: 0.5909    accuracy: 0.6846    val_loss: 0.5577    val_accuracy: 0.7058
+[========================================] 100%	loss: 0.1825    accuracy: 0.9279    val_loss: 0.1985    val_accuracy: 0.9192
 
-Validation loss decreased (0.633563 --> 0.557686).  Saving model ...
+Validation loss decreased (0.217185 --> 0.198474).  Saving model ...
 Epoch 3 / 10
-[========================================] 100%	loss: 0.5133    accuracy: 0.7439    val_loss: 0.4690    val_accuracy: 0.7617
+[========================================] 100%	loss: 0.1782    accuracy: 0.9311    val_loss: 0.1958    val_accuracy: 0.9217
 
-Validation loss decreased (0.557686 --> 0.469044).  Saving model ...
+Validation loss decreased (0.198474 --> 0.195823).  Saving model ...
 Epoch 4 / 10
-[========================================] 100%	loss: 0.4162    accuracy: 0.7729    val_loss: 0.3827    val_accuracy: 0.8525
+[========================================] 100%	loss: 0.1803    accuracy: 0.9275    val_loss: 0.1974    val_accuracy: 0.9208
 
-Validation loss decreased (0.469044 --> 0.382657).  Saving model ...
+EarlyStopping counter: 1 out of 5
 Epoch 5 / 10
-[========================================] 100%	loss: 0.3343    accuracy: 0.8836    val_loss: 0.2852    val_accuracy: 0.9000
+[========================================] 100%	loss: 0.1808    accuracy: 0.9250    val_loss: 0.1993    val_accuracy: 0.9242
 
-Validation loss decreased (0.382657 --> 0.285220).  Saving model ...
+EarlyStopping counter: 2 out of 5
 Epoch 6 / 10
-[========================================] 100%	loss: 0.2718    accuracy: 0.9036    val_loss: 0.2496    val_accuracy: 0.9075
+[========================================] 100%	loss: 0.1822    accuracy: 0.9254    val_loss: 0.2105    val_accuracy: 0.9142
 
-Validation loss decreased (0.285220 --> 0.249568).  Saving model ...
+EarlyStopping counter: 3 out of 5
 Epoch 7 / 10
-[========================================] 100%	loss: 0.2363    accuracy: 0.9125    val_loss: 0.2266    val_accuracy: 0.9100
+[========================================] 100%	loss: 0.1869    accuracy: 0.9282    val_loss: 0.1975    val_accuracy: 0.9208
 
-Validation loss decreased (0.249568 --> 0.226555).  Saving model ...
+EarlyStopping counter: 4 out of 5
 Epoch 8 / 10
-[========================================] 100%	loss: 0.2220    accuracy: 0.9157    val_loss: 0.2078    val_accuracy: 0.9142
+[========================================] 100%	loss: 0.1773    accuracy: 0.9325    val_loss: 0.1970    val_accuracy: 0.9233
 
-Validation loss decreased (0.226555 --> 0.207836).  Saving model ...
-Epoch 9 / 10
-[========================================] 100%	loss: 0.2069    accuracy: 0.9214    val_loss: 0.2357    val_accuracy: 0.8942
-
-EarlyStopping counter: 1 out of 10
-Epoch 10 / 10
-[========================================] 100%	loss: 0.2164    accuracy: 0.9071    val_loss: 0.2221    val_accuracy: 0.9067
-
-EarlyStopping counter: 2 out of 10
+EarlyStopping counter: 5 out of 5
+Early stopping
 ```
 
 ```python
@@ -315,10 +308,8 @@ tensor([[0.9979],
 ```python
 # save the model parameters
 
-torch.save(model.state_dict(), "model_parameter.pkl")
-
 model_clone = torchkeras.Model(Net())
-model_clone.load_state_dict(torch.load("model_parameter.pkl"))
+model_clone.load_state_dict(torch.load("save_model.pkl"))
 
 model_clone.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
              metrics_dict={"accuracy":accuracy})

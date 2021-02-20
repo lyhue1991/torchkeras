@@ -4,7 +4,7 @@
 Created on 2月 18, 2021 
 
 @file: torchtools.py
-@desc: EarlyStopping, copy from https://github.com/Bjarten/early-stopping-pytorch/blob/master/pytorchtools.py
+@desc: EarlyStopping, copy from Bjarten/early-stopping-pytorch
 """
 import torch
 import numpy as np

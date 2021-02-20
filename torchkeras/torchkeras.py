@@ -7,7 +7,7 @@ from torchkeras.summary import summary
 from torchkeras.torchtools import EarlyStopping
 from torchkeras.utils import log_to_message, ProgressBar
 
-__version__ = "2.1.2"
+__version__ = "2.2.1"
 
 # On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -26,6 +26,16 @@ class Model(torch.nn.Module):
             raise NotImplementedError
 
     def compile(self, loss_func, optimizer=None, metrics_dict=None, device=None):
+        """
+        Compile the model similar to Keras' .compile(...) method
+
+        # Arguments
+            loss_func: training loss
+            optimizer: training optimizer
+            metrics_dict: list of functions with signatures `metric(y_true, y_pred)`
+                where y_true and y_pred are both Tensors
+            device: run device
+        """
         self.history = {}
         self.loss_func = loss_func
         self.metrics_dict = metrics_dict if metrics_dict else {}
@@ -82,19 +92,33 @@ class Model(torch.nn.Module):
 
         return val_metrics
 
-    def fit(self, dl_train,  dl_val=None, epochs=10, patience=10, monitor="val_loss", save_path='checkpoint.pt', verbose=True):
+    def fit(self, train_data,  val_data=None, epochs=10, patience=10, monitor="val_loss", save_path='checkpoint.pt', verbose=True):
+        """
+        Trains the model similar to Keras' .fit(...) method
 
-        dl_val = dl_val if dl_val else []
+        # Arguments
+            train_data: Training data Tensor.
+            val_data: Evaluate data Tensor.
+            epochs: integer, The number of times to iterate.
+            patience: integer, How long to wait after last time validation loss improved.
+            monitor: str, The metric name to monitor. 
+            save_path: str, Path for the checkpoint to be saved to.
+            verbose : bool, If True, prints a message for each validation loss improvement.
+
+        # Returns
+            DataFrame with training metrics
+        """
+        val_data = val_data if val_data else []
         # initialize the early_stopping object
         early_stopping = EarlyStopping(patience=patience, path=save_path, verbose=verbose)
 
         for epoch in range(1, epochs+1):
             print("Epoch {0} / {1}".format(epoch, epochs))
-            pb = ProgressBar(len(dl_train))
+            pb = ProgressBar(len(train_data))
 
             # 1，training loop -------------------------------------------------
             train_metrics_sum, log, step = {}, {}, 0
-            for features, labels in dl_train:
+            for features, labels in train_data:
                 step += 1
                 train_metrics = self.train_step(features, labels)
 
@@ -111,7 +135,7 @@ class Model(torch.nn.Module):
 
             # 2，validate loop -------------------------------------------------
             val_metrics_sum, step = {}, 0
-            for features, labels in dl_val:
+            for features, labels in val_data:
                 step = step + 1
                 val_metrics = self.evaluate_step(features, labels)
                 for name, metric in val_metrics.items():
@@ -132,10 +156,10 @@ class Model(torch.nn.Module):
         return pd.DataFrame(self.history)
 
     @torch.no_grad()
-    def evaluate(self, dl_val):
+    def evaluate(self, val_data):
         self.eval()
         val_metrics_list = {}
-        for features, labels in dl_val:
+        for features, labels in val_data:
             val_metrics = self.evaluate_step(features, labels)
             for name, metric in val_metrics.items():
                 val_metrics_list[name] = val_metrics_list.get(name, []) + [metric]

@@ -4,7 +4,7 @@
 Created on 2月 18, 2021 
 
 @file: utils.py
-@desc: progress bar, copy from https://github.com/henryre/pytorch-fitmodule/blob/master/pytorch_fitmodule/utils.py
+@desc: progress bar
 """
 import sys
 import numpy as np

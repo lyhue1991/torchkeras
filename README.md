@@ -24,12 +24,13 @@ like this three steps as below:
 
 🍉🍉 **new feature**🍉🍉: torchkeras.LightModel 😋😋
 
+🍉🍉 **new feature**🍉🍉: Add EarltStopping, Multiple custom metrics can be added, Progress bar synchronous feedback😋😋
+
 it's more powerful than torchkeras.Model and with more flexibility and easier to use!
 
 the tutorial of torchkeras.LightModel is here:
 
 **[Use Pytorch-Lightning Like Keras ](./Tutorial.md)**
-
 
 <br/>
 
@@ -149,55 +150,67 @@ Estimated Total Size (MB): 0.000340
 
 ```python
 # define metric
-def accuracy(y_pred,y_true):
+def accuracy(y_pred, y_true):
     y_pred = torch.where(y_pred>0.5,torch.ones_like(y_pred,dtype = torch.float32),
                       torch.zeros_like(y_pred,dtype = torch.float32))
     acc = torch.mean(1-torch.abs(y_true-y_pred))
     return acc
 
+
+def mse(y_pred, y_true):
+    return torch.sqrt(torch.mean((y_true - y_pred) ** 2))
+
+
 # if gpu is available, use gpu
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
-             metrics_dict={"accuracy":accuracy},device = device)
+             metrics_dict={accuracy, mse},device = device)
 
-dfhistory=model.fit(epochs=10, dl_train=dl_train, dl_val=dl_valid, patience=5, monitor="val_loss", save_path="save_model.pkl")
+dfhistory=model.fit(epochs=10, train_data=dl_train, val_data=dl_valid, patience=5, monitor="val_loss", save_path="save_model.pkl", verbose=True)
 ```
 
 ```
 Epoch 1 / 10
-[========================================] 100%	loss: 0.1924    accuracy: 0.9225    val_loss: 0.2172    val_accuracy: 0.9167
+[========================================] 100%	loss: 0.6570    accuracy: 0.5525    mse: 0.4824    val_loss: 0.6188    val_accuracy: 0.6167    val_mse: 0.4638
 
-Validation loss decreased (inf --> 0.217185).  Saving model ...
+Validation loss decreased (inf --> 0.618847).  Saving model ...
 Epoch 2 / 10
-[========================================] 100%	loss: 0.1825    accuracy: 0.9279    val_loss: 0.1985    val_accuracy: 0.9192
+[========================================] 100%	loss: 0.5877    accuracy: 0.6857    mse: 0.4476    val_loss: 0.5518    val_accuracy: 0.6950    val_mse: 0.4315
 
-Validation loss decreased (0.217185 --> 0.198474).  Saving model ...
+Validation loss decreased (0.618847 --> 0.551810).  Saving model ...
 Epoch 3 / 10
-[========================================] 100%	loss: 0.1782    accuracy: 0.9311    val_loss: 0.1958    val_accuracy: 0.9217
+[========================================] 100%	loss: 0.4949    accuracy: 0.8079    mse: 0.3984    val_loss: 0.4342    val_accuracy: 0.8558    val_mse: 0.3645
 
-Validation loss decreased (0.198474 --> 0.195823).  Saving model ...
+Validation loss decreased (0.551810 --> 0.434237).  Saving model ...
 Epoch 4 / 10
-[========================================] 100%	loss: 0.1803    accuracy: 0.9275    val_loss: 0.1974    val_accuracy: 0.9208
+[========================================] 100%	loss: 0.3819    accuracy: 0.8682    mse: 0.3359    val_loss: 0.3284    val_accuracy: 0.9117    val_mse: 0.3023
+
+Validation loss decreased (0.434237 --> 0.328433).  Saving model ...
+Epoch 5 / 10
+[========================================] 100%	loss: 0.2942    accuracy: 0.9007    mse: 0.2882    val_loss: 0.2541    val_accuracy: 0.9092    val_mse: 0.2649
+
+Validation loss decreased (0.328433 --> 0.254060).  Saving model ...
+Epoch 6 / 10
+[========================================] 100%	loss: 0.2441    accuracy: 0.9104    mse: 0.2627    val_loss: 0.2311    val_accuracy: 0.9125    val_mse: 0.2561
+
+Validation loss decreased (0.254060 --> 0.231079).  Saving model ...
+Epoch 7 / 10
+[========================================] 100%	loss: 0.2247    accuracy: 0.9100    mse: 0.2542    val_loss: 0.2218    val_accuracy: 0.9083    val_mse: 0.2546
+
+Validation loss decreased (0.231079 --> 0.221847).  Saving model ...
+Epoch 8 / 10
+[========================================] 100%	loss: 0.2091    accuracy: 0.9164    mse: 0.2441    val_loss: 0.2084    val_accuracy: 0.9192    val_mse: 0.2441
+
+Validation loss decreased (0.221847 --> 0.208386).  Saving model ...
+Epoch 9 / 10
+[========================================] 100%	loss: 0.1972    accuracy: 0.9218    mse: 0.2366    val_loss: 0.2032    val_accuracy: 0.9175    val_mse: 0.2435
+
+Validation loss decreased (0.208386 --> 0.203234).  Saving model ...
+Epoch 10 / 10
+[========================================] 100%	loss: 0.1940    accuracy: 0.9204    mse: 0.2367    val_loss: 0.2058    val_accuracy: 0.9167    val_mse: 0.2445
 
 EarlyStopping counter: 1 out of 5
-Epoch 5 / 10
-[========================================] 100%	loss: 0.1808    accuracy: 0.9250    val_loss: 0.1993    val_accuracy: 0.9242
-
-EarlyStopping counter: 2 out of 5
-Epoch 6 / 10
-[========================================] 100%	loss: 0.1822    accuracy: 0.9254    val_loss: 0.2105    val_accuracy: 0.9142
-
-EarlyStopping counter: 3 out of 5
-Epoch 7 / 10
-[========================================] 100%	loss: 0.1869    accuracy: 0.9282    val_loss: 0.1975    val_accuracy: 0.9208
-
-EarlyStopping counter: 4 out of 5
-Epoch 8 / 10
-[========================================] 100%	loss: 0.1773    accuracy: 0.9325    val_loss: 0.1970    val_accuracy: 0.9233
-
-EarlyStopping counter: 5 out of 5
-Early stopping
 ```
 
 ```python

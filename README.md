@@ -24,12 +24,13 @@ like this three steps as below:
 
 🍉🍉 **new feature**🍉🍉: torchkeras.LightModel 😋😋
 
+🍉🍉 **new feature**🍉🍉: Add EarltStopping, Multiple custom metrics can be added, Progress bar synchronous feedback😋😋
+
 it's more powerful than torchkeras.Model and with more flexibility and easier to use!
 
 the tutorial of torchkeras.LightModel is here:
 
 **[Use Pytorch-Lightning Like Keras ](./Tutorial.md)**
-
 
 <br/>
 
@@ -149,116 +150,67 @@ Estimated Total Size (MB): 0.000340
 
 ```python
 # define metric
-def accuracy(y_pred,y_true):
+def accuracy(y_pred, y_true):
     y_pred = torch.where(y_pred>0.5,torch.ones_like(y_pred,dtype = torch.float32),
                       torch.zeros_like(y_pred,dtype = torch.float32))
     acc = torch.mean(1-torch.abs(y_true-y_pred))
     return acc
 
+
+def mse(y_pred, y_true):
+    return torch.sqrt(torch.mean((y_true - y_pred) ** 2))
+
+
 # if gpu is available, use gpu
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 model.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
-             metrics_dict={"accuracy":accuracy},device = device)
+             metrics_dict={accuracy, mse},device = device)
 
-dfhistory = model.fit(30,dl_train = dl_train,dl_val = dl_valid,log_step_freq = 20)
+dfhistory=model.fit(epochs=10, train_data=dl_train, val_data=dl_valid, patience=5, monitor="val_loss", save_path="save_model.pkl", verbose=True)
 ```
 
 ```
-Start Training ...
+Epoch 1 / 10
+[========================================] 100%	loss: 0.6570    accuracy: 0.5525    mse: 0.4824    val_loss: 0.6188    val_accuracy: 0.6167    val_mse: 0.4638
 
-================================================================================2020-06-21 20:40:23
-{'step': 10, 'loss': 0.217, 'accuracy': 0.905}
-{'step': 20, 'loss': 0.215, 'accuracy': 0.914}
+Validation loss decreased (inf --> 0.618847).  Saving model ...
+Epoch 2 / 10
+[========================================] 100%	loss: 0.5877    accuracy: 0.6857    mse: 0.4476    val_loss: 0.5518    val_accuracy: 0.6950    val_mse: 0.4315
 
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|   1   | 0.212 |  0.914   |  0.186   |    0.927     |
-+-------+-------+----------+----------+--------------+
+Validation loss decreased (0.618847 --> 0.551810).  Saving model ...
+Epoch 3 / 10
+[========================================] 100%	loss: 0.4949    accuracy: 0.8079    mse: 0.3984    val_loss: 0.4342    val_accuracy: 0.8558    val_mse: 0.3645
 
-================================================================================2020-06-21 20:40:23
-{'step': 10, 'loss': 0.211, 'accuracy': 0.912}
-{'step': 20, 'loss': 0.193, 'accuracy': 0.919}
+Validation loss decreased (0.551810 --> 0.434237).  Saving model ...
+Epoch 4 / 10
+[========================================] 100%	loss: 0.3819    accuracy: 0.8682    mse: 0.3359    val_loss: 0.3284    val_accuracy: 0.9117    val_mse: 0.3023
 
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|   2   | 0.194 |  0.919   |  0.188   |    0.935     |
-+-------+-------+----------+----------+--------------+
+Validation loss decreased (0.434237 --> 0.328433).  Saving model ...
+Epoch 5 / 10
+[========================================] 100%	loss: 0.2942    accuracy: 0.9007    mse: 0.2882    val_loss: 0.2541    val_accuracy: 0.9092    val_mse: 0.2649
 
-================================================================================2020-06-21 20:40:23
-{'step': 10, 'loss': 0.217, 'accuracy': 0.913}
-{'step': 20, 'loss': 0.205, 'accuracy': 0.92}
+Validation loss decreased (0.328433 --> 0.254060).  Saving model ...
+Epoch 6 / 10
+[========================================] 100%	loss: 0.2441    accuracy: 0.9104    mse: 0.2627    val_loss: 0.2311    val_accuracy: 0.9125    val_mse: 0.2561
 
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|   3   | 0.195 |  0.921   |  0.176   |    0.931     |
-+-------+-------+----------+----------+--------------+
+Validation loss decreased (0.254060 --> 0.231079).  Saving model ...
+Epoch 7 / 10
+[========================================] 100%	loss: 0.2247    accuracy: 0.9100    mse: 0.2542    val_loss: 0.2218    val_accuracy: 0.9083    val_mse: 0.2546
 
-================================================================================2020-06-21 20:40:23
-{'step': 10, 'loss': 0.164, 'accuracy': 0.932}
-{'step': 20, 'loss': 0.197, 'accuracy': 0.917}
+Validation loss decreased (0.231079 --> 0.221847).  Saving model ...
+Epoch 8 / 10
+[========================================] 100%	loss: 0.2091    accuracy: 0.9164    mse: 0.2441    val_loss: 0.2084    val_accuracy: 0.9192    val_mse: 0.2441
 
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|   4   | 0.197 |  0.917   |  0.178   |    0.935     |
-+-------+-------+----------+----------+--------------+
+Validation loss decreased (0.221847 --> 0.208386).  Saving model ...
+Epoch 9 / 10
+[========================================] 100%	loss: 0.1972    accuracy: 0.9218    mse: 0.2366    val_loss: 0.2032    val_accuracy: 0.9175    val_mse: 0.2435
 
-================================================================================2020-06-21 20:40:24
-{'step': 10, 'loss': 0.192, 'accuracy': 0.926}
-{'step': 20, 'loss': 0.182, 'accuracy': 0.931}
+Validation loss decreased (0.208386 --> 0.203234).  Saving model ...
+Epoch 10 / 10
+[========================================] 100%	loss: 0.1940    accuracy: 0.9204    mse: 0.2367    val_loss: 0.2058    val_accuracy: 0.9167    val_mse: 0.2445
 
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|   5   | 0.193 |  0.924   |  0.188   |    0.928     |
-+-------+-------+----------+----------+--------------+
-
-================================================================================2020-06-21 20:40:44
-{'step': 10, 'loss': 0.175, 'accuracy': 0.932}
-{'step': 20, 'loss': 0.188, 'accuracy': 0.924}
-
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|   97  | 0.184 |  0.923   |  0.176   |    0.935     |
-+-------+-------+----------+----------+--------------+
-
-================================================================================2020-06-21 20:40:44
-{'step': 10, 'loss': 0.21, 'accuracy': 0.913}
-{'step': 20, 'loss': 0.192, 'accuracy': 0.918}
-
- +-------+------+----------+----------+--------------+
-| epoch | loss | accuracy | val_loss | val_accuracy |
-+-------+------+----------+----------+--------------+
-|   98  | 0.19 |  0.922   |  0.179   |    0.934     |
-+-------+------+----------+----------+--------------+
-
-================================================================================2020-06-21 20:40:45
-{'step': 10, 'loss': 0.186, 'accuracy': 0.923}
-{'step': 20, 'loss': 0.181, 'accuracy': 0.928}
-
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|   99  | 0.182 |  0.926   |  0.178   |    0.938     |
-+-------+-------+----------+----------+--------------+
-
-================================================================================2020-06-21 20:40:45
-{'step': 10, 'loss': 0.16, 'accuracy': 0.93}
-{'step': 20, 'loss': 0.173, 'accuracy': 0.93}
-
- +-------+-------+----------+----------+--------------+
-| epoch |  loss | accuracy | val_loss | val_accuracy |
-+-------+-------+----------+----------+--------------+
-|  100  | 0.185 |  0.925   |  0.174   |    0.936     |
-+-------+-------+----------+----------+--------------+
-
-================================================================================2020-06-21 20:40:45
-Finished Training...
+EarlyStopping counter: 1 out of 5
 ```
 
 ```python
@@ -276,17 +228,12 @@ ax2.scatter(Xp_pred[:,0],Xp_pred[:,1],c = "r")
 ax2.scatter(Xn_pred[:,0],Xn_pred[:,1],c = "g")
 ax2.legend(["positive","negative"]);
 ax2.set_title("y_pred")
-
 ```
 
 ![](./data/training_result.png)
 
 
 ### (4) evaluate the model
-
-```python
-
-```
 
 ```python
 %matplotlib inline
@@ -319,9 +266,6 @@ plot_metric(dfhistory,"accuracy")
 
 ![](./data/accuracy_curve.png)
 
-```python
-
-```
 
 ```python
 model.evaluate(dl_valid)
@@ -372,19 +316,13 @@ tensor([[0.9979],
         [0.9579]])
 ```
 
-```python
-
-```
-
 ### (6) save the model
 
 ```python
 # save the model parameters
 
-torch.save(model.state_dict(), "model_parameter.pkl")
-
 model_clone = torchkeras.Model(Net())
-model_clone.load_state_dict(torch.load("model_parameter.pkl"))
+model_clone.load_state_dict(torch.load("save_model.pkl"))
 
 model_clone.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
              metrics_dict={"accuracy":accuracy})

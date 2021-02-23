@@ -4,3 +4,5 @@
 torchkeras.egg-info/*
 dist/*
 build/*
+torchkeras/__pycache__/
+.idea

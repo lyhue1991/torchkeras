@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 import os
-import datetime
-import numpy as np 
-import pandas as pd 
 import torch
+import numpy as np
 from collections import OrderedDict
-from prettytable import PrettyTable
 
-#On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
+# On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" 
 
 # Some modules do the computation themselves using parameters or the parameters of children, treat these as layers
 layer_modules = (torch.nn.MultiheadAttention, )
+
 
 def summary(model, input_shape, input_dtype = torch.FloatTensor, batch_size=-1,
             layer_modules = layer_modules,*args, **kwargs):
@@ -61,7 +59,7 @@ def summary(model, input_shape, input_dtype = torch.FloatTensor, batch_size=-1,
     if isinstance(input_shape, tuple):
         input_shape = [input_shape]
         
-    # batch_size of 2 for batchnorm
+    # batch_size of 2 for batch norm
     x = [torch.rand(2, *size).type(input_dtype) for size in input_shape]
     # print(type(x[0]))
     

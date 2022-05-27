@@ -1,13 +1,13 @@
 # 1，Introduction
 
-
+<!-- #region -->
 The torchkeras library is a simple tool for training neural network in pytorch jusk like in a keras style. 😋😋
 
 With torchkeras, You need not to write your training loop with many lines of code, all you need to do is just 
 
-like this three steps as below:
+like these two steps as below:
 
-(i) create your network and wrap it and the loss_fn together with torchkeras.KerasModel like this: `model = torchkeras.KerasModel(net,loss_fn)` 
+(i) create your network and wrap it and the loss_fn together with torchkeras.KerasModel like this: `model = torchkeras.KerasModel(net,loss_fn=nn.BCEWithLogitsLoss())` , a metrics_dict parameter is optional.
 
 (ii) fit your model with the training data and validate data.
 
@@ -18,8 +18,13 @@ like this three steps as below:
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 
 
+**🍉🍉 useful features in version 3.0🍉🍉**:
+* **😋 support early stopping and progress bar.**
+* **😋 auto choose gpu when cuda is available, this feature is borrowed from the accelerate library.**
+* **😋 support metrics such as accuracy,precision,recall, auc and many other metrics in the torchmetrics library.**
 
 
+<!-- #endregion -->
 
 # 2,  Use example
 
@@ -75,6 +80,7 @@ plt.figure(figsize = (6,6))
 plt.scatter(Xp[:,0],Xp[:,1],c = "r")
 plt.scatter(Xn[:,0],Xn[:,1],c = "g")
 plt.legend(["positive","negative"]);
+
 ```
 
 ![](./data/input_data.png)
@@ -83,8 +89,8 @@ plt.legend(["positive","negative"]);
 # split samples into train and valid data.
 ds = TensorDataset(X,Y)
 ds_train,ds_val = torch.utils.data.random_split(ds,[int(len(ds)*0.7),len(ds)-int(len(ds)*0.7)])
-dl_train = DataLoader(ds_train,batch_size = 100,shuffle=True,num_workers=2)
-dl_val = DataLoader(ds_val,batch_size = 100,num_workers=2)
+dl_train = DataLoader(ds_train,batch_size = 200,shuffle=True,num_workers=2)
+dl_val = DataLoader(ds_val,batch_size = 200,num_workers=2)
 
 ```
 
@@ -93,6 +99,7 @@ for features,labels in dl_train:
     break
 print(features.shape)
 print(labels.shape)
+
 ```
 
 ```python
@@ -112,40 +119,29 @@ class Net(nn.Module):
     def forward(self,x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        y = nn.Sigmoid()(self.fc3(x))
+        y = self.fc3(x) #注意无需加nn.Sigmoid()
         return y
         
 net = Net()
 
-from torchmetrics import Metric 
-class Accuracy(Metric):
-    def __init__(self, dist_sync_on_step=False):
-        super().__init__(dist_sync_on_step=dist_sync_on_step)
+from torchkeras.metrics import Accuracy 
 
-        self.add_state("correct", default=torch.tensor(0), dist_reduce_fx="sum")
-        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+```
 
-    def update(self, preds: torch.Tensor, targets: torch.Tensor):
-        assert preds.shape == targets.shape
+```python
 
-        self.correct += torch.sum((preds>=0.5)==(targets>0.5))
-        self.total += targets.numel()
-
-    def compute(self):
-        return self.correct.float() / self.total 
-    
 ```
 
 ```python
 model = torchkeras.KerasModel(net,
-                              loss_fn = nn.BCELoss(),
-                              optimizer= torch.optim.Adam(net.parameters(),lr = 0.05),
+                              loss_fn = nn.BCEWithLogitsLoss(),
+                              optimizer= torch.optim.Adam(net.parameters(),lr = 0.03),
                               metrics_dict = {"acc":Accuracy()}
                              )
 
 from torchkeras.summary import summary
-
 summary(model,input_data=features);
+
 ```
 
 ### (3) train the model
@@ -153,7 +149,9 @@ summary(model,input_data=features);
 ```python
 dfhistory=model.fit(epochs=30, train_data=dl_train, 
                     val_data=dl_val, patience=3, 
-                    monitor="val_acc",mode="max")
+                    monitor="val_acc",mode="max",
+                    ckpt_path='checkpoint.pt')
+
 ```
 
 ```python
@@ -164,8 +162,8 @@ ax1.scatter(Xn[:,0],Xn[:,1],c = "g")
 ax1.legend(["positive","negative"]);
 ax1.set_title("y_true")
 
-Xp_pred = X[torch.squeeze(model.forward(X)>=0.5)]
-Xn_pred = X[torch.squeeze(model.forward(X)<0.5)]
+Xp_pred = X[torch.squeeze(F.sigmoid(model.forward(X))>=0.5)]
+Xn_pred = X[torch.squeeze(F.sigmoid(model.forward(X))<0.5)]
 
 ax2.scatter(Xp_pred[:,0],Xp_pred[:,1],c = "r")
 ax2.scatter(Xn_pred[:,0],Xn_pred[:,1],c = "g")
@@ -215,33 +213,33 @@ model.evaluate(dl_val)
 ```
 
 ```
-{'val_loss': 0.13576620258390903, 'val_accuracy': 0.9441666702429453}
+{'val_loss': 0.18998068571090698, 'val_acc': 0.9300000071525574}
 ```
 
 
 ### (5) use the model
 
 ```python
-model.predict(dl_val)[0:10]
+F.sigmoid(model.predict(dl_val)[0:10]) 
 ```
 
 ```
-tensor([[0.8767],
-        [0.0154],
-        [0.9976],
-        [0.9990],
-        [0.9984],
-        [0.0071],
-        [0.3529],
-        [0.4061],
-        [0.9938],
-        [0.9997]])
+tensor([[0.2218],
+        [0.0424],
+        [0.9959],
+        [0.0155],
+        [0.0824],
+        [0.9820],
+        [0.0013],
+        [0.2190],
+        [0.0043],
+        [0.9928]])
 ```
 
 ```python
-for features,labels in dl_valid:
+for features,labels in dl_val:
     with torch.no_grad():
-        predictions = model.forward(features)
+        predictions = F.sigmoid(model.forward(features)) 
         print(predictions[0:10])
     break
 ```
@@ -264,7 +262,7 @@ tensor([[0.9979],
 ```python
 # save the model parameters
 
-model_clone = torchkeras.KerasModel(Net(),loss_fn = nn.BCELoss(),
+model_clone = torchkeras.KerasModel(Net(),loss_fn = nn.BCEWithLogitsLoss(),
              optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
              metrics_dict={"acc":Accuracy()})
 model_clone.net.load_state_dict(torch.load("checkpoint.pt"))

@@ -5,16 +5,10 @@ import pandas as pd
 import datetime 
 from tqdm import tqdm 
 
-# +
 import torch
 from torch import nn 
 from accelerate import Accelerator
 from copy import deepcopy
-
-__version__ = '3.0.1'
-
-
-# -
 
 def printlog(info):
     nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

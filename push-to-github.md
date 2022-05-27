@@ -33,7 +33,7 @@
 ```
 
 ```python
-!git commit -m"3.0.0"
+!git commit -m"3.0.1"
 ```
 
 ```python
@@ -41,7 +41,7 @@
 ```
 
 ```python
-!git remote add origin https://github.com/lyhue1991/torchkeras
+!git remote add origin git@github.com:lyhue1991/torchkeras.git
 ```
 
 ```python

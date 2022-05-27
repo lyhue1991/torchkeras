@@ -1,3 +1,4 @@
 from torchkeras.kerasmodel import KerasModel
 from torchkeras.summary import summary
-from torchkeras.kerasmodel import __version__
+from torchkeras import metrics
+__version__='3.0.2'

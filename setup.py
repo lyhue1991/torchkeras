@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="torchkeras",
-    version="3.0.1",
+    version="3.0.2",
     author="PythonAiRoad, Laugh",
     author_email="lyhue1991@163.com",
     description="pytorch❤️ keras",
@@ -14,6 +14,7 @@ setuptools.setup(
          'pandas',
          'accelerate',
          'torch',
+         'torchmetrics',
          'tqdm'
        ],
     long_description_content_type="text/markdown",

@@ -33,7 +33,11 @@
 ```
 
 ```python
-!git commit -m"2.1.1"
+!git commit -m"3.0.0"
+```
+
+```python
+!git remote remove origin 
 ```
 
 ```python

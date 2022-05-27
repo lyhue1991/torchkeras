@@ -82,9 +82,21 @@ plt.legend(["positive","negative"]);
 ```python
 # split samples into train and valid data.
 ds = TensorDataset(X,Y)
-ds_train,ds_valid = torch.utils.data.random_split(ds,[int(len(ds)*0.7),len(ds)-int(len(ds)*0.7)])
+ds_train,ds_val = torch.utils.data.random_split(ds,[int(len(ds)*0.7),len(ds)-int(len(ds)*0.7)])
 dl_train = DataLoader(ds_train,batch_size = 100,shuffle=True,num_workers=2)
-dl_valid = DataLoader(ds_valid,batch_size = 100,num_workers=2)
+dl_val = DataLoader(ds_val,batch_size = 100,num_workers=2)
+
+```
+
+```python
+for features,labels in dl_train:
+    break
+print(features.shape)
+print(labels.shape)
+```
+
+```python
+
 ```
 
 ### (2) create the  model
@@ -105,96 +117,43 @@ class Net(nn.Module):
         
 net = Net()
 
-### Attention here
-model = torchkeras.Model(net)
-model.summary(input_shape =(2,))
+from torchmetrics import Metric 
+class Accuracy(Metric):
+    def __init__(self, dist_sync_on_step=False):
+        super().__init__(dist_sync_on_step=dist_sync_on_step)
+
+        self.add_state("correct", default=torch.tensor(0), dist_reduce_fx="sum")
+        self.add_state("total", default=torch.tensor(0), dist_reduce_fx="sum")
+
+    def update(self, preds: torch.Tensor, targets: torch.Tensor):
+        assert preds.shape == targets.shape
+
+        self.correct += torch.sum((preds>=0.5)==(targets>0.5))
+        self.total += targets.numel()
+
+    def compute(self):
+        return self.correct.float() / self.total 
+    
 ```
 
-```
-----------------------------------------------------------------
-        Layer (type)               Output Shape         Param #
-================================================================
-            Linear-1                    [-1, 4]              12
-            Linear-2                    [-1, 8]              40
-            Linear-3                    [-1, 1]               9
-================================================================
-Total params: 61
-Trainable params: 61
-Non-trainable params: 0
-----------------------------------------------------------------
-Input size (MB): 0.000008
-Forward/backward pass size (MB): 0.000099
-Params size (MB): 0.000233
-Estimated Total Size (MB): 0.000340
-----------------------------------------------------------------
-```
+```python
+model = torchkeras.KerasModel(net,
+                              loss_fn = nn.BCELoss(),
+                              optimizer= torch.optim.Adam(net.parameters(),lr = 0.05),
+                              metrics_dict = {"acc":Accuracy()}
+                             )
 
+from torchkeras.summary import summary
+
+summary(model,input_data=features);
+```
 
 ### (3) train the model
 
 ```python
-# define metric
-def accuracy(y_pred, y_true):
-    y_pred = torch.where(y_pred>0.5,torch.ones_like(y_pred,dtype = torch.float32),
-                      torch.zeros_like(y_pred,dtype = torch.float32))
-    acc = torch.mean(1-torch.abs(y_true-y_pred))
-    return acc
-
-
-def mse(y_pred, y_true):
-    return torch.sqrt(torch.mean((y_true - y_pred) ** 2))
-
-
-# if gpu is available, use gpu
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-
-model.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
-             metrics_dict={accuracy, mse},device = device)
-
-dfhistory=model.fit(epochs=10, train_data=dl_train, val_data=dl_valid, patience=5, monitor="val_loss", save_path="save_model.pkl", verbose=True)
-```
-
-```
-Epoch 1 / 10
-[========================================] 100%	loss: 0.6570    accuracy: 0.5525    mse: 0.4824    val_loss: 0.6188    val_accuracy: 0.6167    val_mse: 0.4638
-
-Validation loss decreased (inf --> 0.618847).  Saving model ...
-Epoch 2 / 10
-[========================================] 100%	loss: 0.5877    accuracy: 0.6857    mse: 0.4476    val_loss: 0.5518    val_accuracy: 0.6950    val_mse: 0.4315
-
-Validation loss decreased (0.618847 --> 0.551810).  Saving model ...
-Epoch 3 / 10
-[========================================] 100%	loss: 0.4949    accuracy: 0.8079    mse: 0.3984    val_loss: 0.4342    val_accuracy: 0.8558    val_mse: 0.3645
-
-Validation loss decreased (0.551810 --> 0.434237).  Saving model ...
-Epoch 4 / 10
-[========================================] 100%	loss: 0.3819    accuracy: 0.8682    mse: 0.3359    val_loss: 0.3284    val_accuracy: 0.9117    val_mse: 0.3023
-
-Validation loss decreased (0.434237 --> 0.328433).  Saving model ...
-Epoch 5 / 10
-[========================================] 100%	loss: 0.2942    accuracy: 0.9007    mse: 0.2882    val_loss: 0.2541    val_accuracy: 0.9092    val_mse: 0.2649
-
-Validation loss decreased (0.328433 --> 0.254060).  Saving model ...
-Epoch 6 / 10
-[========================================] 100%	loss: 0.2441    accuracy: 0.9104    mse: 0.2627    val_loss: 0.2311    val_accuracy: 0.9125    val_mse: 0.2561
-
-Validation loss decreased (0.254060 --> 0.231079).  Saving model ...
-Epoch 7 / 10
-[========================================] 100%	loss: 0.2247    accuracy: 0.9100    mse: 0.2542    val_loss: 0.2218    val_accuracy: 0.9083    val_mse: 0.2546
-
-Validation loss decreased (0.231079 --> 0.221847).  Saving model ...
-Epoch 8 / 10
-[========================================] 100%	loss: 0.2091    accuracy: 0.9164    mse: 0.2441    val_loss: 0.2084    val_accuracy: 0.9192    val_mse: 0.2441
-
-Validation loss decreased (0.221847 --> 0.208386).  Saving model ...
-Epoch 9 / 10
-[========================================] 100%	loss: 0.1972    accuracy: 0.9218    mse: 0.2366    val_loss: 0.2032    val_accuracy: 0.9175    val_mse: 0.2435
-
-Validation loss decreased (0.208386 --> 0.203234).  Saving model ...
-Epoch 10 / 10
-[========================================] 100%	loss: 0.1940    accuracy: 0.9204    mse: 0.2367    val_loss: 0.2058    val_accuracy: 0.9167    val_mse: 0.2445
-
-EarlyStopping counter: 1 out of 5
+dfhistory=model.fit(epochs=30, train_data=dl_train, 
+                    val_data=dl_val, patience=3, 
+                    monitor="val_acc",mode="max")
 ```
 
 ```python
@@ -226,7 +185,7 @@ ax2.set_title("y_pred")
 import matplotlib.pyplot as plt
 
 def plot_metric(dfhistory, metric):
-    train_metrics = dfhistory[metric]
+    train_metrics = dfhistory["train_"+metric]
     val_metrics = dfhistory['val_'+metric]
     epochs = range(1, len(train_metrics) + 1)
     plt.plot(epochs, train_metrics, 'bo--')
@@ -245,14 +204,14 @@ plot_metric(dfhistory,"loss")
 ![](./data/loss_curve.png)
 
 ```python
-plot_metric(dfhistory,"accuracy")
+plot_metric(dfhistory,"acc")
 ```
 
 ![](./data/accuracy_curve.png)
 
 
 ```python
-model.evaluate(dl_valid)
+model.evaluate(dl_val)
 ```
 
 ```
@@ -263,7 +222,7 @@ model.evaluate(dl_valid)
 ### (5) use the model
 
 ```python
-model.predict(dl_valid)[0:10]
+model.predict(dl_val)[0:10]
 ```
 
 ```
@@ -305,13 +264,11 @@ tensor([[0.9979],
 ```python
 # save the model parameters
 
-model_clone = torchkeras.Model(Net())
-model_clone.load_state_dict(torch.load("save_model.pkl"))
-
-model_clone.compile(loss_func = nn.BCELoss(),optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
-             metrics_dict={"accuracy":accuracy})
-
-model_clone.evaluate(dl_valid)
+model_clone = torchkeras.KerasModel(Net(),loss_fn = nn.BCELoss(),
+             optimizer= torch.optim.Adam(model.parameters(),lr = 0.01),
+             metrics_dict={"acc":Accuracy()})
+model_clone.net.load_state_dict(torch.load("checkpoint.pt"))
+model_clone.evaluate(dl_val)
 ```
 
 ```

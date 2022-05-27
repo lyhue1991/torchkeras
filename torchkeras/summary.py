@@ -1,18 +1,22 @@
-# -*- coding: utf-8 -*-
-import os
+import os,sys
+import datetime
+import numpy as np 
+import pandas as pd 
 import torch
-import numpy as np
 from collections import OrderedDict
 
-# On macOs, run pytorch and matplotlib at the same time in jupyter should set this.
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE" 
-
-# Some modules do the computation themselves using parameters or the parameters of children, treat these as layers
-layer_modules = (torch.nn.MultiheadAttention, )
-
-
-def summary(model, input_shape, input_dtype = torch.FloatTensor, batch_size=-1,
-            layer_modules = layer_modules,*args, **kwargs):
+def summary(model,input_data = None,input_data_args = None,input_shape=None,input_dtype = torch.FloatTensor, batch_size=-1, 
+            *args, **kwargs):
+    """
+    give example input data as least one way like below:
+    ① input_data ---> model.forward(input_data) 
+    ② input_data_args ---> model.forward(*input_data_args)
+    ③ input_shape & input_dtype ---> model.forward(*[torch.rand(2, *size).type(input_dtype) for size in input_shape])
+    """
+    
+    hooks = []
+    summary = OrderedDict()
+    
     def register_hook(module):
         def hook(module, inputs, outputs):
             
@@ -37,21 +41,11 @@ def summary(model, input_shape, input_dtype = torch.FloatTensor, batch_size=-1,
                 info["params"] += param.nelement() * param.requires_grad
                 info["params_nt"] += param.nelement() * (not param.requires_grad)
 
-            # if the current module is already-used, mark as "(recursive)"
-            # check if this module has params
-            if list(module.named_parameters()):
-                for v in summary.values():
-                    if info["id"] == v["id"]:
-                        info["params"] = "(recursive)"
-
             summary[key] = info
 
         # ignore Sequential and ModuleList and other containers
-        if isinstance(module, layer_modules) or not module._modules:
-            hooks.append(module.register_forward_hook(hook))
-
-    hooks = []
-    summary = OrderedDict()
+        # if  not module._modules:
+        hooks.append(module.register_forward_hook(hook))
 
     model.apply(register_hook)
     
@@ -59,31 +53,36 @@ def summary(model, input_shape, input_dtype = torch.FloatTensor, batch_size=-1,
     if isinstance(input_shape, tuple):
         input_shape = [input_shape]
         
-    # batch_size of 2 for batch norm
-    x = [torch.rand(2, *size).type(input_dtype) for size in input_shape]
-    # print(type(x[0]))
-    
+    if input_data is not None:
+        x = [input_data]
+    elif input_shape is not None:
+        # batch_size of 2 for batchnorm
+        x = [torch.rand(2, *size).type(input_dtype) for size in input_shape]
+    elif input_data_args is not None:
+        x = input_data_args
+    else:
+        x = []
     try:
         with torch.no_grad():
             model(*x) if not (kwargs or args) else model(*x, *args, **kwargs)
     except Exception:
         # This can be usefull for debugging
-        print("Failed to run torchkeras.summary...")
+        print("Failed to run summary...")
         raise
     finally:
         for hook in hooks:
             hook.remove()
-            
-    print("----------------------------------------------------------------")
-    line_new = "{:>20}  {:>25} {:>15}".format("Layer (type)", "Output Shape", "Param #")
-    print(line_new)
-    print("================================================================")
+    summary_logs = []     
+    summary_logs.append("--------------------------------------------------------------------------")
+    line_new = "{:<30}  {:>20} {:>20}".format("Layer (type)", "Output Shape", "Param #")
+    summary_logs.append(line_new)
+    summary_logs.append("==========================================================================")
     total_params = 0
     total_output = 0
     trainable_params = 0
     for layer in summary:
         # layer, output_shape, params
-        line_new = "{:>20}  {:>25} {:>15}".format(
+        line_new = "{:<30}  {:>20} {:>20}".format(
             layer,
             str(summary[layer]["out"]),
             "{0:,}".format(summary[layer]["params"]+summary[layer]["params_nt"])
@@ -91,21 +90,32 @@ def summary(model, input_shape, input_dtype = torch.FloatTensor, batch_size=-1,
         total_params += (summary[layer]["params"]+summary[layer]["params_nt"])
         total_output += np.prod(summary[layer]["out"])
         trainable_params += summary[layer]["params"]
-        print(line_new)
+        summary_logs.append(line_new)
 
     # assume 4 bytes/number
-    total_input_size = abs(np.prod(input_shape) * batch_size * 4. / (1024 ** 2.))
+    if input_data is not None:
+        total_input_size = abs(sys.getsizeof(input_data)/(1024 ** 2.))
+    elif input_shape is not None:
+        total_input_size = abs(np.prod(input_shape) * batch_size * 4. / (1024 ** 2.))
+    else:
+        total_input_size = 0.0
     total_output_size = abs(2. * total_output * 4. / (1024 ** 2.))  # x2 for gradients
     total_params_size = abs(total_params * 4. / (1024 ** 2.))
     total_size = total_params_size + total_output_size + total_input_size
 
-    print("================================================================")
-    print("Total params: {0:,}".format(total_params))
-    print("Trainable params: {0:,}".format(trainable_params))
-    print("Non-trainable params: {0:,}".format(total_params - trainable_params))
-    print("----------------------------------------------------------------")
-    print("Input size (MB): %0.6f" % total_input_size)
-    print("Forward/backward pass size (MB): %0.6f" % total_output_size)
-    print("Params size (MB): %0.6f" % total_params_size)
-    print("Estimated Total Size (MB): %0.6f" % total_size)
-    print("----------------------------------------------------------------")
+    summary_logs.append("==========================================================================")
+    summary_logs.append("Total params: {0:,}".format(total_params))
+    summary_logs.append("Trainable params: {0:,}".format(trainable_params))
+    summary_logs.append("Non-trainable params: {0:,}".format(total_params - trainable_params))
+    summary_logs.append("--------------------------------------------------------------------------")
+    summary_logs.append("Input size (MB): %0.6f" % total_input_size)
+    summary_logs.append("Forward/backward pass size (MB): %0.6f" % total_output_size)
+    summary_logs.append("Params size (MB): %0.6f" % total_params_size)
+    summary_logs.append("Estimated Total Size (MB): %0.6f" % total_size)
+    summary_logs.append("--------------------------------------------------------------------------")
+    
+    summary_info = "\n".join(summary_logs)
+    
+    print(summary_info)
+    return summary_info
+

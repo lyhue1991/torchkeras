@@ -1,5 +1,3 @@
-from torchkeras.torchkeras import Model
+from torchkeras.kerasmodel import KerasModel
 from torchkeras.summary import summary
-from torchkeras.torchtools import EarlyStopping
-from torchkeras.lightkeras import LightModel
-from torchkeras.torchkeras import __version__
+from torchkeras.kerasmodel import __version__

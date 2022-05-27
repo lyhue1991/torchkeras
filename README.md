@@ -1,17 +1,15 @@
 # 1，Introduction
 
-<!-- #region -->
+
 The torchkeras library is a simple tool for training neural network in pytorch jusk like in a keras style. 😋😋
 
 With torchkeras, You need not to write your training loop with many lines of code, all you need to do is just 
 
 like this three steps as below:
 
-(i) create your network and wrap it with torchkeras.Model like this: `model = torchkeras.Model(net)` 
+(i) create your network and wrap it and the loss_fn together with torchkeras.KerasModel like this: `model = torchkeras.KerasModel(net,loss_fn)` 
 
-(ii) compile your model to 	bind the loss function, the optimizer and the metrics function.
-
-(iii) fit your model with the training data and validate data.
+(ii) fit your model with the training data and validate data.
 
 **This project seems somehow powerful, but the source code is very simple.**
 
@@ -20,22 +18,8 @@ like this three steps as below:
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 
 
-<br/>
-
-🍉🍉 **new feature**🍉🍉: torchkeras.LightModel 😋😋
-
-🍉🍉 **new feature**🍉🍉: Add EarltStopping, Multiple custom metrics can be added, Progress bar synchronous feedback😋😋
-
-it's more powerful than torchkeras.Model and with more flexibility and easier to use!
-
-the tutorial of torchkeras.LightModel is here:
-
-**[Use Pytorch-Lightning Like Keras ](./Tutorial.md)**
-
-<br/>
 
 
-<!-- #endregion -->
 
 # 2,  Use example
 

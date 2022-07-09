@@ -57,8 +57,12 @@ class EpochRunner:
         loop = tqdm(enumerate(dataloader), total =len(dataloader))
         for i, batch in loop:
             features,labels = batch
-            loss, step_metrics = self.steprunner(features,labels)
-
+            
+            if self.stage=="train":
+                loss, step_metrics = self.steprunner(batch)
+            else:
+                with torch.no_grad():
+                    loss, step_metrics = self.steprunner(batch)
             step_log = dict({self.stage+"_loss":loss},**step_metrics)
 
             total_loss += loss
@@ -161,6 +165,7 @@ class KerasModel(torch.nn.Module):
     @torch.no_grad()
     def predict(self, dataloader):
         dataloader = self.accelerator.prepare(dataloader)
+        self.net.eval()
         result = torch.cat([self.forward(t[0]) for t in dataloader])
         return result.data
 

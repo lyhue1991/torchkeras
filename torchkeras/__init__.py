@@ -1,4 +1,4 @@
-from torchkeras.kerasmodel import KerasModel
-from torchkeras.summary import summary
-from torchkeras import metrics
-__version__='3.0.2'
+from .kerasmodel import KerasModel
+from .lightmodel import LightModel 
+from .summary import summary
+__version__='3.1.0'

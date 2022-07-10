@@ -7,6 +7,11 @@ You can install torchkeras using pip:
 Here is a complete examples using torchkeras.KerasModel! 
 
 ```python
+import sys 
+sys.path.append("..")
+```
+
+```python
 import numpy as np 
 import pandas as pd 
 from matplotlib import pyplot as plt

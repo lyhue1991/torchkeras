@@ -55,14 +55,12 @@ class EpochRunner:
     def __call__(self,dataloader):
         total_loss,step = 0,0
         loop = tqdm(enumerate(dataloader), total =len(dataloader))
-        for i, batch in loop:
-            features,labels = batch
-            
+        for i, batch in loop: 
             if self.stage=="train":
-                loss, step_metrics = self.steprunner(batch)
+                loss, step_metrics = self.steprunner(*batch)
             else:
                 with torch.no_grad():
-                    loss, step_metrics = self.steprunner(batch)
+                    loss, step_metrics = self.steprunner(*batch)
             step_log = dict({self.stage+"_loss":loss},**step_metrics)
 
             total_loss += loss

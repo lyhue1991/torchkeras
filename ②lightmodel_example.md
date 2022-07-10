@@ -12,10 +12,6 @@ sys.path.append("..")
 ```
 
 ```python
-from torchkeras import LightModel 
-```
-
-```python
 import numpy as np 
 import pandas as pd 
 from matplotlib import pyplot as plt

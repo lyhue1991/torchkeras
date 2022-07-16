@@ -98,13 +98,6 @@ class Net(nn.Module):
         y = self.fc3(x) #don't need nn.Sigmoid()
         return y
     
-def create_net():
-    net = Net()
-    return net 
-        
-net = create_net() 
-
-
 ```
 
 ```python
@@ -114,10 +107,11 @@ net = create_net()
 ```python
 from torchkeras.metrics import Accuracy 
 
+net = Net()
 loss_fn = nn.BCEWithLogitsLoss()
 metric_dict = {"acc":Accuracy()}
 
-optimizer = torch.optim.Adam(net.parameters(), lr=0.03)
+optimizer = torch.optim.Adam(net.parameters(), lr=0.05)
 lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.0001)
 
 model = torchkeras.LightModel(net,
@@ -139,16 +133,15 @@ Layer (type)                            Output Shape              Param #
 Linear-1                                     [-1, 4]                   12
 Linear-2                                     [-1, 8]                   40
 Linear-3                                     [-1, 1]                    9
-KerasModel-4                                 [-1, 1]                   61
 ==========================================================================
-Total params: 122
-Trainable params: 122
+Total params: 61
+Trainable params: 61
 Non-trainable params: 0
 --------------------------------------------------------------------------
 Input size (MB): 0.000069
-Forward/backward pass size (MB): 0.000107
-Params size (MB): 0.000465
-Estimated Total Size (MB): 0.000641
+Forward/backward pass size (MB): 0.000099
+Params size (MB): 0.000233
+Estimated Total Size (MB): 0.000401
 --------------------------------------------------------------------------
 
 ```
@@ -164,14 +157,14 @@ import pytorch_lightning as pl
 
 #1，设置回调函数
 model_ckpt = pl.callbacks.ModelCheckpoint(
-    monitor='val_loss',
+    monitor='val_acc',
     save_top_k=1,
-    mode='min'
+    mode='max'
 )
 
-early_stopping = pl.callbacks.EarlyStopping(monitor = 'val_loss',
-                           patience=5,
-                           mode = 'min'
+early_stopping = pl.callbacks.EarlyStopping(monitor = 'val_acc',
+                           patience=3,
+                           mode = 'max'
                           )
 
 #2，设置训练参数
@@ -180,7 +173,7 @@ early_stopping = pl.callbacks.EarlyStopping(monitor = 'val_loss',
 # gpus=[0,1]则指定使用0号和1号gpu训练， gpus="0,1,2,3"则使用0,1,2,3号gpu训练
 # tpus=1 则使用1个tpu训练
 trainer = pl.Trainer(logger=True,
-                     min_epochs=3,max_epochs=10,
+                     min_epochs=3,max_epochs=20,
                      gpus=0,
                      callbacks = [model_ckpt,early_stopping],
                      enable_progress_bar = True) 

@@ -115,7 +115,7 @@ model = torchkeras.KerasModel(net,
                               metrics_dict = {"acc":Accuracy()}
                              )
 
-from torchkeras.summary import summary
+from torchkeras import summary
 summary(model,input_data=features);
 
 ```
@@ -127,16 +127,15 @@ Layer (type)                            Output Shape              Param #
 Linear-1                                     [-1, 4]                   12
 Linear-2                                     [-1, 8]                   40
 Linear-3                                     [-1, 1]                    9
-KerasModel-4                                 [-1, 1]                   61
 ==========================================================================
-Total params: 122
-Trainable params: 122
+Total params: 61
+Trainable params: 61
 Non-trainable params: 0
 --------------------------------------------------------------------------
 Input size (MB): 0.000069
-Forward/backward pass size (MB): 0.000107
-Params size (MB): 0.000465
-Estimated Total Size (MB): 0.000641
+Forward/backward pass size (MB): 0.000099
+Params size (MB): 0.000233
+Estimated Total Size (MB): 0.000401
 --------------------------------------------------------------------------
 
 ```
@@ -170,6 +169,7 @@ ax2.scatter(Xp_pred[:,0],Xp_pred[:,1],c = "r")
 ax2.scatter(Xn_pred[:,0],Xn_pred[:,1],c = "g")
 ax2.legend(["positive","negative"]);
 ax2.set_title("y_pred")
+
 ```
 
 ![](./data/training_result.png)
@@ -272,5 +272,5 @@ model_clone.evaluate(dl_val)
 ```
 
 ```
-{'val_loss': 0.17422042911251387, 'val_accuracy': 0.9358333299557368}
+{'val_loss': 0.1927894577383995, 'val_acc': 0.925000011920929}
 ```

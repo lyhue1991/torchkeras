@@ -135,6 +135,8 @@ class KerasModel(torch.nn.Module):
                     self.history[name] = self.history.get(name, []) + [metric]
             
             # 3，early-stopping -------------------------------------------------
+            if not val_data:
+                continue
             arr_scores = self.history[monitor]
             best_score_idx = np.argmax(arr_scores) if mode=="max" else np.argmin(arr_scores)
             if best_score_idx==len(arr_scores)-1:
@@ -144,9 +146,9 @@ class KerasModel(torch.nn.Module):
             if len(arr_scores)-best_score_idx>patience:
                 print("<<<<<< {} without improvement in {} epoch, early stopping >>>>>>".format(
                     monitor,patience),file=sys.stderr)
-                self.net.load_state_dict(torch.load(ckpt_path))
                 break 
-            
+                
+        self.net.load_state_dict(torch.load(ckpt_path)) 
         return pd.DataFrame(self.history)
 
     @torch.no_grad()

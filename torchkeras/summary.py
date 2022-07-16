@@ -5,6 +5,9 @@ import pandas as pd
 import torch
 from collections import OrderedDict
 
+layer_modules = (torch.nn.MultiheadAttention, )
+
+
 def summary(model,input_data = None,input_data_args = None,input_shape=None,input_dtype = torch.FloatTensor, batch_size=-1, 
             *args, **kwargs):
     """
@@ -44,8 +47,9 @@ def summary(model,input_data = None,input_data_args = None,input_shape=None,inpu
             summary[key] = info
 
         # ignore Sequential and ModuleList and other containers
-        # if  not module._modules:
-        hooks.append(module.register_forward_hook(hook))
+        if isinstance(module, layer_modules) or not module._modules:
+            hooks.append(module.register_forward_hook(hook))
+        
 
     model.apply(register_hook)
     

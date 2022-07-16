@@ -2,6 +2,7 @@ import torch
 from torch import nn 
 import pytorch_lightning as pl
 import datetime
+import sys
 import numpy as np
 import pandas as pd 
 from copy import deepcopy
@@ -101,6 +102,16 @@ class LightModel(pl.LightningModule):
         self.print(dic)
         dic.pop("epoch",None)
         self.log_dict(dic, logger=True)
+        
+        #log when reach best score
+        ckpt_cb = self.trainer.checkpoint_callback
+        monitor = ckpt_cb.monitor 
+        mode = ckpt_cb.mode 
+        arr_scores = self.get_history()[monitor]
+        best_score_idx = np.argmax(arr_scores) if mode=="max" else np.argmin(arr_scores)
+        if best_score_idx==len(arr_scores)-1:   
+            self.print("<<<<<< reach best {0} : {1} >>>>>>".format(
+                monitor,arr_scores[best_score_idx]),file=sys.stderr)
     
     def test_epoch_end(self, outputs):
         dic = self.shared_epoch_end(outputs,stage="test")

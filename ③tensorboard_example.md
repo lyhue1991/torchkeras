@@ -24,7 +24,6 @@ from torch.utils.data import Dataset,DataLoader,TensorDataset
 
 import torchkeras #Attention this line 
 
-
 ```
 
 ### 1, prepare data 
@@ -100,11 +99,8 @@ class Net(nn.Module):
         y = self.fc3(x) #don't need nn.Sigmoid()
         return y
     
-def create_net():
-    net = Net()
-    return net 
         
-net = create_net() 
+net = Net() 
 
 
 ```

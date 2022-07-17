@@ -51,10 +51,10 @@ class TensorBoard(pl.callbacks.Callback):
         self.writer.flush()
         
         #image日志
-        summary_text =  summary(net_cpu,input_data = self.example_input_array)
-        summary_tensor = image_to_tensor(text_to_image(summary_text))
-        self.writer.add_image('summary',summary_tensor,global_step=-1)
-        self.writer.flush()
+        #summary_text =  summary(net_cpu,input_data = self.example_input_array)
+        #summary_tensor = image_to_tensor(text_to_image(summary_text))
+        #self.writer.add_image('summary',summary_tensor,global_step=-1)
+        #self.writer.flush()
         del(net_cpu)
         
         

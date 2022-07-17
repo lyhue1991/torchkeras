@@ -99,7 +99,6 @@ class Net(nn.Module):
         y = self.fc3(x) #don't need nn.Sigmoid()
         return y
     
-        
 net = Net() 
 
 
@@ -137,23 +136,20 @@ Layer (type)                            Output Shape              Param #
 Linear-1                                     [-1, 4]                   12
 Linear-2                                     [-1, 8]                   40
 Linear-3                                     [-1, 1]                    9
-KerasModel-4                                 [-1, 1]                   61
 ==========================================================================
-Total params: 122
-Trainable params: 122
+Total params: 61
+Trainable params: 61
 Non-trainable params: 0
 --------------------------------------------------------------------------
 Input size (MB): 0.000069
-Forward/backward pass size (MB): 0.000107
-Params size (MB): 0.000465
-Estimated Total Size (MB): 0.000641
+Forward/backward pass size (MB): 0.000099
+Params size (MB): 0.000233
+Estimated Total Size (MB): 0.000401
 --------------------------------------------------------------------------
 
-```
-
-```python
 
 ```
+
 
 ### 3, train the model
 
@@ -217,19 +213,22 @@ The callback TensorBoard saves logs at the directory  'tb_logs'.
 We can monitor and analysis training process using TensorBoard now.
 
 
-!tensorboard --logdir=all_my_experiments --bind_all --port=8082
+!tensorboard --logdir="./tb_logs" --bind_all --port=6006
 
 ```python
+!rm -rf tb_logs 
+```
+
+```python
+from tensorboard import notebook
+notebook.list() 
+notebook.start("--logdir ./tb_logs")
 
 ```
 
 #### metrics
 
 ![](https://tva1.sinaimg.cn/large/e6c9d24egy1h412vlgpqdj20n40cmaaf.jpg)
-
-
-#### model_structure
-![](https://tva1.sinaimg.cn/large/e6c9d24egy1h412veplwxj20m809gwfb.jpg)
 
 
 #### graphs

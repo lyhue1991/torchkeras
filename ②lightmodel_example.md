@@ -301,7 +301,7 @@ torch.save(best_net.state_dict(),"best_net.pt")
 
 ```python
 #加载权重
-net_clone = create_net()
+net_clone = Net()
 net_clone.load_state_dict(torch.load("best_net.pt"))
 ```
 

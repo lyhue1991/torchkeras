@@ -14,6 +14,17 @@ def printlog(info):
     nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print("\n"+"=========="*8 + "%s"%nowtime)
     print(str(info)+"\n")
+    
+def colorful(obj,color="red", display_type="plain"):
+    color_dict = {"black":"30", "red":"31", "green":"32", "yellow":"33",
+                    "blue":"34", "purple":"35","cyan":"36",  "white":"37"}
+    display_type_dict = {"plain":"0","highlight":"1","underline":"4",
+                "shine":"5","inverse":"7","invisible":"8"}
+    s = str(obj)
+    color_code = color_dict.get(color,"")
+    display  = display_type_dict.get(display_type,"")
+    out = '\033[{};{}m'.format(display,color_code)+s+'\033[0m'
+    return out 
 
 class StepRunner:
     def __init__(self, net, loss_fn,stage = "train", metrics_dict = None, 
@@ -24,7 +35,8 @@ class StepRunner:
         self.optimizer,self.lr_scheduler = optimizer,lr_scheduler
         self.accelerator = accelerator
     
-    def __call__(self, features, labels):
+    def __call__(self, batch):
+        features,labels = batch
         #loss
         preds = self.net(features)
         loss = self.loss_fn(preds,labels)
@@ -54,13 +66,13 @@ class EpochRunner:
         
     def __call__(self,dataloader):
         total_loss,step = 0,0
-        loop = tqdm(enumerate(dataloader), total =len(dataloader))
+        loop = tqdm(enumerate(dataloader), total =len(dataloader),file=sys.stdout)
         for i, batch in loop: 
             if self.stage=="train":
-                loss, step_metrics = self.steprunner(*batch)
+                loss, step_metrics = self.steprunner(batch)
             else:
                 with torch.no_grad():
-                    loss, step_metrics = self.steprunner(*batch)
+                    loss, step_metrics = self.steprunner(batch)
             step_log = dict({self.stage+"_loss":loss},**step_metrics)
 
             total_loss += loss
@@ -82,6 +94,9 @@ class KerasModel(torch.nn.Module):
     def __init__(self,net,loss_fn,metrics_dict=None,optimizer=None,lr_scheduler = None):
         super().__init__()
         self.accelerator = Accelerator()
+        device = str(self.accelerator.device)
+        device_type = '⚡️'  if 'cuda' in device else '🐌'
+        print(colorful("<<<<<< "+device_type +" "+ device +" is used >>>>>>"))
         self.history = {}
         
         self.net = net
@@ -141,11 +156,11 @@ class KerasModel(torch.nn.Module):
             best_score_idx = np.argmax(arr_scores) if mode=="max" else np.argmin(arr_scores)
             if best_score_idx==len(arr_scores)-1:
                 torch.save(self.net.state_dict(),ckpt_path)
-                print("<<<<<< reach best {0} : {1} >>>>>>".format(monitor,
-                     arr_scores[best_score_idx]),file=sys.stderr)
+                print(colorful("<<<<<< reach best {0} : {1} >>>>>>".format(monitor,
+                     arr_scores[best_score_idx])))
             if len(arr_scores)-best_score_idx>patience:
                 print("<<<<<< {} without improvement in {} epoch, early stopping >>>>>>".format(
-                    monitor,patience),file=sys.stderr)
+                    monitor,patience))
                 break 
                 
         self.net.load_state_dict(torch.load(ckpt_path)) 

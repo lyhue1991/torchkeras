@@ -216,10 +216,6 @@ We can monitor and analysis training process using TensorBoard now.
 !tensorboard --logdir="./tb_logs" --bind_all --port=6006
 
 ```python
-!rm -rf tb_logs 
-```
-
-```python
 from tensorboard import notebook
 notebook.list() 
 notebook.start("--logdir ./tb_logs")

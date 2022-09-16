@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import optuna
 import torch 
 import pytorch_lightning as pl 
@@ -133,7 +134,7 @@ class TensorBoard(pl.callbacks.Callback):
             self.writer.flush() 
             
         self.writer.close()
-        
+
 
 class OptunaPruning(pl.callbacks.Callback):
     def __init__(self, trial: optuna.trial.Trial, monitor: str) -> None:
@@ -152,4 +153,4 @@ class OptunaPruning(pl.callbacks.Callback):
                 raise optuna.TrialPruned(message)
         else:
             self.before_train = False
-             
+

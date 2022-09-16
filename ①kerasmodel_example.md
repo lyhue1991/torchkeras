@@ -4,7 +4,7 @@
 You can install torchkeras using pip:
 `pip install torchkeras`
 
-Here is a complete examples using torchkeras.KerasModel! 
+Here is a complete example using torchkeras.KerasModel! 
 
 ```python
 import sys 

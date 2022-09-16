@@ -5,18 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="torchkeras",
-    version="3.2.3",
+    version="3.2.4",
     author="PythonAiRoad, Laugh",
     author_email="lyhue1991@163.com",
-    description="pytorch❤️ keras",
+    description="pytorch❤️keras",
     long_description=long_description,
     install_requires=[           
-         'pandas',
          'accelerate',
-         'torch',
-         'torchmetrics',
-         'tqdm',
-         'pytorch_lightning'
+         'torchmetrics'
        ],
     long_description_content_type="text/markdown",
     url="https://github.com/lyhue1991/torchkeras",

@@ -4,7 +4,7 @@
 You can install torchkeras using pip:
 `pip install torchkeras`
 
-Here is a complete examples using torchkeras.LightModel 
+Here is a complete example using torchkeras.LightModel 
 
 ```python
 import sys 
@@ -184,7 +184,6 @@ trainer = pl.Trainer(logger=True,
 ##4，启动训练循环
 trainer.fit(model,dl_train,dl_val)
 
-
 ```
 
 ```python
@@ -202,6 +201,7 @@ ax2.scatter(Xp_pred[:,0],Xp_pred[:,1],c = "r")
 ax2.scatter(Xn_pred[:,0],Xn_pred[:,1],c = "g")
 ax2.legend(["positive","negative"]);
 ax2.set_title("y_pred")
+
 ```
 
 ![](./data/training_result.png)
@@ -291,7 +291,7 @@ print(trainer.checkpoint_callback.best_model_score)
 ```
 
 ```python
-model_best = LightModel.load_from_checkpoint(trainer.checkpoint_callback.best_model_path)
+model_best = torchkeras.LightModel.load_from_checkpoint(trainer.checkpoint_callback.best_model_path)
 ```
 
 ```python

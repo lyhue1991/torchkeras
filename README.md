@@ -109,11 +109,3 @@ Any other questions, you can contact the author form the wechat official account
 
 ![](https://tva1.sinaimg.cn/large/e6c9d24egy1h41m2zugguj20k00b9q46.jpg)
 
-
-```python
-
-```
-
-```python
-
-```

@@ -1,11 +1,11 @@
 import torch 
 from torch import nn 
-import pytorch_lightning as pl
 import datetime
 import sys
 import numpy as np
 import pandas as pd 
 from copy import deepcopy
+import pytorch_lightning as pl
 
 class LightModel(pl.LightningModule):
     def __init__(self,net,loss_fn,metrics_dict=None,optimizer=None,lr_scheduler=None):
@@ -111,7 +111,7 @@ class LightModel(pl.LightningModule):
         best_score_idx = np.argmax(arr_scores) if mode=="max" else np.argmin(arr_scores)
         if best_score_idx==len(arr_scores)-1:   
             self.print("<<<<<< reach best {0} : {1} >>>>>>".format(
-                monitor,arr_scores[best_score_idx]),file=sys.stderr)
+                monitor,arr_scores[best_score_idx]),file = sys.stderr)
     
     def test_epoch_end(self, outputs):
         dic = self.shared_epoch_end(outputs,stage="test")

@@ -1,4 +1,8 @@
+import sys
 from .kerasmodel import KerasModel
-from .lightmodel import LightModel 
 from .summary import summary
-__version__='3.2.4'
+try:
+    from .lightmodel import LightModel 
+except Exception:
+    print("torchkeras.LightModel can't be used!",file = sys.stderr)
+__version__='3.2.5'

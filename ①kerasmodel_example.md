@@ -19,10 +19,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset,DataLoader,TensorDataset
-
 import torchkeras #Attention this line 
-
-
 ```
 
 ### 1, prepare data 

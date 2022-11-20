@@ -25,6 +25,15 @@
 ### Upload to github
 
 ```python
+!git config --global user.name "lyhue1991"
+!git config --global user.email "lyhue1991@163.com"
+```
+
+```python
+!git config --email lyhue1991@163.com 
+```
+
+```python
 #!git init 
 ```
 

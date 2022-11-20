@@ -13,6 +13,11 @@ so we need to use the metrics class below to suit the torch.float labels.
 """
 
 class Accuracy(Metric):
+    
+    is_differentiable  = False
+    higher_is_better = True
+    full_state_update = False
+    
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 
@@ -29,6 +34,11 @@ class Accuracy(Metric):
         return self.correct.float() / self.total 
 
 class Precision(Metric):
+    
+    is_differentiable  = False
+    higher_is_better = True
+    full_state_update = False
+    
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 
@@ -46,6 +56,10 @@ class Precision(Metric):
         return torch.true_divide(self.true_positive, (self.true_positive+self.false_positive))
 
 class Recall(Metric):
+    is_differentiable  = False
+    higher_is_better = True
+    full_state_update = False
+    
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 
@@ -63,6 +77,11 @@ class Recall(Metric):
         return torch.true_divide(self.true_positive,self.total_positive) 
 
 class AUC(torchmetrics.AUROC):
+    
+    is_differentiable  = False
+    higher_is_better = True
+    full_state_update = False
+    
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
         
@@ -74,6 +93,11 @@ class AUC(torchmetrics.AUROC):
 
 #AUC近似计算
 class AUCROC(Metric):
+    
+    is_differentiable  = False
+    higher_is_better = True
+    full_state_update = False
+    
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 
@@ -103,6 +127,11 @@ class AUCROC(Metric):
         return auc
 
 class KS(Metric):
+    
+    is_differentiable  = False
+    higher_is_better = True
+    full_state_update = False
+    
     def __init__(self, dist_sync_on_step=False):
         super().__init__(dist_sync_on_step=dist_sync_on_step)
 

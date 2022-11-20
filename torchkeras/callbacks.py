@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import optuna
 import torch 
 import pytorch_lightning as pl 
 from torch.utils.tensorboard import SummaryWriter 
@@ -135,22 +134,4 @@ class TensorBoard(pl.callbacks.Callback):
             
         self.writer.close()
 
-
-class OptunaPruning(pl.callbacks.Callback):
-    def __init__(self, trial: optuna.trial.Trial, monitor: str) -> None:
-        super().__init__()
-        self.trial = trial
-        self.monitor = monitor
-        self.before_train = True #第一个 validation是训练前的得分，无需report
-
-    def on_validation_end(self, trainer: pl.Trainer, pl_module: pl.LightningModule) -> None:
-        if not self.before_train:
-            epoch = pl_module.current_epoch
-            current_score = float(trainer.callback_metrics.get(self.monitor))
-            self.trial.report(current_score, step=epoch)
-            if self.trial.should_prune():
-                message = "Trial was pruned at epoch {}.".format(epoch)
-                raise optuna.TrialPruned(message)
-        else:
-            self.before_train = False
 

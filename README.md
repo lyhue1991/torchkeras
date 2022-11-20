@@ -75,6 +75,7 @@ Although different, the usage of torchkeras.KerasModel and  torchkeras.LightMode
 |early stopping | ✅    |✅    |
 |metrics from torchmetrics | ✅    |✅    |
 |gpu training | ✅    |✅    |
+|mac m1 training | ✅    |✅    |
 |multi-gpus training |   ❌  |✅    |
 |tensorboard callback |   ❌  |✅    |
 |simple source code|   ✅   |❌  |
@@ -92,11 +93,11 @@ You can follow these full examples to get started with torchkeras.
 
 Have fun!😋😋
 
-* ① [**torchkeras.KerasModel example**](./①kerasmodel_example.md)
+* ① [**torchkeras.KerasModel example**](./1，kerasmodel_example.ipynb)
 
-* ② [**torchkeras.LightModel example**](./②lightmodel_example.md)
+* ② [**torchkeras.LightModel example**](./2，lightmodel_example.ipynb)
 
-* ③ [**torchkeras.LightModel  with tensorboard example**](./③tensorboard_example.md)
+* ③ [**torchkeras.LightModel  with tensorboard example**](./3，tensorboard_example.ipynb)
 
 
 

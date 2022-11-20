@@ -8,7 +8,7 @@ from copy import deepcopy
 import pytorch_lightning as pl
 
 class LightModel(pl.LightningModule):
-    def __init__(self,net,loss_fn,metrics_dict=None,optimizer=None,lr_scheduler=None):
+    def __init__(self,net=None,loss_fn=None,metrics_dict=None,optimizer=None,lr_scheduler=None):
         super().__init__()
         self.net = net
         self.history = {}
@@ -24,6 +24,7 @@ class LightModel(pl.LightningModule):
         for p in ["net","loss_fn","metrics_dict","optimizer","lr_scheduler"]:
             self.save_hyperparameters(p)
         
+
     def forward(self,x):
         if self.net:
             return self.net.forward(x)

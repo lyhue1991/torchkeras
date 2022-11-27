@@ -30,10 +30,6 @@
 ```
 
 ```python
-!git config --email lyhue1991@163.com 
-```
-
-```python
 #!git init 
 ```
 

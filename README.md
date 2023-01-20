@@ -4,7 +4,13 @@
 The torchkeras library is a simple tool for training neural network in pytorch jusk in a keras style. 😋😋
 
 
+ <br>
 
+ <div>
+    </a>
+     <a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a>
+  </div>
+ <br>
 
 
 ## 1, Introduction
@@ -31,13 +37,16 @@ import torchkeras
 #use torchkeras.KerasModel 
 model = torchkeras.KerasModel(net,
                               loss_fn = nn.BCEWithLogitsLoss(),
-                              optimizer= torch.optim.Adam(net.parameters(),lr = 0.03),
-                              metrics_dict = {"acc":torchmetrics.metrics.Accuracy()}
+                              optimizer= torch.optim.Adam(net.parameters(),lr = 0.001),
+                              metrics_dict = {"acc":torchmetrics.Accuracy(task='binary')}
                              )
-dfhistory=model.fit(epochs=30, train_data=dl_train, 
-                    val_data=dl_val, patience=3, 
-                    monitor="val_acc",mode="max",
-                    ckpt_path='checkpoint.pt')
+dfhistory=model.fit(train_data=dl_train, 
+                    val_data=dl_val, 
+                    epochs=20, 
+                    patience=3, 
+                    ckpt_path='checkpoint.pt',
+                    monitor="val_acc",
+                    mode="max")
 
 ```
 
@@ -75,10 +84,8 @@ Although different, the usage of torchkeras.KerasModel and  torchkeras.LightMode
 |early stopping | ✅    |✅    |
 |metrics from torchmetrics | ✅    |✅    |
 |gpu training | ✅    |✅    |
-|mac m1 training | ✅    |✅    |
-|multi-gpus training |   ❌  |✅    |
+|multi-gpus training(ddp) |   ✅   |✅    |
 |tensorboard callback |   ❌  |✅    |
-|simple source code|   ✅   |❌  |
 
  
 
@@ -98,6 +105,8 @@ Have fun!😋😋
 * ② [**torchkeras.LightModel example**](./2，lightmodel_example.ipynb)
 
 * ③ [**torchkeras.LightModel  with tensorboard example**](./3，tensorboard_example.ipynb)
+
+* ④ [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)
 
 
 

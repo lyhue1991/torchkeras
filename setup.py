@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="torchkeras",
-    version="3.3.0",
+    version="3.3.3",
     author="PythonAiRoad, Laugh",
     author_email="lyhue1991@163.com",
-    description="pytorch❤️ keras",
+    description="pytorch❤️keras",
     long_description=long_description,
     install_requires=[           
          #'pandas',

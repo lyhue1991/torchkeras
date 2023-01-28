@@ -13,7 +13,7 @@ from argparse import Namespace
 from .summary import summary
 from .utils import text_to_image,image_to_tensor,namespace2dict
 
-class TensorBoard(pl.callbacks.Callback):
+class TensorBoardCallback(pl.callbacks.Callback):
     def __init__(self, save_dir = "tb_logs", model_name="default", 
                  log_weight=True, log_weight_freq=5,
                  log_graph=True, example_input_array=None,

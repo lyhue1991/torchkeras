@@ -85,9 +85,9 @@ Although different, the usage of torchkeras.KerasModel and  torchkeras.LightMode
 |metrics from torchmetrics | ✅    |✅    |
 |gpu training | ✅    |✅    |
 |multi-gpus training(ddp) |   ✅   |✅    |
-|tensorboard callback |   ❌  |✅    |
-
- 
+|tensorboard callback |   ✅   |✅    |
+|other features from pytorch_lightning |   ❌  |✅    |
+|simple code |  ✅   |❌    |
 
 ```python
 
@@ -104,9 +104,11 @@ Have fun!😋😋
 
 * ② [**torchkeras.LightModel example**](./2，lightmodel_example.ipynb)
 
-* ③ [**torchkeras.LightModel  with tensorboard example**](./3，tensorboard_example.ipynb)
+* ③ [**torchkeras.KerasModel with tensorboard example**](./3，kerasmodel_tensorboard_demo.ipynb)
 
-* ④ [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)
+* ④ [**torchkeras.LightModel  with tensorboard example**](./4，lightmodel_tensorboard_demo.ipynb)
+
+* ⑤ [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)
 
 
 

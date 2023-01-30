@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="torchkeras",
-    version="3.5.0",
+    version="3.6.0",
     author="PythonAiRoad, Laugh",
     author_email="lyhue1991@163.com",
     description="pytorch❤️keras",
@@ -16,7 +16,9 @@ setuptools.setup(
          #'torch',
          #'torchmetrics',
          #'tqdm',
-         #'pytorch_lightning'
+         #'pytorch_lightning',
+         #'plotly',
+         #'wandb'
        ],
     long_description_content_type="text/markdown",
     url="https://github.com/lyhue1991/torchkeras",

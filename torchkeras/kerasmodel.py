@@ -138,7 +138,7 @@ class KerasModel(torch.nn.Module):
             self.accelerator.print("Epoch {0} / {1}".format(epoch, epochs)+"\n")
 
             # 1，train -------------------------------------------------  
-            train_step_runner = StepRunner(
+            train_step_runner = self.StepRunner(
                     net = self.net,
                     loss_fn = self.loss_fn,
                     accelerator = self.accelerator,
@@ -148,7 +148,7 @@ class KerasModel(torch.nn.Module):
                     lr_scheduler = self.lr_scheduler
             )
 
-            train_epoch_runner = EpochRunner(train_step_runner)
+            train_epoch_runner = self.EpochRunner(train_step_runner)
             train_metrics = {'epoch':epoch}
             train_metrics.update(train_epoch_runner(train_dataloader))
             
@@ -161,14 +161,14 @@ class KerasModel(torch.nn.Module):
 
             # 2，validate -------------------------------------------------
             if val_dataloader:
-                val_step_runner = StepRunner(
+                val_step_runner = self.StepRunner(
                     net = self.net,
                     loss_fn = self.loss_fn,
                     accelerator = self.accelerator,
                     stage="val",
                     metrics_dict= deepcopy(self.metrics_dict)
                 )
-                val_epoch_runner = EpochRunner(val_step_runner)
+                val_epoch_runner = self.EpochRunner(val_step_runner)
                 with torch.no_grad():
                     val_metrics = val_epoch_runner(val_dataloader)
 
@@ -211,9 +211,9 @@ class KerasModel(torch.nn.Module):
         accelerator = Accelerator()
         self.net,self.loss_fn,self.metrics_dict = accelerator.prepare(self.net,self.loss_fn,self.metrics_dict)
         val_data = accelerator.prepare(val_data)
-        val_step_runner = StepRunner(net = self.net,stage="val",
+        val_step_runner = self.StepRunner(net = self.net,stage="val",
                     loss_fn = self.loss_fn,metrics_dict=deepcopy(self.metrics_dict),
                     accelerator = accelerator)
-        val_epoch_runner = EpochRunner(val_step_runner)
+        val_epoch_runner = self.EpochRunner(val_step_runner)
         val_metrics = val_epoch_runner(val_data)
         return val_metrics

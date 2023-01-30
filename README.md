@@ -86,7 +86,8 @@ Although different, the usage of torchkeras.KerasModel and  torchkeras.LightMode
 |gpu training | ✅    |✅    |
 |multi-gpus training(ddp) |   ✅   |✅    |
 |tensorboard callback |   ✅   |✅    |
-|other features from pytorch_lightning |   ❌  |✅    |
+|pretty wandb callback |  ✅ 👍🏻   |  ❌ |
+|other callbacks from pytorch_lightning |   ❌  |✅    |
 |simple code |  ✅   |❌    |
 
 ```python
@@ -100,15 +101,19 @@ You can follow these full examples to get started with torchkeras.
 
 Have fun!😋😋
 
-* ① [**torchkeras.KerasModel example**](./1，kerasmodel_example.ipynb)
+* ① [**torchkeras.KerasModel example**](./1，kerasmodel_example.ipynb) 🔥🔥
 
-* ② [**torchkeras.LightModel example**](./2，lightmodel_example.ipynb)
+* ② [**torchkeras.KerasModel with wandb demo**](./2，kerasmodel_wandb_demo.ipynb) 🔥🔥🔥
 
 * ③ [**torchkeras.KerasModel with tensorboard example**](./3，kerasmodel_tensorboard_demo.ipynb)
 
-* ④ [**torchkeras.LightModel  with tensorboard example**](./4，lightmodel_tensorboard_demo.ipynb)
+* ④ [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)
 
-* ⑤ [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)
+* ⑤ [**torchkeras.LightModel example**](./5，lightmodel_example.ipynb)
+
+* ⑥ [**torchkeras.LightModel  with tensorboard example**](./6，lightmodel_tensorboard_demo.ipynb)
+
+
 
 
 

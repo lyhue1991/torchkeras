@@ -44,12 +44,17 @@ class StepRunner:
         all_labels = self.accelerator.gather(labels)
         all_loss = self.accelerator.gather(loss).sum()
         
+        #losses
+        step_losses = {self.stage+"_loss":all_loss.item()}
+        
         #metrics
         step_metrics = {self.stage+"_"+name:metric_fn(all_preds, all_labels).item() 
                         for name,metric_fn in self.metrics_dict.items()}
+        
         if self.optimizer is not None and self.stage=="train":
             step_metrics['lr'] = self.optimizer.state_dict()['param_groups'][0]['lr']
-        return all_loss.item(),step_metrics
+            
+        return step_losses,step_metrics
 
 class EpochRunner:
     def __init__(self,steprunner):
@@ -59,40 +64,42 @@ class EpochRunner:
         self.accelerator = self.steprunner.accelerator
         
     def __call__(self,dataloader):
-        total_loss,step = 0,0
-        loop = tqdm(enumerate(dataloader), 
+        loop = tqdm(enumerate(dataloader,start=1), 
                     total =len(dataloader),
                     file=sys.stdout,
                     disable=not self.accelerator.is_local_main_process,
                     ncols = 100
                    )
         
-        for i, batch in loop: 
+        epoch_losses = {}
+        for step, batch in loop: 
             if self.stage=="train":
-                loss, step_metrics = self.steprunner(batch)
+                step_losses,step_metrics = self.steprunner(batch)
             else:
                 with torch.no_grad():
-                    loss, step_metrics = self.steprunner(batch)
+                    step_losses,step_metrics = self.steprunner(batch)
                     
-            step_log = dict({self.stage+"_loss":loss},**step_metrics)
-            total_loss += loss
-            step+=1
+            step_log = dict(step_losses,**step_metrics)
+            for k,v in step_losses.items():
+                epoch_losses[k] = epoch_losses.get(k,0.0)+v
             
-            if i!=len(dataloader)-1:
+            if step!=len(dataloader):
                 loop.set_postfix(**step_log)
             else:
                 epoch_metrics = step_metrics
                 epoch_metrics.update({self.stage+"_"+name:metric_fn.compute().item() 
                                  for name,metric_fn in self.steprunner.metrics_dict.items()})
-                epoch_loss = total_loss/step
-                epoch_log = dict({self.stage+"_loss":epoch_loss},**epoch_metrics)
+                epoch_losses = {k:v/step for k,v in epoch_losses.items()}
+                epoch_log = dict(epoch_losses,**epoch_metrics)
                 loop.set_postfix(**epoch_log)
                 for name,metric_fn in self.steprunner.metrics_dict.items():
                     metric_fn.reset()
         return epoch_log
 
-
 class KerasModel(torch.nn.Module):
+    
+    StepRunner,EpochRunner = StepRunner,EpochRunner
+    
     def __init__(self,net,loss_fn,metrics_dict=None,optimizer=None,lr_scheduler = None):
         super().__init__()
         self.net,self.loss_fn,self.metrics_dict = net, loss_fn, torch.nn.ModuleDict(metrics_dict) 
@@ -106,6 +113,7 @@ class KerasModel(torch.nn.Module):
     def fit(self, train_data, val_data=None, epochs=10,ckpt_path='checkpoint.pt',
             patience=5, monitor="val_loss", mode="min", mixed_precision='no',callbacks = None):
         
+        self.__dict__.update(locals())
         self.accelerator = Accelerator(mixed_precision=mixed_precision)
         device = str(self.accelerator.device)
         device_type = '🐌'  if 'cpu' in device else '⚡️'

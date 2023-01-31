@@ -4,39 +4,9 @@ from copy import deepcopy
 import numpy as np 
 import pandas as pd 
 import wandb
-import plotly.graph_objs as go
 from torch.utils.tensorboard import SummaryWriter 
+from .utils import plot_metric
 
-def plot_metric(dfhistory, metric):
-    train_metrics = dfhistory["train_"+metric].values.tolist()
-    val_metrics = dfhistory['val_'+metric].values.tolist()
-    epochs = list(range(1, len(train_metrics) + 1))
-    
-    train_scatter = go.Scatter(x = epochs, y=train_metrics, mode = "lines+markers",
-                               name = 'train_'+metric,marker = dict(size=8,color="blue"),
-                                line= dict(width=2,color="blue",dash="dash"))
-    val_scatter = go.Scatter(x = epochs, y=val_metrics, mode = "lines+markers",
-                            name = 'val_'+metric,marker = dict(size=10,color="red"),
-                            line= dict(width=2,color="red",dash="solid"))
-    fig = go.Figure(data = [train_scatter,val_scatter])
-    
-    return fig
-
-def getNotebookPath():
-    from jupyter_server import serverapp
-    from jupyter_server.utils import url_path_join
-    from pathlib import Path
-    import requests,re
-    kernelIdRegex = re.compile(r"(?<=kernel-)[\w\d\-]+(?=\.json)")
-    kernelId = kernelIdRegex.search(get_ipython().config["IPKernelApp"]["connection_file"])[0]
-    for jupServ in serverapp.list_running_servers():
-        for session in requests.get(url_path_join(jupServ["url"], "api/sessions"),
-                                    params={"token":jupServ["token"]}).json():
-            if kernelId == session["kernel"]["id"]:
-                return str(Path(jupServ["root_dir"]) / session["notebook"]['path']) 
-    raise Exception('failed to get current notebook path')
-    
-    
 class TensorBoardCallback:
     def __init__(self, save_dir= "runs", model_name="model", 
                  log_weight=False, log_weight_freq=5):
@@ -97,28 +67,24 @@ class TensorBoardCallback:
         #save history
         dfhistory = pd.DataFrame(model.history)
         dfhistory.to_csv(os.path.join(self.log_path,'dfhistory.csv'),index=None)
-        
-        
+
+
 class WandbCallback:
     def __init__(self, 
                  project="model",
                  config = None,
                  name = None,
-                 save_code = True,
-                 save_ckpt = True
+                 save_ckpt = True,
+                 save_code = True
                 ):
-        self.project = project
-        self.config = config if config else {}
+        self.__dict__.update(locals())
         self.name = name if name is not None else datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.save_code = save_code
-        self.save_ckpt = save_ckpt
         
     def on_fit_start(self, model:'KerasModel'):
         run = wandb.init(project=self.project, config = self.config,
-                   name = self.name)
+                   name = self.name, save_code=self.save_code)
         model.run_id = run.id
         
-
     def on_train_epoch_end(self, model:'KerasModel'):
         pass
     
@@ -147,20 +113,7 @@ class WandbCallback:
         #save ckpt
         if self.save_ckpt:
             wandb.save(model.ckpt_path)
-        
-        #save code
-        if self.save_code:
-            try:
-                current_file = eval('__file__')
-                wandb.save(current_file)
-            except Exception as err1:
-                try:
-                    current_file = getNotebookPath()
-                    wandb.save(current_file)
-                except Exception as err2:
-                    print(err1,err2)
- 
-                
+                  
         #plotly metrics
         metrics = [x.replace('train_','').replace('val_','') for x in dfhistory.columns if 'train_' in x] 
         metric_fig = {m+'_curve':plot_metric(dfhistory,m) for m in metrics}

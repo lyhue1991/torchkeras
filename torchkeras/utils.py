@@ -4,7 +4,6 @@ from copy import deepcopy
 import numpy as np 
 from PIL import Image, ImageFont, ImageDraw
 import pathlib
-from torchvision.transforms import ToTensor
 from argparse import Namespace
 
 def text_to_image(text):
@@ -18,6 +17,7 @@ def text_to_image(text):
     return image
 
 def image_to_tensor(image):
+    from torchvision.transforms import ToTensor
     tensor = ToTensor()(np.array(image))
     return tensor
 
@@ -63,5 +63,39 @@ def colorful(obj,color="red", display_type="plain"):
     display  = display_type_dict.get(display_type,"")
     out = '\033[{};{}m'.format(display,color_code)+s+'\033[0m'
     return out 
+
+def get_call_file(): 
+    import traceback
+    stack = traceback.extract_stack()
+    return stack[-2].filename 
+
+def getNotebookPath():
+    from jupyter_server import serverapp
+    from jupyter_server.utils import url_path_join
+    from pathlib import Path
+    import requests,re
+    kernelIdRegex = re.compile(r"(?<=kernel-)[\w\d\-]+(?=\.json)")
+    kernelId = kernelIdRegex.search(get_ipython().config["IPKernelApp"]["connection_file"])[0]
+    for jupServ in serverapp.list_running_servers():
+        for session in requests.get(url_path_join(jupServ["url"], "api/sessions"),
+                                    params={"token":jupServ["token"]}).json():
+            if kernelId == session["kernel"]["id"]:
+                return str(Path(jupServ["root_dir"]) / session["notebook"]['path']) 
+    raise Exception('failed to get current notebook path')
+    
+def plot_metric(dfhistory, metric):
+    import plotly.graph_objs as go
+    train_metrics = dfhistory["train_"+metric].values.tolist()
+    val_metrics = dfhistory['val_'+metric].values.tolist()
+    epochs = list(range(1, len(train_metrics) + 1))
+    
+    train_scatter = go.Scatter(x = epochs, y=train_metrics, mode = "lines+markers",
+                               name = 'train_'+metric,marker = dict(size=8,color="blue"),
+                                line= dict(width=2,color="blue",dash="dash"))
+    val_scatter = go.Scatter(x = epochs, y=val_metrics, mode = "lines+markers",
+                            name = 'val_'+metric,marker = dict(size=10,color="red"),
+                            line= dict(width=2,color="red",dash="solid"))
+    fig = go.Figure(data = [train_scatter,val_scatter])
+    return fig    
 
 

@@ -4,13 +4,11 @@
 The torchkeras library is a simple tool for training neural network in pytorch jusk in a keras style. 😋😋
 
 
- <br>
+torchkeras ❤️ wandb: https://wandb.ai/lyhue1991/mnist_torchkeras
 
- <div>
-    </a>
-     <a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a>
-  </div>
- <br>
+<br><div></a><a href="https://www.kaggle.com/lyhue1991/kerasmodel-wandb-example"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>
+
+
 
 
 ## 1, Introduction
@@ -53,7 +51,7 @@ dfhistory=model.fit(train_data=dl_train,
 
 **This project seems somehow powerful, but the source code is very simple.**
 
-**Actually, less than 200 lines of Python code.**
+**Actually, only about 200 lines of Python code.**
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 <!-- #endregion -->
@@ -64,21 +62,19 @@ dfhistory=model.fit(train_data=dl_train,
 
 ## 2, Features 
 
-<!-- #region -->
-Besides the basic torchkeras.KerasModel, another much more powerful class torchkeras.LightModel is created to support many other features.
 
+Besides the basic torchkeras.KerasModel, another powerful class torchkeras.LightModel is created to support pytorch_lightning training style.
 
 The KerasModel is much simpler, and is recommended for beginner users.
 
 The LightModel borrows many features from the library pytorch_lightning and shows a best practice.
 
-
 Although different, the usage of torchkeras.KerasModel and  torchkeras.LightModel is very similar.
 
 
-<!-- #endregion -->
 
-|features| torchkeras.KerasModel     |  torchkeras.LightModel   | 
+
+|features| torchkeras.KerasModel 🔥🔥🔥    |  torchkeras.LightModel   | 
 |----:|:-------------------------:|:-----------:|
 |progress bar | ✅    |✅    |
 |early stopping | ✅    |✅    |
@@ -86,7 +82,7 @@ Although different, the usage of torchkeras.KerasModel and  torchkeras.LightMode
 |gpu training | ✅    |✅    |
 |multi-gpus training(ddp) |   ✅   |✅    |
 |tensorboard callback |   ✅   |✅    |
-|pretty wandb callback |  ✅ 👍🏻   |  ❌ |
+|pretty wandb callback |  ✅  |  ❌ |
 |other callbacks from pytorch_lightning |   ❌  |✅    |
 |simple code |  ✅   |❌    |
 
@@ -96,26 +92,23 @@ Although different, the usage of torchkeras.KerasModel and  torchkeras.LightMode
 
 ### 3, Basic Examples 
 
-
+<!-- #region -->
 You can follow these full examples to get started with torchkeras.
 
 Have fun!😋😋
 
-* ① [**torchkeras.KerasModel example**](./1，kerasmodel_example.ipynb) 🔥🔥
-
-* ② [**torchkeras.KerasModel with wandb demo**](./2，kerasmodel_wandb_demo.ipynb) 🔥🔥🔥
-
-* ③ [**torchkeras.KerasModel with tensorboard example**](./3，kerasmodel_tensorboard_demo.ipynb)
-
-* ④ [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)
-
-* ⑤ [**torchkeras.LightModel example**](./5，lightmodel_example.ipynb)
-
-* ⑥ [**torchkeras.LightModel  with tensorboard example**](./6，lightmodel_tensorboard_demo.ipynb)
 
 
+|example| read notebook code     |  run example in kaggle| 
+|:----|:-------------------------|:-----------:|
+|①kerasmodel basic 🔥🔥|  [**torchkeras.KerasModel example**](./1，kerasmodel_example.ipynb)  |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/kerasmodel-example"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|②kerasmodel wandb 🔥🔥🔥|[**torchkeras.KerasModel with wandb demo**](./2，kerasmodel_wandb_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/kerasmodel-wandb-example"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|③kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./3，kerasmodel_tensorboard_demo.ipynb)   |  |
+|④kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|⑤lightmodel basic |  [**torchkeras.LightModel example**](./5，lightmodel_example.ipynb)  |   |
+|⑥lightmodel tensorboard |  [**torchkeras.LightModel  with tensorboard example**](./6，lightmodel_tensorboard_demo.ipynb)  |  |
 
-
+<!-- #endregion -->
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 

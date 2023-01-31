@@ -38,7 +38,7 @@
 ```
 
 ```python
-!git commit -m"3.4.0"
+!git commit -m"3.7.0"
 ```
 
 ```python

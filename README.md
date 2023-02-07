@@ -98,15 +98,15 @@ You can follow these full examples to get started with torchkeras.
 Have fun!😋😋
 
 
-
 |example| read notebook code     |  run example in kaggle| 
 |:----|:-------------------------|:-----------:|
 |①kerasmodel basic 🔥🔥|  [**torchkeras.KerasModel example**](./1，kerasmodel_example.ipynb)  |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/kerasmodel-example"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |②kerasmodel wandb 🔥🔥🔥|[**torchkeras.KerasModel with wandb demo**](./2，kerasmodel_wandb_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/kerasmodel-wandb-example"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|③kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./3，kerasmodel_tensorboard_demo.ipynb)   |  |
-|④kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|⑤lightmodel basic |  [**torchkeras.LightModel example**](./5，lightmodel_example.ipynb)  |   |
-|⑥lightmodel tensorboard |  [**torchkeras.LightModel  with tensorboard example**](./6，lightmodel_tensorboard_demo.ipynb)  |  |
+|③kerasmodel tunning 🔥🔥🔥|[**torchkeras.KerasModel with wandb sweep demo**](./3，kerasmodel_tuning_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-loves-wandb-sweep"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|④kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./4，kerasmodel_tensorboard_demo.ipynb)   |  |
+|⑤kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|⑥lightmodel basic |  [**torchkeras.LightModel example**](./6，lightmodel_example.ipynb)  |   |
+|⑦lightmodel tensorboard |  [**torchkeras.LightModel  with tensorboard example**](./7，lightmodel_tensorboard_demo.ipynb)  |  |
 
 <!-- #endregion -->
 

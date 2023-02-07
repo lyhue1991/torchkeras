@@ -2,6 +2,7 @@ import torch
 import datetime
 from copy import deepcopy
 import numpy as np 
+import pandas as pd 
 from PIL import Image, ImageFont, ImageDraw
 import pathlib
 from argparse import Namespace
@@ -97,5 +98,3 @@ def plot_metric(dfhistory, metric):
                             line= dict(width=2,color="red",dash="solid"))
     fig = go.Figure(data = [train_scatter,val_scatter])
     return fig    
-
-

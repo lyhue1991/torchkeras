@@ -196,14 +196,14 @@ class KerasModel(torch.nn.Module):
                 break 
                 
         if self.accelerator.is_local_main_process:
-        
+            dfhistory = pd.DataFrame(self.history)
+            self.accelerator.print(dfhistory)
+            
             for callback_obj in self.callbacks:
                 callback_obj.on_fit_end(model = self)
                 
             self.net = self.accelerator.unwrap_model(self.net)
             self.net.load_state_dict(torch.load(ckpt_path))
-            dfhistory = pd.DataFrame(self.history)
-            self.accelerator.print(dfhistory)
             return dfhistory 
     
     @torch.no_grad()

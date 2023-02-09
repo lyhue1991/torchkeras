@@ -1,6 +1,0 @@
-include torchkeras/*.ttf
-graft assets
-prune assets/*checkpoint*
-include setup.py
-recursive-include torchkeras *.ttf
-recursive-exclude __pycache__ *

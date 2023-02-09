@@ -9,8 +9,8 @@ PARENT = FILE.parent  # root directory
 README = (PARENT / "README.md").read_text(encoding="utf-8")
 
 def get_version():
-    file = PARENT / 'torchkeras/__init__.py'
-    return re.search(r'^__version__ = [\'"]([^\'"]*)[\'"]', file.read_text(encoding="utf-8"), re.M)[1]
+    file = PARENT/'torchkeras/__init__.py'
+    return re.search(r'__version__="(.*)"', file.read_text(encoding="utf-8"),re.M)[1]
 
     
 setup(

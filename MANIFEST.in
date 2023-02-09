@@ -1,0 +1,3 @@
+include torchkeras/*.ttf
+graft assets
+prune assets/*checkpoint*

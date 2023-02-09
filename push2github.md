@@ -30,6 +30,10 @@
 ```
 
 ```python
+!git reset --mixed b37a9b8 
+```
+
+```python
 #!git init 
 ```
 
@@ -38,7 +42,7 @@
 ```
 
 ```python
-!git commit -m"3.7.0"
+!git commit -m"3.7.2"
 ```
 
 ```python

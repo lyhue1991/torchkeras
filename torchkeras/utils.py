@@ -84,17 +84,4 @@ def getNotebookPath():
                 return str(Path(jupServ["root_dir"]) / session["notebook"]['path']) 
     raise Exception('failed to get current notebook path')
     
-def plot_metric(dfhistory, metric):
-    import plotly.graph_objs as go
-    train_metrics = dfhistory["train_"+metric].values.tolist()
-    val_metrics = dfhistory['val_'+metric].values.tolist()
-    epochs = list(range(1, len(train_metrics) + 1))
-    
-    train_scatter = go.Scatter(x = epochs, y=train_metrics, mode = "lines+markers",
-                               name = 'train_'+metric,marker = dict(size=8,color="blue"),
-                                line= dict(width=2,color="blue",dash="dash"))
-    val_scatter = go.Scatter(x = epochs, y=val_metrics, mode = "lines+markers",
-                            name = 'val_'+metric,marker = dict(size=10,color="red"),
-                            line= dict(width=2,color="red",dash="solid"))
-    fig = go.Figure(data = [train_scatter,val_scatter])
-    return fig    
+  

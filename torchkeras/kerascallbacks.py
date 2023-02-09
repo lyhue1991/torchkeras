@@ -7,7 +7,7 @@ import pandas as pd
 import wandb
 from torch.utils.tensorboard import SummaryWriter 
 from argparse import Namespace 
-from .utils import plot_metric
+from .plots import plot_metric
 
 class TensorBoardCallback:
     def __init__(self, save_dir= "runs", model_name="model", 

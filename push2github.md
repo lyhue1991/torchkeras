@@ -30,11 +30,7 @@
 ```
 
 ```python
-!git reset --mixed b37a9b8 
-```
-
-```python
-#!git init 
+#!git reset  b37a9b8
 ```
 
 ```python

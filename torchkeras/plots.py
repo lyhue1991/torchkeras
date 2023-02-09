@@ -1,3 +1,9 @@
+import numpy as np
+import PIL
+from PIL import Image,ImageDraw,ImageFont
+import pathlib
+import sys 
+
 def plot_metric(dfhistory, metric):
     import plotly.graph_objs as go
     train_metrics = dfhistory["train_"+metric].values.tolist()
@@ -50,15 +56,9 @@ class _Colors:
 colors = _Colors()
 
 class Annotator:
-    import numpy as np
-    import PIL
-    from PIL import Image,ImageDraw,ImageFont
-    import pathlib
-    import sys 
-    global np,PIL,Image,ImageDraw,ImageFont,pathlib,sys
     def __init__(self, img, line_width=None, 
                  font_size=None):
-        assert np.asarray(img).data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to Annotator() input images.'
+        assert np.asarray(img).data.contiguous, 'Image not contiguous. Apply np.ascontiguousarray(im) to input images.'
         self.img = img if isinstance(img, Image.Image) else Image.fromarray(img)
         
         try:

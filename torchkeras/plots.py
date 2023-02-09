@@ -63,7 +63,7 @@ class Annotator:
         
         try:
             path = pathlib.Path(__file__)
-            font = str(path.parent/"Arial.ttf")
+            font = str(path.parent/"assets/Arial.ttf")
             size = font_size or max(round(sum(self.img.size) / 2 * 0.035), 12)
             self.font = ImageFont.truetype(font, size)
         except Exception as err:

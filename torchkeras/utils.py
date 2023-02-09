@@ -9,7 +9,7 @@ from argparse import Namespace
 
 def text_to_image(text):
     path = pathlib.Path(__file__)
-    simhei = path.parent/"SimHei.ttf"
+    simhei = path.parent/"assets/SimHei.ttf"
     lines  = len(text.split("\n")) 
     image = Image.new("RGB", (800, lines*20), (255, 255, 255))
     draw = ImageDraw.Draw(image)

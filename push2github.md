@@ -42,6 +42,14 @@
 ```
 
 ```python
+#!git config pull.rebase true
+```
+
+```python
+!git pull origin master 
+```
+
+```python
 !git remote remove origin 
 ```
 
@@ -51,6 +59,10 @@
 
 ```python
 !git push origin master 
+```
+
+```python
+!git reflog 
 ```
 
 ```python

@@ -2,6 +2,7 @@
 
 ```python
 %run setup.py sdist bdist_wheel
+
 ```
 
 ```python
@@ -58,7 +59,7 @@
 ```
 
 ```python
-!git push -f origin master 
+!git push  origin master 
 ```
 
 ```python
@@ -66,5 +67,20 @@
 ```
 
 ```python
+
+```
+
+## gitignore
+
+```python
+# %load .gitignore
+.DS_store
+.ipynb_checkpoints
+.ipynb_checkpoints/* 
+torchkeras.egg-info/*
+dist/*
+build/*
+torchkeras/__pycache__/
+.idea
 
 ```

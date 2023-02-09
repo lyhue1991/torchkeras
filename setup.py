@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 import re
 from pathlib import Path
-from setuptools import find_packages, setup
+from setuptools import find_packages, setup, find_namespace_packages
 
 # Settings
 FILE = Path(__file__).resolve()
@@ -32,7 +32,7 @@ setup(
        ],
     long_description_content_type="text/markdown",
     url="https://github.com/lyhue1991/torchkeras",
-    packages=find_packages(),
+    packages=find_namespace_packages(exclude=['torchkeras.assets','data']),
     include_package_data=True,
     classifiers=[
         "Programming Language :: Python :: 3",

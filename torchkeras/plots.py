@@ -40,14 +40,17 @@ def plot_score_distribution(labels,scores):
 
 class _Colors:
     def __init__(self):
-        hexs = ('FF3838', 'FF9D97', 'FF701F', 'FFB21D', 'CFD231', '48F90A', '92CC17', '3DDB86', '1A9334', '00D4BB',
+        self.hexs = ('FF3838', 'FF9D97', 'FF701F', 'FFB21D', 'CFD231', '48F90A', '92CC17', '3DDB86', '1A9334', '00D4BB',
                 '2C99A8', '00C2FF', '344593', '6473FF', '0018EC', '8438FF', '520085', 'CB38FF', 'FF95C8', 'FF37C7')
-        self.palette = [self.hex2rgb(f'#{c}') for c in hexs]
+        self.palette = [self.hex2rgb(f'#{c}') for c in self.hexs]
         self.n = len(self.palette)
 
     def __call__(self, i, bgr=False):
         c = self.palette[int(i) % self.n]
         return (c[2], c[1], c[0]) if bgr else c
+    
+    def get_hex_color(self,i):
+        return self.hexs[int(i)%self.n]
 
     @staticmethod
     def hex2rgb(h):  # rgb order (PIL)
@@ -119,3 +122,101 @@ def plot_instance_segmentation(img, boxes, masks, class_names, min_score=0.2):
             annotator.add_box_label(box, label, color=colors(cls))
             annotator.add_mask(mask.cpu().numpy(),colors(cls))
     return annotator.img 
+
+
+def vis_detections(image,
+                   boxes,
+                   classes=None,
+                   scores=None,
+                   min_score=0.2,
+                   figsize=(16, 16),
+                   linewidth=2,
+                   color='lawngreen'):
+    
+    import matplotlib.pyplot as plt
+    image = np.array(image, dtype=np.uint8)
+    fig = plt.figure(figsize=figsize)
+    plt.axis("off")
+    plt.imshow(image)
+    ax = plt.gca()
+    if classes is None:
+        classes = ['object' for _ in boxes]
+    if scores is None:
+        scores = [1 for _ in boxes]
+    for box, name, score in zip(boxes, classes, scores):
+        if score >= min_score:
+            text = "{}: {:.2f}".format(name, score)
+            x1, y1, x2, y2 = box
+            w, h = x2 - x1, y2 - y1
+            patch = plt.Rectangle(
+                [x1, y1], w, h, fill=False, edgecolor=color, linewidth=linewidth
+            )
+            ax.add_patch(patch)
+            ax.text(
+                x1,
+                y1,
+                text,
+                bbox={"facecolor": color, "alpha": 0.8},
+                clip_box=ax.clipbox,
+                clip_on=True,
+            )
+    plt.show()
+    
+
+def joint_imgs_row(img1,img2):
+    size1 = img1.size
+    size2 = img2.size
+    joint = Image.new('RGB', (size1[0]+size2[0], max(size1[1],size2[1])))
+    loc1, loc2 = (0, 0), (size1[0], 0)
+    joint.paste(img1, loc1)
+    joint.paste(img2, loc2)
+    return joint 
+
+def joint_imgs_col(img1,img2):
+    size1 = img1.size
+    size2 = img2.size
+    joint = Image.new('RGB', (max(size1[0],size2[0]), size1[1]+size2[1]))
+    loc1, loc2 = (0, 0), (0, size1[1])
+    joint.paste(img1, loc1)
+    joint.paste(img2, loc2)
+    return joint 
+
+def get_color_map_list(num_classes):
+    color_map = num_classes * [0, 0, 0]
+    for i in range(0, num_classes):
+        j = 0
+        lab = i
+        while lab:
+            color_map[i * 3] |= (((lab >> 0) & 1) << (7 - j))
+            color_map[i * 3 + 1] |= (((lab >> 1) & 1) << (7 - j))
+            color_map[i * 3 + 2] |= (((lab >> 2) & 1) << (7 - j))
+            j += 1
+            lab >>= 3
+    return color_map
+
+def gray2pseudo(gray_img):
+    color_map = get_color_map_list(256)
+    gray_p = gray_img.convert('P')
+    gray_p.putpalette(color_map)
+    return gray_p 
+
+def fig2img(fig):
+    import io
+    buf = io.BytesIO()
+    fig.savefig(buf)
+    buf.seek(0)
+    img = PIL.Image.open(buf)
+    return img
+
+def text2img(text):
+    path = pathlib.Path(__file__)
+    simhei = path.parent/"assets/SimHei.ttf"
+    lines  = len(text.split("\n")) 
+    image = Image.new("RGB", (800, lines*20), (255, 255, 255))
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype(str(simhei),18)
+    draw.text((0, 0), text, font=font, fill="#000000")
+    return image
+
+
+

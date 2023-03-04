@@ -156,3 +156,55 @@ class MiniLogCallback:
         
     def on_fit_end(self, model:"KerasModel"):
         pass
+    
+     
+class VisProgress:
+    def __init__(self,figsize = (6,4)):
+        self.figsize = (6,4)
+    
+    def on_fit_start(self,model: 'KerasModel'):
+        from .fastprogress import master_bar
+        self.mb = master_bar(range(model.epochs))
+        self.metric =  model.monitor.replace('val_','')
+        dfhistory = pd.DataFrame(model.history)
+        x_bounds = [1, min(10,model.epochs)]
+        title = f'best {model.monitor} = ?'
+        self.mb.update_graph(dfhistory, self.metric, x_bounds = x_bounds, title=title, figsize = self.figsize)
+        self.mb.update(0)
+        self.mb.show()
+        
+    def on_train_epoch_end(self,model:'KerasModel'):
+        pass
+    
+    def get_title(self,model:'KerasModel'):
+        dfhistory = pd.DataFrame(model.history)
+        arr_scores = dfhistory[model.monitor]
+        best_score = np.max(arr_scores) if model.mode=="max" else np.min(arr_scores)
+            
+        title = f'best {model.monitor} = {best_score:.4f}'
+        return title
+        
+        
+    def on_validation_epoch_end(self, model:"KerasModel"):
+        dfhistory = pd.DataFrame(model.history)
+        n = len(dfhistory)
+        
+        x_bounds = [1, min(10+(n//10)*10,model.epochs)]
+        title = self.get_title(model)
+        self.mb.update_graph(dfhistory, self.metric, x_bounds = x_bounds, 
+                             title = title, figsize = self.figsize)
+        self.mb.update(n)
+        if n==1:
+            self.mb.write(dfhistory.columns,table=True)
+        self.mb.write(dfhistory.iloc[n-1],table=True)
+        
+    def on_fit_end(self, model:"KerasModel"):
+        dfhistory = pd.DataFrame(model.history)
+        title = self.get_title(model)
+        self.mb.update_graph(dfhistory, self.metric, 
+                             title = title, figsize = self.figsize)
+        self.mb.on_iter_end()
+        
+        
+        
+        

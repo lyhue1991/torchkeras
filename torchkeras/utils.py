@@ -1,11 +1,20 @@
 import torch 
 import datetime
 from copy import deepcopy
+import random
 import numpy as np 
 import pandas as pd 
 from PIL import Image, ImageFont, ImageDraw
 import pathlib
 from argparse import Namespace
+
+def seed_everything(seed=42):
+    print(f"Global seed set to {seed}")
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    return seed
 
 def text_to_image(text):
     path = pathlib.Path(__file__)

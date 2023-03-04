@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import torch 
 from torch import nn 
-"""
-Attention!These metrics below are only for binary-classification task !
-"""
+import sys 
+
 class Accuracy(nn.Module):
+    'Accuracy for binary-classification task'
     def __init__(self):
         super().__init__()
         self.correct = nn.Parameter(torch.tensor(0),requires_grad=False)
@@ -27,6 +27,7 @@ class Accuracy(nn.Module):
         self.total-=self.total
 
 class Precision(nn.Module):
+    'Precision for binary-classification task'
     def __init__(self):
         super().__init__()
         self.true_positive = nn.Parameter(torch.tensor(0),requires_grad=False)
@@ -51,6 +52,7 @@ class Precision(nn.Module):
         
 
 class Recall(nn.Module):
+    'Recall for binary-classification task'
     def __init__(self):
         super().__init__()
         self.true_positive = nn.Parameter(torch.tensor(0),requires_grad=False)
@@ -76,7 +78,7 @@ class Recall(nn.Module):
         
 
 class AUC(nn.Module):
-    'approximate AUC calculation'
+    'approximate AUC calculation for binary-classification task'
     def __init__(self):
         super().__init__()
         self.tp = nn.Parameter(torch.zeros(10001),requires_grad=False)
@@ -118,7 +120,7 @@ class AUC(nn.Module):
         self.fp-=self.fp
 
 class KS(nn.Module):    
-    'approximate KS calculation'
+    'approximate KS calculation for binary-classification task'
     def __init__(self):
         super().__init__()
         self.tp = nn.Parameter(torch.zeros(10001),requires_grad=False)
@@ -156,3 +158,53 @@ class KS(nn.Module):
     def reset(self):
         self.tp-=self.tp
         self.fp-=self.fp
+    
+
+class IOU(nn.Module):
+    'IOU calculation for segmentation task (bath binary and multiclass)'
+    def __init__(self, num_classes, if_print=False):
+        super().__init__()
+        self.num_classes = num_classes   
+        n = num_classes if num_classes>=2 else 2
+        self.mat = nn.Parameter(torch.zeros((n, n), dtype=torch.int64),requires_grad=False)
+        self.if_print = if_print
+
+    def forward(self, preds: torch.Tensor, targets: torch.Tensor):
+        n = self.num_classes if self.num_classes>=2 else 2
+        with torch.no_grad():
+            if self.num_classes>=2:
+                a,b = targets.flatten(),preds.argmax(1).flatten()
+            else:
+                a,b = targets.flatten(),(preds>0).long().flatten()
+            assert a.shape == b.shape
+            k = (a >= 0) & (a < n)
+            inds = n * a[k].to(torch.int64) + b[k]
+            mati = torch.bincount(inds, minlength=n**2).reshape(n, n)
+            self.mat += mati
+            acc_global,  iou = self.eval_iou(mati) 
+            return iou.mean()
+
+    def compute(self):
+        acc_global,  iou = self.eval_iou(self.mat) 
+        if self.if_print:
+            print(self,file = sys.stderr)
+        return iou.mean()
+        
+    def reset(self):
+        self.mat.zero_()
+        
+    def eval_iou(self,mat):
+        h = mat.float()
+        acc_global = torch.diag(h).sum() / h.sum()
+        iou = torch.diag(h) / (h.sum(1) + h.sum(0) - torch.diag(h))
+        return acc_global, iou 
+
+    def __str__(self):
+        acc_global,iou = self.eval_iou(self.mat)
+        return (
+            'global correct: {:.4f}\n'
+            'IoU: {}\n'
+            'mean IoU: {:.4f}').format(
+                acc_global.item(),
+                ['{:.4f}'.format(i) for i in iou.tolist()],
+                iou.mean().item())

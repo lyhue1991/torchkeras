@@ -57,17 +57,18 @@ class StepRunner:
         return step_losses,step_metrics
 
 class EpochRunner:
-    def __init__(self,steprunner):
+    def __init__(self,steprunner,quiet=False):
         self.steprunner = steprunner
         self.stage = steprunner.stage
         self.steprunner.net.train() if self.stage=="train" else self.steprunner.net.eval()
         self.accelerator = self.steprunner.accelerator
+        self.quiet = quiet
         
     def __call__(self,dataloader):
         loop = tqdm(enumerate(dataloader,start=1), 
                     total =len(dataloader),
                     file=sys.stdout,
-                    disable=not self.accelerator.is_local_main_process,
+                    disable=not self.accelerator.is_local_main_process or self.quiet,
                     ncols = 100
                    )
         
@@ -111,13 +112,15 @@ class KerasModel(torch.nn.Module):
         return self.net.forward(x)
 
     def fit(self, train_data, val_data=None, epochs=10,ckpt_path='checkpoint.pt',
-            patience=5, monitor="val_loss", mode="min", mixed_precision='no',callbacks = None):
+            patience=5, monitor="val_loss", mode="min",
+            mixed_precision='no',callbacks = None, plot = False, quiet = False):
         
         self.__dict__.update(locals())
         self.accelerator = Accelerator(mixed_precision=mixed_precision)
         device = str(self.accelerator.device)
         device_type = '🐌'  if 'cpu' in device else '⚡️'
-        self.accelerator.print(colorful("<<<<<< "+device_type +" "+ device +" is used >>>>>>"))
+        self.accelerator.print(
+            colorful("<<<<<< "+device_type +" "+ device +" is used >>>>>>"))
     
         self.net,self.loss_fn,self.metrics_dict,self.optimizer,self.lr_scheduler= self.accelerator.prepare(
             self.net,self.loss_fn,self.metrics_dict,self.optimizer,self.lr_scheduler)
@@ -125,17 +128,25 @@ class KerasModel(torch.nn.Module):
         train_dataloader,val_dataloader = self.accelerator.prepare(train_data,val_data)
         
         self.history = {}
-        self.callbacks = self.accelerator.prepare(callbacks) if callbacks is not None else []
+        callbacks = callbacks if callbacks is not None else []
+        
+        if plot==True:
+            from .kerascallbacks import VisProgress
+            callbacks.append(VisProgress(self))
+            
+        self.callbacks = self.accelerator.prepare(callbacks)
         
         if self.accelerator.is_local_main_process:
             for callback_obj in self.callbacks:
                 callback_obj.on_fit_start(model = self)
         
         for epoch in range(1, epochs+1):
-
-            nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            self.accelerator.print("\n"+"=========="*8 + "%s"%nowtime)
-            self.accelerator.print("Epoch {0} / {1}".format(epoch, epochs)+"\n")
+            should_quiet = False if quiet==False else (quiet==True or epoch>quiet)
+            
+            if not should_quiet:
+                nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                self.accelerator.print("\n"+"=========="*8 + "%s"%nowtime)
+                self.accelerator.print("Epoch {0} / {1}".format(epoch, epochs)+"\n")
 
             # 1，train -------------------------------------------------  
             train_step_runner = self.StepRunner(
@@ -148,7 +159,7 @@ class KerasModel(torch.nn.Module):
                     lr_scheduler = self.lr_scheduler
             )
 
-            train_epoch_runner = self.EpochRunner(train_step_runner)
+            train_epoch_runner = self.EpochRunner(train_step_runner,should_quiet)
             train_metrics = {'epoch':epoch}
             train_metrics.update(train_epoch_runner(train_dataloader))
             
@@ -168,7 +179,7 @@ class KerasModel(torch.nn.Module):
                     stage="val",
                     metrics_dict= deepcopy(self.metrics_dict)
                 )
-                val_epoch_runner = self.EpochRunner(val_step_runner)
+                val_epoch_runner = self.EpochRunner(val_step_runner,should_quiet)
                 with torch.no_grad():
                     val_metrics = val_epoch_runner(val_dataloader)
 
@@ -185,26 +196,28 @@ class KerasModel(torch.nn.Module):
             best_score_idx = np.argmax(arr_scores) if mode=="max" else np.argmin(arr_scores)
 
             if best_score_idx==len(arr_scores)-1:
-                unwrapped_net = self.accelerator.unwrap_model(self.net)
-                self.accelerator.save(unwrapped_net.state_dict(),ckpt_path)
-                self.accelerator.print(colorful("<<<<<< reach best {0} : {1} >>>>>>".format(monitor,
-                     arr_scores[best_score_idx])))
+                net_dict = self.accelerator.get_state_dict(self.net)
+                self.accelerator.save(net_dict,ckpt_path)
+                if not should_quiet:
+                    self.accelerator.print(colorful("<<<<<< reach best {0} : {1} >>>>>>".format(
+                        monitor,arr_scores[best_score_idx])))
 
             if len(arr_scores)-best_score_idx>patience:
                 self.accelerator.print(colorful(
-                    "<<<<<< {} without improvement in {} epoch, early stopping >>>>>>".format(monitor,patience)))
-                break 
+                    "<<<<<< {} without improvement in {} epoch,""early stopping >>>>>>"
+                ).format(monitor,patience))
+                break; 
                 
-        if self.accelerator.is_local_main_process:
+        if self.accelerator.is_local_main_process:   
             dfhistory = pd.DataFrame(self.history)
             self.accelerator.print(dfhistory)
             
             for callback_obj in self.callbacks:
                 callback_obj.on_fit_end(model = self)
-                
+        
             self.net = self.accelerator.unwrap_model(self.net)
             self.net.load_state_dict(torch.load(ckpt_path))
-            return dfhistory 
+            return dfhistory
     
     @torch.no_grad()
     def evaluate(self, val_data):

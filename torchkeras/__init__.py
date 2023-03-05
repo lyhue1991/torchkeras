@@ -4,6 +4,7 @@ import sys
 from .kerasmodel import KerasModel
 from .summary import summary
 from .kerasmodel import colorful
+from .utils import seed_everything
 try:
     from .lightmodel import LightModel 
 except Exception:

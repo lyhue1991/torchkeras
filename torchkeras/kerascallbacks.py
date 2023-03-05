@@ -40,10 +40,11 @@ class TensorBoardCallback:
     def on_validation_epoch_end(self, model:"KerasModel"):
         
         dfhistory = pd.DataFrame(model.history)
+        n = len(dfhistory)
         epoch = max(model.history['epoch'])
         
         #log metric
-        dic = deepcopy(dfhistory.loc[epoch-1])
+        dic = deepcopy(dfhistory.iloc[n-1])
         dic.pop("epoch")
         
         metrics_group = {}
@@ -96,14 +97,13 @@ class WandbCallback:
     
     def on_validation_epoch_end(self, model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
-        epoch = max(dfhistory['epoch'])
-        
-        if epoch==1:
+        n = len(dfhistory)
+        if n==1:
             for m in dfhistory.columns:
                 wandb.define_metric(name=m, step_metric='epoch', hidden=False if m!='epoch' else True)
             wandb.define_metric(name='best_'+model.monitor,step_metric='epoch')
         
-        dic = dict(dfhistory.loc[epoch-1])
+        dic = dict(dfhistory.iloc[n-1])
         monitor_arr = dfhistory[model.monitor]
         best_monitor_score = monitor_arr.max() if model.mode=='max' else monitor_arr.min()
         dic.update({'best_'+model.monitor:best_monitor_score})
@@ -116,7 +116,6 @@ class WandbCallback:
         dfhistory = pd.DataFrame(model.history)
         dfhistory.to_csv(os.path.join(wandb.run.dir,'dfhistory.csv'),index=None) 
         
-        
         #save ckpt
         if self.save_ckpt:
             import shutil
@@ -126,8 +125,7 @@ class WandbCallback:
             arti_model = wandb.Artifact('checkpoint', type='model')
             arti_model.add_file(model.ckpt_path)
             wandb.log_artifact(arti_model)
-            
-                  
+                 
         #plotly metrics
         metrics = [x.replace('train_','').replace('val_','') for x in dfhistory.columns if 'train_' in x] 
         metric_fig = {m+'_curve':plot_metric(dfhistory,m) for m in metrics}
@@ -204,7 +202,4 @@ class VisProgress:
         self.mb.update_graph(dfhistory, self.metric, 
                              title = title, figsize = self.figsize)
         self.mb.on_iter_end()
-        
-        
-        
         

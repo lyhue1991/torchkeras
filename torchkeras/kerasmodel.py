@@ -107,10 +107,15 @@ class KerasModel(torch.nn.Module):
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(
             self.net.parameters(), lr=1e-3)
         self.lr_scheduler = lr_scheduler
+        self.from_scratch = True
+        
+    def load_ckpt(self, ckpt_path='checkpoint.pt'):
+        self.net.load_state_dict(torch.load(ckpt_path))
+        self.from_scratch = False
 
     def forward(self, x):
         return self.net.forward(x)
-
+    
     def fit(self, train_data, val_data=None, epochs=10,ckpt_path='checkpoint.pt',
             patience=5, monitor="val_loss", mode="min",
             mixed_precision='no',callbacks = None, plot = False, quiet = False):
@@ -140,7 +145,8 @@ class KerasModel(torch.nn.Module):
             for callback_obj in self.callbacks:
                 callback_obj.on_fit_start(model = self)
         
-        for epoch in range(1, epochs+1):
+        start_epoch = 1 if self.from_scratch else 0
+        for epoch in range(start_epoch,epochs+1):
             should_quiet = False if quiet==False else (quiet==True or epoch>quiet)
             
             if not should_quiet:
@@ -155,17 +161,17 @@ class KerasModel(torch.nn.Module):
                     accelerator = self.accelerator,
                     stage="train",
                     metrics_dict=deepcopy(self.metrics_dict),
-                    optimizer = self.optimizer,
-                    lr_scheduler = self.lr_scheduler
+                    optimizer = self.optimizer if epoch>0 else None,
+                    lr_scheduler = self.lr_scheduler if epoch>0 else None
             )
 
             train_epoch_runner = self.EpochRunner(train_step_runner,should_quiet)
             train_metrics = {'epoch':epoch}
             train_metrics.update(train_epoch_runner(train_dataloader))
-            
+
             for name, metric in train_metrics.items():
                 self.history[name] = self.history.get(name, []) + [metric]
-                
+
             if self.accelerator.is_local_main_process:
                 for callback_obj in self.callbacks:
                     callback_obj.on_train_epoch_end(model = self)

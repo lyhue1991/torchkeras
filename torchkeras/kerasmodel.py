@@ -51,9 +51,11 @@ class StepRunner:
         step_metrics = {self.stage+"_"+name:metric_fn(all_preds, all_labels).item() 
                         for name,metric_fn in self.metrics_dict.items()}
         
-        if self.optimizer is not None and self.stage=="train":
-            step_metrics['lr'] = self.optimizer.state_dict()['param_groups'][0]['lr']
-            
+        if self.stage=="train":
+            if self.optimizer is not None:
+                step_metrics['lr'] = self.optimizer.state_dict()['param_groups'][0]['lr']
+            else:
+                step_metrics['lr'] = 0.0
         return step_losses,step_metrics
 
 class EpochRunner:

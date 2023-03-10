@@ -353,6 +353,9 @@ class ConsoleProgressBar(ProgressBar):
         if not self.leave and printing():
             print(f'\r{self.prefix}' + ' ' * (self.max_len - len(f'\r{self.prefix}')), end='\r', flush=FLUSH)
         super().on_iter_end()
+        
+    def show(self):
+        pass
 
     def on_update(self, val, text):
         if self.display:
@@ -389,15 +392,19 @@ class ConsoleMasterBar(MasterBar):
         super().on_iter_begin()
         if SAVE_PATH is not None and os.path.exists(SAVE_PATH) and not SAVE_APPEND:
             with open(SAVE_PATH, 'w') as f: f.write('')
+                
+    def show(self):
+        pass
 
     def write(self, line, table=False):
+        fstr = lambda x: f'{x:.3}' if isinstance(x,float) else str(x)
         if table:
             text = ''
             if not hasattr(self, 'names'):
-                self.names = [name + ' ' * (8-len(name)) if len(name) < 8 else name for name in line]
+                self.names = [name + ' ' * (8-len(fstr(name))) if len(fstr(name)) < 8 else fstr(name) for name in line]
                 text = '  '.join(self.names)
             else:
-                for (t,name) in zip(line,self.names): text += t + ' ' * (2 + len(name)-len(t))
+                for (t,name) in zip(line,self.names): text += fstr(t) + ' ' * (2 + len(fstr(name))-len(fstr(t)))
             print_and_maybe_save(text)
         else: print_and_maybe_save(line)
         if self.total_time:

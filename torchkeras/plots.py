@@ -136,8 +136,8 @@ def vis_detection(image,
     boxes= np.array(prediction['boxes'].tolist()) 
     scores = np.array(prediction['scores'].tolist()) if 'scores' in prediction else [1.0 for _ in boxes]
     labels = np.array(prediction['labels'].tolist()) if 'labels' in prediction else None
-    classes = [class_names[x] for x in labels] if 
-    (class_names is not None and labels is not None) else ['object']*len(boxes)
+    classes = [class_names[x] for x in labels] if (
+        class_names is not None and labels is not None) else ['object']*len(boxes)
     
     import matplotlib.pyplot as plt
     image = np.array(image, dtype=np.uint8)

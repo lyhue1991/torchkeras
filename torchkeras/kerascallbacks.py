@@ -118,10 +118,6 @@ class WandbCallback:
         
         #save ckpt
         if self.save_ckpt:
-            import shutil
-            shutil.copy(model.ckpt_path,
-                        os.path.join(wandb.run.dir,os.path.basename(model.ckpt_path)))
-            
             arti_model = wandb.Artifact('checkpoint', type='model')
             arti_model.add_file(model.ckpt_path)
             wandb.log_artifact(arti_model)
@@ -130,7 +126,13 @@ class WandbCallback:
         metrics = [x.replace('train_','').replace('val_','') for x in dfhistory.columns if 'train_' in x] 
         metric_fig = {m+'_curve':plot_metric(dfhistory,m) for m in metrics}
         wandb.log(metric_fig)
+        run_dir = wandb.run.dir
         wandb.finish()
+
+        #local save
+        import shutil
+        shutil.copy(model.ckpt_path,os.path.join(run_dir,os.path.basename(model.ckpt_path)))
+        
         
 class MiniLogCallback:
     def __init__(self, ):
@@ -165,7 +167,7 @@ class VisProgress:
         self.mb = master_bar(range(model.epochs))
         self.metric =  model.monitor.replace('val_','')
         dfhistory = pd.DataFrame(model.history)
-        x_bounds = [1, min(10,model.epochs)]
+        x_bounds = [0, min(10,model.epochs)]
         title = f'best {model.monitor} = ?'
         self.mb.update_graph(dfhistory, self.metric, x_bounds = x_bounds, title=title, figsize = self.figsize)
         self.mb.update(0)
@@ -186,8 +188,7 @@ class VisProgress:
     def on_validation_epoch_end(self, model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         n = len(dfhistory)
-        
-        x_bounds = [1, min(10+(n//10)*10,model.epochs)]
+        x_bounds = [dfhistory['epoch'].min(), min(10+(n//10)*10,model.epochs)]
         title = self.get_title(model)
         self.mb.update_graph(dfhistory, self.metric, x_bounds = x_bounds, 
                              title = title, figsize = self.figsize)

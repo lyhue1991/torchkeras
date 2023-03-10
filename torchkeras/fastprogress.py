@@ -285,7 +285,7 @@ class NBMasterBar(MasterBar):
             self.graph_out = display(self.graph_ax.figure, display_id=True)
             
         self.graph_ax.clear()
-        epochs = range(1,len(dfhistory)+1)
+        epochs = dfhistory['epoch']
         
         m1 = "train_"+metric
         if  m1 in dfhistory.columns:

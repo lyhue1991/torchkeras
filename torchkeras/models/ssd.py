@@ -9,21 +9,14 @@ from .resnet import resnet50
 
 def box_area(boxes):
     """
-    Computes the area of a set of bounding boxes, which are specified by its
-    (x1, y1, x2, y2) coordinates.
-    Arguments:
-        boxes (Tensor[N, 4]): boxes for which the area will be computed. They
-            are expected to be in (x1, y1, x2, y2) format
-    Returns:
-        area (Tensor[N]): area for each box
+    bounding boxes type: (x1, y1, x2, y2)
     """
     return (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
 
 
 def calc_iou_tensor(boxes1, boxes2):
     """
-    Return intersection-over-union (Jaccard index) of boxes.
-    Both sets of boxes are expected to be in (x1, y1, x2, y2) format.
+    bounding boxes type: (x1, y1, x2, y2)
     Arguments:
         boxes1 (Tensor[N, 4])
         boxes2 (Tensor[M, 4])
@@ -79,6 +72,7 @@ class Encoder(object):
             criteria : IoU threshold of bboexes
         """
         # [nboxes, 8732]
+        self.dboxes = self.dboxes.to(bboxes_in.device)
         ious = calc_iou_tensor(bboxes_in, self.dboxes)  # 计算每个GT与default box的iou
         # [8732,]
         best_dbox_ious, best_dbox_idx = ious.max(dim=0)  # 寻找每个default box匹配到的最大IoU
@@ -89,14 +83,14 @@ class Encoder(object):
         # set best ious 2.0
         best_dbox_ious.index_fill_(0, best_bbox_idx, 2.0)  # dim, index, value
         # 将相应default box匹配最大IOU的GT索引进行替换
-        idx = torch.arange(0, best_bbox_idx.size(0), dtype=torch.int64)
+        idx = torch.arange(0, best_bbox_idx.size(0), dtype=torch.int64).to(bboxes_in.device)
         best_dbox_idx[best_bbox_idx[idx]] = idx
 
         # filter IoU > 0.5
         # 寻找与GT iou大于0.5的default box,对应论文中Matching strategy的第二条(这里包括了第一条匹配到的信息)
         masks = best_dbox_ious > criteria
         # [8732,]
-        labels_out = torch.zeros(self.nboxes, dtype=torch.int64)
+        labels_out = torch.zeros(self.nboxes, dtype=torch.int64).to(bboxes_in.device)
         labels_out[masks] = labels_in[best_dbox_idx[masks]]
         # 将default box匹配到正样本的位置设置成对应GT的box信息
         bboxes_out = self.dboxes.clone()
@@ -162,10 +156,10 @@ class Encoder(object):
         for bbox, prob in zip(bboxes.split(1, 0), probs.split(1, 0)):
             bbox = bbox.squeeze(0)
             prob = prob.squeeze(0)
-            outputs.append(self.decode_single_new(bbox, prob, criteria, max_output))
+            outputs.append(self.decode_single(bbox, prob, criteria, max_output))
         return outputs
 
-    def decode_single_new(self, bboxes_in, scores_in, criteria, num_output=200):
+    def decode_single(self, bboxes_in, scores_in, criteria, num_output=200):
         """
         decode:
             input  : bboxes_in (Tensor 8732 x 4), scores_in (Tensor 8732 x nitems)
@@ -218,75 +212,6 @@ class Encoder(object):
         labels_out = labels[keep]
 
         return bboxes_out, labels_out, scores_out
-
-    # perform non-maximum suppression
-    def decode_single(self, bboxes_in, scores_in, criteria, max_output, max_num=200):
-        """
-        decode:
-            input  : bboxes_in (Tensor 8732 x 4), scores_in (Tensor 8732 x nitems)
-            output : bboxes_out (Tensor nboxes x 4), labels_out (Tensor nboxes)
-            criteria : IoU threshold of bboexes
-            max_output : maximum number of output bboxes
-        """
-        # Reference to https://github.com/amdegroot/ssd.pytorch
-        bboxes_out = []
-        scores_out = []
-        labels_out = []
-
-        # 非极大值抑制算法
-        # scores_in (Tensor 8732 x nitems), 遍历返回每一列数据，即8732个目标的同一类别的概率
-        for i, score in enumerate(scores_in.split(1, 1)):
-            # skip background
-            if i == 0:
-                continue
-
-            # [8732, 1] -> [8732]
-            score = score.squeeze(1)
-
-            # 虑除预测概率小于0.05的目标
-            mask = score > 0.05
-            bboxes, score = bboxes_in[mask, :], score[mask]
-            if score.size(0) == 0:
-                continue
-
-            # 按照分数从小到大排序
-            score_sorted, score_idx_sorted = score.sort(dim=0)
-
-            # select max_output indices
-            score_idx_sorted = score_idx_sorted[-max_num:]
-            candidates = []
-
-            while score_idx_sorted.numel() > 0:
-                idx = score_idx_sorted[-1].item()
-                # 获取排名前score_idx_sorted名的bboxes信息 Tensor:[score_idx_sorted, 4]
-                bboxes_sorted = bboxes[score_idx_sorted, :]
-                # 获取排名第一的bboxes信息 Tensor:[4]
-                bboxes_idx = bboxes[idx, :].unsqueeze(dim=0)
-                # 计算前score_idx_sorted名的bboxes与第一名的bboxes的iou
-                iou_sorted = calc_iou_tensor(bboxes_sorted, bboxes_idx).squeeze()
-
-                # we only need iou < criteria
-                # 丢弃与第一名iou > criteria的所有目标(包括自己本身)
-                score_idx_sorted = score_idx_sorted[iou_sorted < criteria]
-                # 保存第一名的索引信息
-                candidates.append(idx)
-
-            # 保存该类别通过非极大值抑制后的目标信息
-            bboxes_out.append(bboxes[candidates, :])   # bbox坐标信息
-            scores_out.append(score[candidates])       # score信息
-            labels_out.extend([i] * len(candidates))   # 标签信息
-
-        if not bboxes_out:  # 如果为空的话，返回空tensor，注意boxes对应的空tensor size，防止验证时出错
-            return [torch.empty(size=(0, 4)), torch.empty(size=(0,), dtype=torch.int64), torch.empty(size=(0,))]
-
-        bboxes_out = torch.cat(bboxes_out, dim=0).contiguous()
-        scores_out = torch.cat(scores_out, dim=0).contiguous()
-        labels_out = torch.as_tensor(labels_out, dtype=torch.long)
-
-        # 对所有目标的概率进行排序（无论是什 么类别）,取前max_num个目标
-        _, max_ids = scores_out.sort(dim=0)
-        max_ids = max_ids[-max_output:]
-        return bboxes_out[max_ids, :], labels_out[max_ids], scores_out[max_ids]
 
 
 class DefaultBoxes(object):
@@ -499,7 +424,7 @@ class PostProcess(nn.Module):
         # scores_in: [batch, 8732, label_num]
         return bboxes_in, F.softmax(scores_in, dim=-1)
 
-    def decode_single_new(self, bboxes_in, scores_in, criteria, num_output):
+    def decode_single(self, bboxes_in, scores_in, criteria, num_output):
         # type: (Tensor, Tensor, float, int) -> Tuple[Tensor, Tensor, Tensor]
         """
         decode:
@@ -568,7 +493,7 @@ class PostProcess(nn.Module):
             # bbox: [1, 8732, 4]
             bbox = bbox.squeeze(0)
             prob = prob.squeeze(0)
-            outputs.append(self.decode_single_new(bbox, prob, self.criteria, self.max_output))
+            outputs.append(self.decode_single(bbox, prob, self.criteria, self.max_output))
         return outputs
     
     
@@ -680,10 +605,10 @@ class Loss(nn.Module):
 
     
 class SSD300(nn.Module):
-    def __init__(self, backbone=None, num_classes=21):
+    def __init__(self, num_classes=21,backbone=None):
         super(SSD300, self).__init__()
         if backbone is None:
-            raise Exception("backbone is None")
+            backbone = Backbone()
         if not hasattr(backbone, "out_channels"):
             raise Exception("the backbone not has attribute: out_channel")
         self.feature_extractor = backbone
@@ -772,12 +697,22 @@ class SSD300(nn.Module):
             if targets is None:
                 raise ValueError("In training mode, targets should be passed")
             # bboxes_out (Tensor 8732 x 4), labels_out (Tensor 8732)
-            bboxes_out = targets['boxes']
-            bboxes_out = bboxes_out.transpose(1, 2).contiguous()
-            # print(bboxes_out.is_contiguous())
-            labels_out = targets['labels']
-            # print(labels_out.is_contiguous())
 
+            
+            #encode
+            for t in targets:
+                boxes = t['boxes']
+                labels = t['labels']
+                bboxes_out, labels_out = self.encoder.encode(boxes, labels)
+                t['boxes'],t['labels'] = bboxes_out, labels_out
+            
+            #stack
+            boxes = [t['boxes'] for t in targets]
+            labels = [t['labels'] for t in targets]
+            bboxes_out = torch.stack(boxes, dim=0)
+            bboxes_out = bboxes_out.transpose(1, 2).contiguous()
+            labels_out = torch.stack(labels, dim=0)
+    
             # ploc, plabel, gloc, glabel
             loss = self.compute_loss(locs, confs, bboxes_out, labels_out)
             return {"total_losses": loss}
@@ -785,4 +720,8 @@ class SSD300(nn.Module):
         # 将预测回归参数叠加到default box上得到最终预测box，并执行非极大值抑制虑除重叠框
         # results = self.encoder.decode_batch(locs, confs)
         results = self.postprocess(locs, confs)
-        return results
+        predictions = []
+        for result in results:
+            boxes,labels,scores = result
+            predictions.append({'boxes':boxes,'labels':labels,'scores':scores})
+        return predictions

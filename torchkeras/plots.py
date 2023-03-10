@@ -124,26 +124,30 @@ def plot_instance_segmentation(img, boxes, masks, class_names, min_score=0.2):
     return annotator.img 
 
 
-def vis_detections(image,
-                   boxes,
-                   classes=None,
-                   scores=None,
+def vis_detection(image,
+                   prediction,
+                   class_names = None,
                    min_score=0.2,
                    figsize=(16, 16),
                    linewidth=2,
-                   color='lawngreen'):
+                   color = 'lawngreen'
+                 ):
+    
+    boxes= np.array(prediction['boxes'].tolist()) 
+    scores = np.array(prediction['scores'].tolist()) if 'scores' 
+    in prediction else [1.0 for _ in boxes]
+    labels = np.array(prediction['labels'].tolist()) if 'labels' in prediction else None
+    classes = [class_names[x] for x in labels] if 
+    (class_names is not None and labels is not None) else ['object']*len(boxes)
     
     import matplotlib.pyplot as plt
     image = np.array(image, dtype=np.uint8)
     fig = plt.figure(figsize=figsize)
     plt.axis("off")
-    plt.imshow(image)
+    plt.imshow(image);
     ax = plt.gca()
-    if classes is None:
-        classes = ['object' for _ in boxes]
-    if scores is None:
-        scores = [1 for _ in boxes]
-    for box, name, score in zip(boxes, classes, scores):
+    
+    for i,(box, name, score) in enumerate(zip(boxes, classes, scores)):
         if score >= min_score:
             text = "{}: {:.2f}".format(name, score)
             x1, y1, x2, y2 = box
@@ -160,8 +164,8 @@ def vis_detections(image,
                 clip_box=ax.clipbox,
                 clip_on=True,
             )
-    plt.show()
-    
+    plt.show();
+
 
 def joint_imgs_row(img1,img2):
     size1 = img1.size

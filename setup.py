@@ -6,13 +6,13 @@ from setuptools import find_packages, setup, find_namespace_packages
 # Settings
 FILE = Path(__file__).resolve()
 PARENT = FILE.parent  # root directory
-README = (PARENT / "README.md").read_text(encoding="utf-8")
+README = (PARENT / "README_en.md").read_text(encoding="utf-8")
 
 def get_version():
     file = PARENT/'torchkeras/__init__.py'
     return re.search(r'__version__="(.*)"', file.read_text(encoding="utf-8"),re.M)[1]
 
-    
+
 setup(
     name="torchkeras",
     version=get_version(),

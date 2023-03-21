@@ -20,7 +20,6 @@ like these two steps as below:
 (ii) fit your model with the training data and validate data.
 
 
-<!-- #region -->
 The main code of use torchkeras is like below.
 
 ```python
@@ -50,7 +49,6 @@ dfhistory=model.fit(train_data=dl_train,
 ![](./data/train_log.png)
 
 
-<!-- #endregion -->
 
 **This project seems somehow powerful, but the source code is very simple.**
 
@@ -90,7 +88,6 @@ Versions when these features are introduced and the libraries which they used  o
 
 ### 3, Basic Examples 
 
-<!-- #region -->
 You can follow these full examples to get started with torchkeras.
 
 Have fun!😋😋
@@ -104,7 +101,6 @@ Have fun!😋😋
 |④kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./4，kerasmodel_tensorboard_demo.ipynb)   |  |
 |⑤kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 
-<!-- #endregion -->
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 

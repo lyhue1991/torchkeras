@@ -96,13 +96,23 @@ class Annotator:
             self.draw.text((box[0], box[1] - h if outside else box[1]), label, fill=txt_color, font=self.font)
 
 
-    def add_mask(self, mask,  color, alpha=0.5):
+    def add_mask(self, mask, color, alpha=0.5):
+    
         # Add one mask to image
         img = np.asarray(self.img).copy()
-                
+
+        im1_shape = mask.shape
+        im0_shape = img.shape
+
+        gain = min(im1_shape[0] / im0_shape[0], im1_shape[1] / im0_shape[1])  
+        pad = (im1_shape[1] - im0_shape[1] * gain) / 2, (im1_shape[0] - im0_shape[0] * gain) / 2 
+
+        top, left = int(pad[1]), int(pad[0])  # y, x
+        bottom, right = int(im1_shape[0] - pad[1]), int(im1_shape[1] - pad[0])
+        mask = mask[top:bottom, left:right]
+
         mask_img = Image.fromarray((255*mask).astype(np.uint8),mode='L')
-        mask = np.array(mask_img.resize(self.img.size))>=1
-        
+        mask = np.array(mask_img.resize(self.img.size,resample = Image.BILINEAR))>=1
         img[mask] = img[mask] * (1-alpha) + np.array(color) * alpha
         self.img = Image.fromarray(img)
           
@@ -220,6 +230,3 @@ def text2img(text):
     font = ImageFont.truetype(str(simhei),18)
     draw.text((0, 0), text, font=font, fill="#000000")
     return image
-
-
-

@@ -8,5 +8,5 @@ from .utils import seed_everything
 try:
     from .lightmodel import LightModel 
 except Exception:
-    print("torchkeras.LightModel can't be used!",file = sys.stderr)
+    pass
 

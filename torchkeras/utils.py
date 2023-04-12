@@ -7,10 +7,12 @@ import pandas as pd
 from PIL import Image, ImageFont, ImageDraw
 import pathlib
 from argparse import Namespace
+import os 
 
 def seed_everything(seed=42):
     print(f"Global seed set to {seed}")
     random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)

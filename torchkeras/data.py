@@ -3,11 +3,11 @@ from PIL import Image
 import numpy as np 
 import os
 import sys 
-import time 
+import time,datetime 
 from tqdm import tqdm 
 import re
 import requests
-from urllib import parse 
+from urllib.parse import quote,unquote
 
 path = Path(__file__)
 
@@ -67,6 +67,16 @@ def download_image(url):
     image = PIL.ImageOps.exif_transpose(image)
     return image
 
+def download_github_file(url,save_name=None):
+    import torch
+    raw_url = url.replace('://github.com/','://raw.githubusercontent.com/').replace('/blob/','/')
+    if save_name is None:
+        save_name = unquote(os.path.basename(raw_url))
+    torch.hub.download_url_to_file(raw_url,save_name)
+    print('saved file: '+save_name,file = sys.stderr)
+    return save_name
+
+
 def download_baidu_pictures(keyword,needed_pics_num=100,save_dir=None):
     spider = _BaiduPictures(keyword,needed_pics_num,save_dir)
     spider.run()
@@ -74,9 +84,10 @@ def download_baidu_pictures(keyword,needed_pics_num=100,save_dir=None):
 class _BaiduPictures:
     def __init__(self,keyword,needed_pics_num=100,save_dir=None):
         from fake_useragent import UserAgent 
+        
         self.save_dir = save_dir if save_dir is not None else './{}'.format(keyword)
         self.name_ = keyword
-        self.name = parse.quote(self.name_) 
+        self.name = quote(self.name_) 
         self.needed_pics_num = needed_pics_num
         self.times = str(int(time.time()*1000)) 
         self.url = 'https://image.baidu.com/search/acjson?tn=resultjson_com&logid=8032920601831512061&ipn=rj&ct=201326592&is=&fp=result&fr=&word={}&cg=star&queryWord={}&cl=2&lm=-1&ie=utf-8&oe=utf-8&adpicid=&st=&z=&ic=&hd=&latest=&copyright=&s=&se=&tab=&width=&height=&face=&istype=&qc=&nc=1&expermode=&nojc=&isAsync=&pn={}&rn=30&gsm=1e&{}='
@@ -102,13 +113,13 @@ class _BaiduPictures:
         ori_num = self.parse_html(regex1,response)[0] 
         num = min(int(ori_num),self.needed_pics_num)
         print('{} {} pictures founded. start downloading {} pictures...'.format(
-            ori_num,self.name_,num)) 
+            ori_num,self.name_,num),file = sys.stderr) 
     
         if int(num)%30 == 0:
             pn = int(int(num)/30)
         else:
             pn = int(int(num)//30 + 2)
-        cnt,loop = 0,tqdm(total=num,file=sys.stdout)
+        cnt,loop = 0,tqdm(total=num)
         for i in range(pn): 
             try:
                 resp = self.get_one_html(self.url, i * 30)
@@ -117,7 +128,7 @@ class _BaiduPictures:
                 for u in urls:  
                     try:
                         content = self.get_two_html(u) 
-                        img_name = '{}.jpg'.format('0'*max(6-len(str(cnt)),1)+str(cnt))
+                        img_name = '{}.jpg'.format(datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f'))
                         img_path = os.path.join(self.save_dir,img_name)
                         with open(img_path,'wb') as f:
                             f.write(content)
@@ -134,4 +145,4 @@ class _BaiduPictures:
                 print(err,file=sys.stderr)
             time.sleep(1.0) 
         loop.close()
-        print('saved {} pictures in dir {}'.format(cnt, self.save_dir))
+        print('saved {} pictures in dir {}'.format(cnt, self.save_dir),file = sys.stderr)

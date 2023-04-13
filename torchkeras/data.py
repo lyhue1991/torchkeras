@@ -49,6 +49,29 @@ def resize_and_pad_image(image,width,height):
         padding_im = Image.fromarray(padding_arr.astype(np.uint8))
         box_factor = resized_w/w
         return padding_im
+    
+def merge_dataset_folders(from_folders, to_folder, rename_file=True):
+    import shutil 
+    get_file_num = lambda x: len([y for y in Path(x).rglob('*') if y.is_file()])
+    print('before merge:')
+    for x in from_folders:
+        print(f'{x}: {get_file_num(x)} files')
+
+    done_files = set()
+    for i,folder in enumerate(from_folders):
+        shutil.copytree(folder,to_folder,dirs_exist_ok=True)
+        folder_name = Path(folder).name
+        if rename_file:
+            files = {x.absolute() for x in Path(to_folder).rglob('*') if x.is_file()}
+            todo_files = files - done_files
+            for x in  todo_files:
+                new_name = folder_name+'_'+str(i)+'_'+x.name
+                y = x.rename(x.parent/new_name)
+                done_files.add(y)
+    print('\nafter merge:')
+    print(f'{to_folder}: {get_file_num(to_folder)} files')
+    return to_folder 
+
 
 def get_example_image(img_name='park.jpg'):
     'name can be bus.jpg / park.jpg / zidane.jpg'

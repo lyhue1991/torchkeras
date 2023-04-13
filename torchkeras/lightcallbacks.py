@@ -11,7 +11,7 @@ from PIL import Image, ImageFont, ImageDraw
 import pathlib
 from argparse import Namespace
 from .summary import summary
-from .utils import text_to_image,image_to_tensor,namespace2dict
+from .utils import namespace2dict
 
 class TensorBoardCallback(pl.callbacks.Callback):
     def __init__(self, save_dir = "tb_logs", model_name="default", 
@@ -51,8 +51,9 @@ class TensorBoardCallback(pl.callbacks.Callback):
         self.writer.flush()
         
         #image日志
+        #from .plots import text2img,img2tensor
         #summary_text =  summary(net_cpu,input_data = self.example_input_array)
-        #summary_tensor = image_to_tensor(text_to_image(summary_text))
+        #summary_tensor = img2tensor(text2img(summary_text))
         #self.writer.add_image('summary',summary_tensor,global_step=-1)
         #self.writer.flush()
         del(net_cpu)

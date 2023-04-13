@@ -5,7 +5,8 @@ import random
 import numpy as np 
 import pandas as pd 
 from PIL import Image, ImageFont, ImageDraw
-import pathlib
+from pathlib import Path 
+
 from argparse import Namespace
 import os 
 
@@ -19,7 +20,7 @@ def seed_everything(seed=42):
     return seed
 
 def text_to_image(text):
-    path = pathlib.Path(__file__)
+    path = Path(__file__)
     simhei = path.parent/"assets/SimHei.ttf"
     lines  = len(text.split("\n")) 
     image = Image.new("RGB", (800, lines*20), (255, 255, 255))
@@ -28,10 +29,7 @@ def text_to_image(text):
     draw.text((0, 0), text, font=font, fill="#000000")
     return image
 
-def image_to_tensor(image):
-    from torchvision.transforms import ToTensor
-    tensor = ToTensor()(np.array(image))
-    return tensor
+
 
 def namespace2dict(namespace):
     result = {}
@@ -84,7 +82,7 @@ def get_call_file():
 def getNotebookPath():
     from jupyter_server import serverapp
     from jupyter_server.utils import url_path_join
-    from pathlib import Path
+
     import requests,re
     kernelIdRegex = re.compile(r"(?<=kernel-)[\w\d\-]+(?=\.json)")
     kernelId = kernelIdRegex.search(get_ipython().config["IPKernelApp"]["connection_file"])[0]

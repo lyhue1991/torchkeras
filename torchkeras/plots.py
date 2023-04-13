@@ -1,9 +1,23 @@
 import numpy as np
 import PIL
 from PIL import Image,ImageDraw,ImageFont
-import pathlib
+from pathlib import Path
 import sys 
 
+def set_matplotlib_font(font_size=15):
+    import matplotlib as mpb
+    from matplotlib import pyplot as plt 
+    from shutil import copy
+    simhei_file = Path(__file__).parent/"assets/SimHei.ttf"
+    ttf_dir = Path(mpb.__path__[0])/'mpl-data'/'fonts'/'ttf'
+    copy(str(simhei_file),str(ttf_dir))
+    plt.rcParams['font.family'] = ['sans-serif']
+    plt.rcParams['font.size'] = str(font_size)
+    plt.rcParams['font.sans-serif'] = ['SimHei']
+    plt.rcParams['axes.unicode_minus'] = False
+    print(f"set matplotlib font to SimHei and fontsize to {font_size}")
+    
+    
 def plot_metric(dfhistory, metric):
     import plotly.graph_objs as go
     train_metrics = dfhistory["train_"+metric].values.tolist()
@@ -65,7 +79,7 @@ class Annotator:
         self.img = img if isinstance(img, Image.Image) else Image.fromarray(img)
         
         try:
-            path = pathlib.Path(__file__)
+            path = Path(__file__)
             font = str(path.parent/"assets/Arial.ttf")
             size = font_size or max(round(sum(self.img.size) / 2 * 0.035), 12)
             self.font = ImageFont.truetype(font, size)
@@ -222,7 +236,7 @@ def fig2img(fig):
     return img
 
 def text2img(text):
-    path = pathlib.Path(__file__)
+    path = Path(__file__)
     simhei = path.parent/"assets/SimHei.ttf"
     lines  = len(text.split("\n")) 
     image = Image.new("RGB", (800, lines*20), (255, 255, 255))
@@ -230,3 +244,8 @@ def text2img(text):
     font = ImageFont.truetype(str(simhei),18)
     draw.text((0, 0), text, font=font, fill="#000000")
     return image
+
+def img2tensor(image):
+    from torchvision.transforms import ToTensor
+    tensor = ToTensor()(np.array(image))
+    return tensor

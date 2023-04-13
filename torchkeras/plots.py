@@ -5,12 +5,13 @@ from pathlib import Path
 import sys 
 
 def set_matplotlib_font(font_size=15):
-    import matplotlib as mpb
+    import matplotlib as mpl
     from matplotlib import pyplot as plt 
-    from shutil import copy
+    import shutil
+    shutil.rmtree(mpl.get_cachedir())
     simhei_file = Path(__file__).parent/"assets/SimHei.ttf"
-    ttf_dir = Path(mpb.__path__[0])/'mpl-data'/'fonts'/'ttf'
-    copy(str(simhei_file),str(ttf_dir))
+    ttf_dir = Path(mpl.__path__[0])/'mpl-data'/'fonts'/'ttf'
+    shutil.copy(str(simhei_file),str(ttf_dir))
     plt.rcParams['font.family'] = ['sans-serif']
     plt.rcParams['font.size'] = str(font_size)
     plt.rcParams['font.sans-serif'] = ['SimHei']

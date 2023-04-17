@@ -10,6 +10,12 @@ from pathlib import Path
 from argparse import Namespace
 import os 
 
+def printlog(info):
+    nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print("\n"+"=========="*8 + "%s"%nowtime)
+    print(info+'...\n\n')
+        
+
 def seed_everything(seed=42):
     print(f"Global seed set to {seed}")
     random.seed(seed)
@@ -19,28 +25,6 @@ def seed_everything(seed=42):
     torch.cuda.manual_seed_all(seed)
     return seed
 
-def text_to_image(text):
-    path = Path(__file__)
-    simhei = path.parent/"assets/SimHei.ttf"
-    lines  = len(text.split("\n")) 
-    image = Image.new("RGB", (800, lines*20), (255, 255, 255))
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype(str(simhei),18)
-    draw.text((0, 0), text, font=font, fill="#000000")
-    return image
-
-
-
-def namespace2dict(namespace):
-    result = {}
-    for k,v in vars(namespace).items():
-        if not isinstance(v,Namespace):
-            result[k] = v
-        else:
-            v_dic = namespace2dict(v)
-            for v_key,v_value in v_dic.items():
-                result[k+"."+v_key] = v_value
-    return result 
 
 def colorful(obj,color="red", display_type="plain"):
     # 彩色输出格式：
@@ -73,6 +57,54 @@ def colorful(obj,color="red", display_type="plain"):
     display  = display_type_dict.get(display_type,"")
     out = '\033[{};{}m'.format(display,color_code)+s+'\033[0m'
     return out 
+
+def prettydf(df,nrows=20,ncols=20,show=True):
+    from prettytable import PrettyTable
+    if len(df)>nrows:
+        df = df.head(nrows).copy()
+        df.loc[len(df)] = '...'
+    if len(df.columns)>ncols:
+        df = df.iloc[:,:ncols].copy()
+        df['...'] = '...'
+        
+    def fmt(x):
+        if isinstance(x, (float,np.float64)):
+            return str(round(x,5))
+        else:
+            s = str(x) if len(str(x))<9 else str(x)[:6]+'...'
+            for char in ['\n','\r','\t','\v','\b']:
+                s = s.replace(char,' ')
+            return s
+        
+    df = df.applymap(fmt)
+    table = PrettyTable()
+    table.field_names = df.columns.tolist()
+    rows =  df.values.tolist()
+    table.add_rows(rows)
+    if show:
+        print(table)
+    return table
+
+def text_to_image(text):
+    path = Path(__file__)
+    simhei = path.parent/"assets/SimHei.ttf"
+    lines  = len(text.split("\n")) 
+    image = Image.new("RGB", (800, lines*20), (255, 255, 255))
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype(str(simhei),18)
+    draw.text((0, 0), text, font=font, fill="#000000")
+    return image
+
+def namespace2dict(namespace):
+    result = {}
+    for k,v in vars(namespace).items():
+        if not isinstance(v,Namespace):
+            result[k] = v
+        else:
+            v_dic = namespace2dict(v)
+            for v_key,v_value in v_dic.items():
+                result[k+"."+v_key] = v_value
+    return result 
 
 def get_call_file(): 
     import traceback

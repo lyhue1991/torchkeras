@@ -6,7 +6,7 @@ import sys
 
 def set_matplotlib_font(font_size=15):
     import matplotlib as mpl
-    from matplotlib import pyplot as plt 
+    import matplotlib.pyplot as plt
     import shutil
     shutil.rmtree(mpl.get_cachedir())
     simhei_file = Path(__file__).parent/"assets/SimHei.ttf"

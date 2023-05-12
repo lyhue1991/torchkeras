@@ -58,7 +58,7 @@ def colorful(obj,color="red", display_type="plain"):
     out = '\033[{};{}m'.format(display,color_code)+s+'\033[0m'
     return out 
 
-def prettydf(df,nrows=20,ncols=20,show=True):
+def prettydf(df,nrows=20,ncols=20,str_len=9,show=True):
     from prettytable import PrettyTable
     if len(df)>nrows:
         df = df.head(nrows).copy()
@@ -69,9 +69,9 @@ def prettydf(df,nrows=20,ncols=20,show=True):
         
     def fmt(x):
         if isinstance(x, (float,np.float64)):
-            return str(round(x,5))
+            return str(round(x,4))
         else:
-            s = str(x) if len(str(x))<9 else str(x)[:6]+'...'
+            s = str(x) if len(str(x))<str_len else str(x)[:str_len-3]+'...'
             for char in ['\n','\r','\t','\v','\b']:
                 s = s.replace(char,' ')
             return s

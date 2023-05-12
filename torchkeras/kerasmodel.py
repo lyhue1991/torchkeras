@@ -228,13 +228,13 @@ class KerasModel(torch.nn.Module):
             return dfhistory
     
     @torch.no_grad()
-    def evaluate(self, val_data):
+    def evaluate(self, val_data, quiet=False):
         accelerator = Accelerator()
         self.net,self.loss_fn,self.metrics_dict = accelerator.prepare(self.net,self.loss_fn,self.metrics_dict)
         val_data = accelerator.prepare(val_data)
         val_step_runner = self.StepRunner(net = self.net,stage="val",
                     loss_fn = self.loss_fn,metrics_dict=deepcopy(self.metrics_dict),
                     accelerator = accelerator)
-        val_epoch_runner = self.EpochRunner(val_step_runner)
+        val_epoch_runner = self.EpochRunner(val_step_runner,quiet=quiet)
         val_metrics = val_epoch_runner(val_data)
         return val_metrics

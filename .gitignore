@@ -8,4 +8,5 @@ torchkeras/__pycache__/
 torchkeras/models/__pycache__/
 examples/.ipynb_checkpoints
 examples/__pycache__/
+torchkeras/chatgpt/__pycache__/
 .idea

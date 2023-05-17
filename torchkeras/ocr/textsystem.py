@@ -33,8 +33,6 @@ logger = get_logger()
 
 class TextSystem(object):
     def __init__(self, args):
-        if not args.show_log:
-            logger.setLevel(logging.INFO)
 
         self.text_detector = predict_det.TextDetector(args)
         self.text_recognizer = predict_rec.TextRecognizer(args)

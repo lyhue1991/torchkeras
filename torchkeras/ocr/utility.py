@@ -35,7 +35,7 @@ def download_with_progressbar(url, save_path):
                 file.write(data)
         progress_bar.close()
     else:
-        logger.error("Something went wrong while downloading models")
+        logger.error(f"Something went wrong while downloading {url}")
         sys.exit(0)
         
 def check_and_read(img_path):
@@ -117,47 +117,7 @@ def get_image_file_list(img_file):
         raise Exception("not found any img file in {}".format(img_file))
     imgs_lists = sorted(imgs_lists)
     return imgs_lists
-
-
-def create_predictor(args, mode, logger):
-    if mode == "det":
-        model_dir = args.det_model_dir
-    elif mode == 'cls':
-        model_dir = args.cls_model_dir
-    elif mode == 'rec':
-        model_dir = args.rec_model_dir
-    else:
-        raise ValueError('mode={} not in (det,cls,rec)'.format(mode))
-
-    if model_dir is None:
-        logger.info("not find {} model file path {}".format(mode, model_dir))
-        sys.exit(0)
-    if args.use_onnx:
-        import onnxruntime as ort
-        model_file_path = model_dir
-        if not os.path.exists(model_file_path):
-            raise ValueError("not find model file path {}".format(
-                model_file_path))
-        sess = ort.InferenceSession(model_file_path)
-        return sess, sess.get_inputs()[0], None, None
-
-def get_output_tensors(args, mode, predictor):
-    output_names = predictor.get_output_names()
-    output_tensors = []
-    if mode == "rec" and args.rec_algorithm in ["CRNN", "SVTR_LCNet"]:
-        output_name = 'softmax_0.tmp_0'
-        if output_name in output_names:
-            return [predictor.get_output_handle(output_name)]
-        else:
-            for output_name in output_names:
-                output_tensor = predictor.get_output_handle(output_name)
-                output_tensors.append(output_tensor)
-    else:
-        for output_name in output_names:
-            output_tensor = predictor.get_output_handle(output_name)
-            output_tensors.append(output_tensor)
-    return output_tensorsccccccccccw
-
+    
 
 def base64_to_cv2(b64str):
     import base64

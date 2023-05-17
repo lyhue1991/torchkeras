@@ -24,6 +24,10 @@ class StepRunner:
         self.net,self.loss_fn,self.metrics_dict,self.stage = net,loss_fn,metrics_dict,stage
         self.optimizer,self.lr_scheduler = optimizer,lr_scheduler
         self.accelerator = accelerator
+        if self.stage=='train':
+            self.net.train() 
+        else:
+            self.net.eval()
     
     def __call__(self, batch):
         features,labels = batch 
@@ -62,7 +66,6 @@ class EpochRunner:
     def __init__(self,steprunner,quiet=False):
         self.steprunner = steprunner
         self.stage = steprunner.stage
-        self.steprunner.net.train() if self.stage=="train" else self.steprunner.net.eval()
         self.accelerator = self.steprunner.accelerator
         self.quiet = quiet
         
@@ -73,15 +76,9 @@ class EpochRunner:
                     disable=not self.accelerator.is_local_main_process or self.quiet,
                     ncols = 100
                    )
-        
         epoch_losses = {}
         for step, batch in loop: 
-            if self.stage=="train":
-                step_losses,step_metrics = self.steprunner(batch)
-            else:
-                with torch.no_grad():
-                    step_losses,step_metrics = self.steprunner(batch)
-                    
+            step_losses,step_metrics = self.steprunner(batch)   
             step_log = dict(step_losses,**step_metrics)
             for k,v in step_losses.items():
                 epoch_losses[k] = epoch_losses.get(k,0.0)+v
@@ -119,8 +116,8 @@ class KerasModel(torch.nn.Module):
         return self.net.forward(x)
     
     def fit(self, train_data, val_data=None, epochs=10,ckpt_path='checkpoint.pt',
-            patience=5, monitor="val_loss", mode="min",
-            mixed_precision='no',callbacks = None, plot = False, quiet = False):
+            patience=5, monitor="val_loss", mode="min", mixed_precision='no', callbacks=None,
+            plot=False, wandb=False, quiet=False):
         
         self.__dict__.update(locals())
         self.accelerator = Accelerator(mixed_precision=mixed_precision)
@@ -140,6 +137,10 @@ class KerasModel(torch.nn.Module):
         if plot==True:
             from .kerascallbacks import VisProgress
             callbacks.append(VisProgress(self))
+        if wandb!=False:
+            from .kerascallbacks import WandbCallback
+            project = wandb if isinstance(wandb,str) else 'torchkeras'
+            callbacks.append(WandbCallback(project=project))
             
         self.callbacks = self.accelerator.prepare(callbacks)
         

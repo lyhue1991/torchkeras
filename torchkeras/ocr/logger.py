@@ -28,5 +28,5 @@ def set_logging(name='ocr', level=None, verbose=True):
                 'handlers': [name],
                 'propagate': False}}})
     
-def get_logger(name='ppocr'):   
+def get_logger(name='ocr'):
     return logging.getLogger(name)

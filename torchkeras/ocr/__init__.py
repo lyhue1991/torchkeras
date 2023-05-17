@@ -44,9 +44,9 @@ def init_args():
     parser = argparse.ArgumentParser()
     
     # params for model path
-    parser.add_argument("--det_model_dir", type=str, default='')
-    parser.add_argument("--cls_model_dir", type=str, default='')
-    parser.add_argument("--rec_model_dir", type=str, default='')
+    parser.add_argument("--det_model_dir", type=str, default=None)
+    parser.add_argument("--cls_model_dir", type=str, default=None)
+    parser.add_argument("--rec_model_dir", type=str, default=None)
     
     
     # params for prediction engine
@@ -119,7 +119,6 @@ def init_args():
     parser.add_argument("--benchmark", type=str2bool, default=False)
     parser.add_argument("--save_log_path", type=str, default="./log_output/")
 
-    parser.add_argument("--show_log", type=str2bool, default=True)
     parser.add_argument("--use_onnx", type=str2bool, default=True)
     return parser
 
@@ -143,18 +142,22 @@ def parse_args(mMain=True):
     
     
 class Pipeline(TextSystem):
-    def __init__(self, **kwargs):
+    def __init__(self, 
+                 det_model_dir=None,
+                 rec_model_dir=None,
+                 rec_char_dict_path=None,
+                 rec_image_shape=None, #"3, 48, 320"
+                 **kwargs):
+        
+        for k,v in locals().items():
+            if v is not None and k in kwargs.keys():
+                kwargs[k]=v
+        
         params = parse_args(mMain=False)
         params.__dict__.update(**kwargs)
 
-        if not params.show_log:
-            set_logging(level=logging.ERROR)
-            logger.setLevel(logging.ERROR)
-
         self.use_angle_cls = params.use_angle_cls
         lang, det_lang = params.lang,params.lang
-
-        params.rec_image_shape = "3, 48, 320"
 
         if params.rec_char_dict_path is None:
             params.rec_char_dict_path = rec_char_dict_path
@@ -254,5 +257,3 @@ class Pipeline(TextSystem):
         else:
             im_show = image.copy()
         return im_show
-            
-            

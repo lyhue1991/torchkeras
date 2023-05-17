@@ -6,6 +6,7 @@ dist/*
 build/*
 torchkeras/__pycache__/
 torchkeras/models/__pycache__/
+torchkeras/ocr/__pycache__/
 examples/.ipynb_checkpoints
 examples/__pycache__/
 torchkeras/chatgpt/__pycache__/

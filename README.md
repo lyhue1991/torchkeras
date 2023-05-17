@@ -18,6 +18,10 @@ torchkeras 是一个通用的pytorch模型训练模版工具，按照如下目�
 ## 1, 使用方法
 
 
+安装torchkeras
+```
+pip install torchkeras
+```
 
 通过使用torchkeras，你不需要写自己的pytorch模型训练循环。你只要做这样两步就可以了。
 
@@ -26,7 +30,7 @@ torchkeras 是一个通用的pytorch模型训练模版工具，按照如下目�
 (2) 使用model的fit方法在你的训练数据和验证数据上进行训练，训练数据和验证数据需要封装成两个DataLoader.
 
 
-<!-- #region -->
+
 核心使用代码就像下面这样：
 
 ```python
@@ -55,11 +59,8 @@ dfhistory=model.fit(train_data=dl_train,
 ![](./data/train_fig.png)
 
 ![](./data/train_log.png)
-<!-- #endregion -->
 
-```python
 
-```
 
 ## 2,  主要特性
 
@@ -87,7 +88,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 ## 3, 基本范例
 
-<!-- #region -->
+
 以下范例是torchkeras的基础范例，演示了torchkeras的主要功能。
 
 包括基础训练，使用wandb可视化，使用wandb调参，使用tensorboard可视化，使用多GPU的ddp模式训练等。
@@ -100,15 +101,12 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |③kerasmodel tunning 🔥🔥🔥|[**torchkeras.KerasModel with wandb sweep demo**](./03，kerasmodel_tuning_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-loves-wandb-sweep"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |④kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./04，kerasmodel_tensorboard_demo.ipynb)   |  |
 |⑤kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-<!-- #endregion -->
 
-```python
 
-```
 
 ## 4, 进阶范例
 
-<!-- #region -->
+
 下面的范例为torchkeras的进阶使用范例，由于输入数据结构的差异，这些范例有些需要对torchkeras的核心模块StepRunner进行修改。
 
 这种修改实际上是非常简单的，保持每个模块的输出与原始实现格式一致就行，中间处理逻辑根据需要灵活调整。
@@ -117,9 +115,6 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 > 如果你想掌握一个东西，那么就去使用它，如果你想真正理解一个东西，那么尝试去改变它。 ———— 爱因斯坦
 
 
-
-
-<!-- #endregion -->
 
 
 |example|  kaggle链接| 

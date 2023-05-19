@@ -204,3 +204,33 @@ class VisProgress:
                              title = title, figsize = self.figsize)
         self.mb.on_iter_end()
         
+class EpochCheckpoint:
+    def __init__(self, ckpt_dir= "weights", 
+                 save_freq=1, max_ckpt=10):
+        self.__dict__.update(locals())
+        self.ckpt_idx=0
+        
+    def on_fit_start(self, model:'KerasModel'):
+        if not os.path.exists(self.ckpt_dir):
+            os.mkdir(self.ckpt_dir)
+        self.ckpt_list = ['' for i in range(self.max_ckpt)]
+        
+    def on_train_epoch_end(self, model:'KerasModel'):
+        pass
+        
+    def on_validation_epoch_end(self, model:"KerasModel"):
+        dfhistory = pd.DataFrame(model.history)
+        epoch = dfhistory['epoch'].iloc[-1]
+        if epoch>0 and epoch%self.save_freq==0:
+            ckpt_path = os.path.join(self.ckpt_dir,f'checkpoint_epoch{epoch}.pt')
+            net_dict = model.accelerator.get_state_dict(model.net)
+            model.accelerator.save(net_dict,ckpt_path)
+            
+            if self.ckpt_list[self.ckpt_idx]!='':
+                os.remove(self.ckpt_list[self.ckpt_idx])
+            self.ckpt_list[self.ckpt_idx] = ckpt_path 
+            self.ckpt_idx = (self.ckpt_idx+1)%self.max_ckpt
+
+    def on_fit_end(self, model:"KerasModel"):
+        pass
+        

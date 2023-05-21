@@ -6,6 +6,7 @@ from torch.jit.annotations import Tuple, List
 from torch import nn, Tensor
 import numpy as np
 from .resnet import resnet50
+import random 
 
 def box_area(boxes):
     """
@@ -692,31 +693,33 @@ class SSD300(nn.Module):
 
         # For SSD 300, shall return nbatch x 8732 x {nlabels, nlocs} results
         # 38x38x4 + 19x19x6 + 10x10x6 + 5x5x6 + 3x3x4 + 1x1x4 = 8732
-
-        if self.training:
-            if targets is None:
-                raise ValueError("In training mode, targets should be passed")
-            # bboxes_out (Tensor 8732 x 4), labels_out (Tensor 8732)
-
-            
+        
+        result = {'loc': locs, 'conf':confs}
+        if targets is not None:
             #encode
             for t in targets:
                 boxes = t['boxes']
                 labels = t['labels']
                 bboxes_out, labels_out = self.encoder.encode(boxes, labels)
                 t['boxes'],t['labels'] = bboxes_out, labels_out
-            
+
             #stack
             boxes = [t['boxes'] for t in targets]
             labels = [t['labels'] for t in targets]
             bboxes_out = torch.stack(boxes, dim=0)
             bboxes_out = bboxes_out.transpose(1, 2).contiguous()
             labels_out = torch.stack(labels, dim=0)
-    
+
             # ploc, plabel, gloc, glabel
             loss = self.compute_loss(locs, confs, bboxes_out, labels_out)
-            return {"total_losses": loss}
-
+            result['loss'] = loss
+        return result 
+    
+    @torch.no_grad()
+    def predict(self, image):
+        self.eval()
+        out = self.forward(image)
+        locs, confs = out['loc'], out['conf']
         # 将预测回归参数叠加到default box上得到最终预测box，并执行非极大值抑制虑除重叠框
         # results = self.encoder.decode_batch(locs, confs)
         results = self.postprocess(locs, confs)
@@ -725,3 +728,4 @@ class SSD300(nn.Module):
             boxes,labels,scores = result
             predictions.append({'boxes':boxes,'labels':labels,'scores':scores})
         return predictions
+    

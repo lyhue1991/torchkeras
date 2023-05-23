@@ -1,5 +1,5 @@
+<h1 class="list-group-item list-group-item-action active" data-toggle="list" style='color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;' role="tab" aria-controls="home"><left>炼丹师，这是你的梦中情炉吗?🌹🌹</left></h1>
 
-# Pytorch❤️Keras
 
 [English](README_en.md) | 简体中文
 
@@ -15,7 +15,81 @@ torchkeras 是一个通用的pytorch模型训练模版工具，按照如下目�
 
 
 
-## 1, 使用方法
+<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>1，torch之痛 😭😭</left></h2>
+
+
+无论是学术研究还是工业落地，pytorch几乎都是目前炼丹的首选框架。
+
+pytorch的胜出不仅在于其简洁一致的api设计，更在于其生态中丰富和强大的模型库。
+
+但是我们会发现不同的pytorch模型库提供的训练和验证代码非常不一样。
+
+torchvision官方提供的范例代码主要是一个关联了非常多依赖函数的train_one_epoch和evaluate函数，针对检测和分割各有一套。
+
+yolo系列的主要是支持ddp模式的各种风格迥异的Trainer，每个不同的yolo版本都会改动很多导致不同yolo版本之间都难以通用。
+
+抱抱脸的transformer库在借鉴了pytorch_lightning的基础上也搞了一个自己的Trainer，但与pytorch_lightning并不兼容。
+
+非常有名的facebook的目标检测库detectron2, 也是搞了一个它自己的Trainer，配合一个全局的cfg参数设置对象来训练模型。
+
+还有我用的比较多的语义分割的segmentation_models.pytorch这个库，设计了一个TrainEpoch和一个ValidEpoch来做训练和验证。
+
+在学习和使用这些不同的pytorch模型库时，尝试阅读理解和改动这些训练和验证相关的代码让我受到了一万点伤害。
+
+有些设计非常糟糕，嵌套了十几层，有些实现非常dirty，各种带下划线的私有变量满天飞。
+
+让你每次想要改动一下加入一些自己想要的功能时就感到望而却步。
+
+我不就想finetune一下模型嘛，何必拿这么多垃圾代码搞我？
+
+
+
+
+<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>2，梦中情炉 🤗🤗</left></h2>
+
+<!-- #region -->
+这一切的苦不由得让我怀念起tensorflow中keras的美好了。
+
+还记得keras那compile, fit, evalute三连击吗？一切都像行云流水般自然，真正的for humans。
+
+而且你看任何用keras实现的模型库，训练和验证都几乎可以用这一套相同的接口，没有那么多莫名奇妙的野生Trainer。
+
+我能否基于pytorch打造一个接口和keras一样简洁易用，功能强大，但是实现代码非常简短易懂，便于修改的模型训练工具呢？
+
+从2020年7月左右发布1.0版本到最近发布的3.86版本，我陆陆续续在工作中一边使用一边打磨一个工具，总共提交修改了70多次。
+
+现在我感觉我细心雕琢的这个作品终于长成了我心目中接近完美的样子。
+
+
+<br>
+
+**她有一个美丽的名字：torchkeras.**
+
+<br>
+
+<font color="red">
+ 
+**是的，她兼具torch的灵动，也有keras的优雅~**
+
+**并且她的美丽，无与伦比~**
+
+**她，就是我的梦中情炉~ 🤗🤗**
+    
+</font> 
+
+<br>
+
+
+
+
+
+<!-- #endregion -->
+
+```python
+
+```
+
+<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>3，使用方法 🍊🍊</left></h2>
 
 
 安装torchkeras
@@ -36,7 +110,7 @@ pip install torchkeras
 ```python
 import torch 
 import torchkeras
-
+import torchmetrics
 model = torchkeras.KerasModel(net,
                               loss_fn = nn.BCEWithLogitsLoss(),
                               optimizer= torch.optim.Adam(net.parameters(),lr = 1e-4),
@@ -62,7 +136,7 @@ dfhistory=model.fit(train_data=dl_train,
 
 
 
-## 2,  主要特性
+<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>4，主要特性 🍉🍉</left></h2>
 
 
 torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版本以及这些功能借鉴或者依赖的库的来源见下表。
@@ -86,7 +160,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 ```
 
-## 3, 基本范例
+<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>4，基本范例 🌰🌰</left></h2>
 
 
 以下范例是torchkeras的基础范例，演示了torchkeras的主要功能。
@@ -104,30 +178,50 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 
 
-## 4, 进阶范例
+<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>5，进阶范例 🔥🔥 </left></h2>
 
-
+<!-- #region -->
 下面的范例为torchkeras的进阶使用范例，由于输入数据结构的差异，这些范例有些需要对torchkeras的核心模块StepRunner进行修改。
 
 这种修改实际上是非常简单的，保持每个模块的输出与原始实现格式一致就行，中间处理逻辑根据需要灵活调整。
 
+这里的范例包括了使用torchkeras对一些非常常用的库中的模型进行训练的例子。
+
+例如：
+
+* torchvision
+* transformers
+* segmentation_models_pytorch
+
+
+更多范例参考项目下的examples目录。
+<!-- #endregion -->
 
 > 如果你想掌握一个东西，那么就去使用它，如果你想真正理解一个东西，那么尝试去改变它。 ———— 爱因斯坦
 
 
 
 
-|example|  kaggle链接| 
-|:----|:-----------:|
-|图片分类——Resnet|    <br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-resnet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|语义分割——UNet|   <br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-unet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|目标检测——SSD|   <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ssd"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|example|使用模型库  |notebook |kaggle链接| 
+|:----|:-----------|:-----------:|:-----------:|
+|图片分类——Resnet|  -  |  [Resnet](./examples/ResNet.ipynb) |<br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-resnet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|语义分割——UNet|  - | [UNet](./examples/UNet.ipynb) | <br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-unet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|目标检测——SSD| -  | [SSD](./examples/SSD.ipynb) |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ssd"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——torchvision.ipynb) |  |
+|语义分割——DeepLabV3++ 🔥🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) | |
+
+
+<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>6，鼓励和联系作者 🎈🎈 </left></h2>
 
 
 
-使用过程中遇到问题推荐优先阅读范例和源码，确实无法解决的可以在公众号算法美食屋留言。
+**如果本项目对你有所帮助，想鼓励一下作者，记得给本项目加一颗星星star⭐️，并分享给你的朋友们喔😊!** 
 
+如果在torchkeras的使用中遇到问题，可以在项目中提交issue。
 
+如果想要获得更快的反馈或者与其他torchkeras用户小伙伴进行交流，
+
+可以在公众号算法美食屋后台回复关键字：**加群**。
 
 ![](https://tva1.sinaimg.cn/large/e6c9d24egy1h41m2zugguj20k00b9q46.jpg)
 

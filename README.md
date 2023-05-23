@@ -1,4 +1,4 @@
-<h1 class="list-group-item list-group-item-action active" data-toggle="list" style='color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;' role="tab" aria-controls="home"><left>炼丹师，这是你的梦中情炉吗?🌹🌹</left></h1>
+# 炼丹师，这是你的梦中情炉吗?🌹🌹
 
 
 [English](README_en.md) | 简体中文
@@ -15,7 +15,7 @@ torchkeras 是一个通用的pytorch模型训练模版工具，按照如下目�
 
 
 
-<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>1，torch之痛 😭😭</left></h2>
+## 1，炼丹之痛 😭😭
 
 
 无论是学术研究还是工业落地，pytorch几乎都是目前炼丹的首选框架。
@@ -45,7 +45,7 @@ yolo系列的主要是支持ddp模式的各种风格迥异的Trainer，每个不
 
 
 
-<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>2，梦中情炉 🤗🤗</left></h2>
+## 2，梦中情炉 🤗🤗
 
 <!-- #region -->
 这一切的苦不由得让我怀念起tensorflow中keras的美好了。
@@ -89,7 +89,7 @@ yolo系列的主要是支持ddp模式的各种风格迥异的Trainer，每个不
 
 ```
 
-<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>3，使用方法 🍊🍊</left></h2>
+## 3，使用方法 🍊🍊
 
 
 安装torchkeras
@@ -136,7 +136,7 @@ dfhistory=model.fit(train_data=dl_train,
 
 
 
-<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>4，主要特性 🍉🍉</left></h2>
+## 4，主要特性 🍉🍉
 
 
 torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版本以及这些功能借鉴或者依赖的库的来源见下表。
@@ -160,7 +160,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 ```
 
-<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>4，基本范例 🌰🌰</left></h2>
+## 5，基本范例 🌰🌰
 
 
 以下范例是torchkeras的基础范例，演示了torchkeras的主要功能。
@@ -178,7 +178,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 
 
-<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>5，进阶范例 🔥🔥 </left></h2>
+## 6，进阶范例 🔥🔥 
 
 <!-- #region -->
 下面的范例为torchkeras的进阶使用范例，由于输入数据结构的差异，这些范例有些需要对torchkeras的核心模块StepRunner进行修改。
@@ -207,11 +207,11 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |图片分类——Resnet|  -  |  [Resnet](./examples/ResNet.ipynb) |<br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-resnet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |语义分割——UNet|  - | [UNet](./examples/UNet.ipynb) | <br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-unet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |目标检测——SSD| -  | [SSD](./examples/SSD.ipynb) |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ssd"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——torchvision.ipynb) |  |
-|语义分割——DeepLabV3++ 🔥🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) | |
+|目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——torchvision.ipynb) | - |
+|语义分割——DeepLabV3++ 🔥🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |- |
 
 
-<h2 class="list-group-item list-group-item-action active" data-toggle="list" style="color:#c3448b; background:#efe9e9; border:1px dashed #efe50b;" role="tab" aria-controls="credits"><left>6，鼓励和联系作者 🎈🎈 </left></h2>
+## 7，鼓励和联系作者 🎈🎈
 
 
 

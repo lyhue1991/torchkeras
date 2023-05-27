@@ -111,6 +111,14 @@ def get_call_file():
     stack = traceback.extract_stack()
     return stack[-2].filename 
 
+
+def is_jupyter():
+    import contextlib
+    with contextlib.suppress(Exception):
+        from IPython import get_ipython
+        return get_ipython() is not None
+    return False
+
 def getNotebookPath():
     from jupyter_server import serverapp
     from jupyter_server.utils import url_path_join

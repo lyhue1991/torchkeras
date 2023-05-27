@@ -13,7 +13,9 @@ torchkeras 是一个通用的pytorch模型训练模版工具，按照如下目�
 * **好改** (修改简单，核心代码模块化，仅约200行，并提供丰富的修改使用案例)
 
 
+```python
 
+```
 
 ## 1，炼丹之痛 😭😭
 
@@ -28,7 +30,7 @@ torchvision官方提供的范例代码主要是一个关联了非常多依赖函
 
 yolo系列的主要是支持ddp模式的各种风格迥异的Trainer，每个不同的yolo版本都会改动很多导致不同yolo版本之间都难以通用。
 
-抱抱脸的transformer库在借鉴了pytorch_lightning的基础上也搞了一个自己的Trainer，但与pytorch_lightning并不兼容。
+抱抱脸的transformers库在借鉴了pytorch_lightning的基础上也搞了一个自己的Trainer，但与pytorch_lightning并不兼容。
 
 非常有名的facebook的目标检测库detectron2, 也是搞了一个它自己的Trainer，配合一个全局的cfg参数设置对象来训练模型。
 
@@ -43,11 +45,12 @@ yolo系列的主要是支持ddp模式的各种风格迥异的Trainer，每个不
 我不就想finetune一下模型嘛，何必拿这么多垃圾代码搞我？
 
 
+```python
 
+```
 
 ## 2，梦中情炉 🤗🤗
 
-<!-- #region -->
 这一切的苦不由得让我怀念起tensorflow中keras的美好了。
 
 还记得keras那compile, fit, evalute三连击吗？一切都像行云流水般自然，真正的for humans。
@@ -64,30 +67,22 @@ yolo系列的主要是支持ddp模式的各种风格迥异的Trainer，每个不
 <br>
 
 **她有一个美丽的名字：torchkeras.**
-
-<br>
-
-<font color="red">
  
 **是的，她兼具torch的灵动，也有keras的优雅~**
 
 **并且她的美丽，无与伦比~**
 
 **她，就是我的梦中情炉~ 🤗🤗**
-    
-</font> 
+
 
 <br>
 
 
 
-
-
-<!-- #endregion -->
-
 ```python
 
 ```
+
 
 ## 3，使用方法 🍊🍊
 
@@ -176,11 +171,12 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |④kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./04，kerasmodel_tensorboard_demo.ipynb)   |  |
 |⑤kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 
+```python
 
+```
 
 ## 6，进阶范例 🔥🔥 
 
-<!-- #region -->
 下面的范例为torchkeras的进阶使用范例，由于输入数据结构的差异，这些范例有些需要对torchkeras的核心模块StepRunner进行修改。
 
 这种修改实际上是非常简单的，保持每个模块的输出与原始实现格式一致就行，中间处理逻辑根据需要灵活调整。
@@ -193,26 +189,24 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 * transformers
 * segmentation_models_pytorch
 
-
 更多范例参考项目下的examples目录。
-<!-- #endregion -->
 
 > 如果你想掌握一个东西，那么就去使用它，如果你想真正理解一个东西，那么尝试去改变它。 ———— 爱因斯坦
 
 
+|example|使用模型库  |notebook |
+|:----|:-----------|:-----------:|
+|图片分类——Resnet|  -  | [Resnet](./examples/ResNet.ipynb) |
+|语义分割——UNet|  - | [UNet](./examples/UNet.ipynb) |
+|目标检测——SSD| -  | [SSD](./examples/SSD.ipynb) |
+|目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——torchvision.ipynb) | 
+|语义分割——DeepLabV3++ 🔥🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
 
+```python
 
-|example|使用模型库  |notebook |kaggle链接| 
-|:----|:-----------|:-----------:|:-----------:|
-|图片分类——Resnet|  -  |  [Resnet](./examples/ResNet.ipynb) |<br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-resnet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|语义分割——UNet|  - | [UNet](./examples/UNet.ipynb) | <br><div></a><a href="https://www.kaggle.com/code/lyhue1991/torchkeras-unet"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|目标检测——SSD| -  | [SSD](./examples/SSD.ipynb) |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ssd"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——torchvision.ipynb) | - |
-|语义分割——DeepLabV3++ 🔥🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |- |
-
+```
 
 ## 7，鼓励和联系作者 🎈🎈
-
 
 
 **如果本项目对你有所帮助，想鼓励一下作者，记得给本项目加一颗星星star⭐️，并分享给你的朋友们喔😊!** 
@@ -224,4 +218,3 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 可以在公众号算法美食屋后台回复关键字：**加群**。
 
 ![](https://tva1.sinaimg.cn/large/e6c9d24egy1h41m2zugguj20k00b9q46.jpg)
-

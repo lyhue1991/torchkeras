@@ -11,3 +11,6 @@ examples/.ipynb_checkpoints
 examples/__pycache__/
 torchkeras/chatgpt/__pycache__/
 .idea
+mnist
+output_dir
+wandb

@@ -6,12 +6,7 @@ from .summary import summary
 from .utils import seed_everything,printlog,colorful
 
 try:
-    from .hfmodel import HfModel
-except Exception:
-    pass
-
-try:
-    from .lightmodel import LightModel
+    from .hugmodel import HugModel
 except Exception:
     pass
 

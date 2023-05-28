@@ -70,8 +70,12 @@ class EpochRunner:
         self.quiet = quiet
         
     def __call__(self,dataloader):
+        try:
+            n = len(dataloader)
+        except Exception as err:
+            n = dataloader.size  
         loop = tqdm(enumerate(dataloader,start=1), 
-                    total =len(dataloader),
+                    total=n,
                     file=sys.stdout,
                     disable=not self.accelerator.is_local_main_process or self.quiet,
                     ncols = 100
@@ -83,9 +87,9 @@ class EpochRunner:
             for k,v in step_losses.items():
                 epoch_losses[k] = epoch_losses.get(k,0.0)+v
             
-            if step!=len(dataloader):
+            if step<n:
                 loop.set_postfix(**step_log)
-            else:
+            elif step==n:
                 epoch_metrics = step_metrics
                 epoch_metrics.update({self.stage+"_"+name:metric_fn.compute().item() 
                                  for name,metric_fn in self.steprunner.metrics_dict.items()})
@@ -94,6 +98,8 @@ class EpochRunner:
                 loop.set_postfix(**epoch_log)
                 for name,metric_fn in self.steprunner.metrics_dict.items():
                     metric_fn.reset()
+            else:
+                break
         return epoch_log
 
 class KerasModel(torch.nn.Module):

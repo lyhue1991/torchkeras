@@ -2,7 +2,7 @@ __version__="3.8.6"
 
 import sys
 from .kerasmodel import KerasModel
-from .summary import summary
+from .summary import summary, flop_summary
 from .utils import seed_everything,printlog,colorful
 
 try:

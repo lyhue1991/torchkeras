@@ -123,3 +123,10 @@ def summary(model,input_data = None,input_data_args = None,input_shape=None,inpu
     print(summary_info)
     return summary_info
 
+
+def flop_summary(model,input_data):
+    from fvcore import nn as fnn 
+    print(fnn.flop_count_table(fnn.FlopCountAnalysis(model,input_data)))
+    
+    
+

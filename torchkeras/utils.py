@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd 
 from PIL import Image, ImageFont, ImageDraw
 from pathlib import Path 
-
 from argparse import Namespace
 import os 
 
@@ -15,7 +14,6 @@ def printlog(info):
     print("\n"+"=========="*8 + "%s"%nowtime)
     print(info+'...\n\n')
         
-
 def seed_everything(seed=42):
     print(f"Global seed set to {seed}")
     random.seed(seed)
@@ -106,11 +104,6 @@ def namespace2dict(namespace):
                 result[k+"."+v_key] = v_value
     return result 
 
-def get_call_file(): 
-    import traceback
-    stack = traceback.extract_stack()
-    return stack[-2].filename 
-
 
 def is_jupyter():
     import contextlib
@@ -119,18 +112,5 @@ def is_jupyter():
         return get_ipython() is not None
     return False
 
-def getNotebookPath():
-    from jupyter_server import serverapp
-    from jupyter_server.utils import url_path_join
-
-    import requests,re
-    kernelIdRegex = re.compile(r"(?<=kernel-)[\w\d\-]+(?=\.json)")
-    kernelId = kernelIdRegex.search(get_ipython().config["IPKernelApp"]["connection_file"])[0]
-    for jupServ in serverapp.list_running_servers():
-        for session in requests.get(url_path_join(jupServ["url"], "api/sessions"),
-                                    params={"token":jupServ["token"]}).json():
-            if kernelId == session["kernel"]["id"]:
-                return str(Path(jupServ["root_dir"]) / session["notebook"]['path']) 
-    raise Exception('failed to get current notebook path')
     
   

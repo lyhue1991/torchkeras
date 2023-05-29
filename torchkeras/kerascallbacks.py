@@ -132,30 +132,6 @@ class WandbCallback:
         #local save
         import shutil
         shutil.copy(model.ckpt_path,os.path.join(run_dir,os.path.basename(model.ckpt_path)))
-        
-        
-class MiniLogCallback:
-    def __init__(self, ):
-        pass
-
-    def on_fit_start(self, model:'KerasModel'):
-        pass
-        
-    def on_train_epoch_end(self, model:'KerasModel'):
-        pass
-    
-    def on_validation_epoch_end(self, model:"KerasModel"):
-        dfhistory = pd.DataFrame(model.history)
-        epoch = max(dfhistory['epoch'])
-        monitor_arr = dfhistory[model.monitor]
-        best_monitor_score = monitor_arr.max() if model.mode=='max' else monitor_arr.min()
-        
-        nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        print(f"epoch【{epoch}】@{nowtime} --> best_{model.monitor} = {str(best_monitor_score)}",
-              file = sys.stderr, end = '\r')
-        
-    def on_fit_end(self, model:"KerasModel"):
-        pass
     
      
 class VisProgress:
@@ -163,8 +139,8 @@ class VisProgress:
         self.figsize = (6,4)
     
     def on_fit_start(self,model: 'KerasModel'):
-        from .fastprogress import master_bar
-        self.mb = master_bar(range(model.epochs))
+        from .fastprogress import NBMasterBar
+        self.mb = NBMasterBar(range(model.epochs))
         self.metric =  model.monitor.replace('val_','')
         dfhistory = pd.DataFrame(model.history)
         x_bounds = [0, min(10,model.epochs)]
@@ -180,10 +156,8 @@ class VisProgress:
         dfhistory = pd.DataFrame(model.history)
         arr_scores = dfhistory[model.monitor]
         best_score = np.max(arr_scores) if model.mode=="max" else np.min(arr_scores)
-            
         title = f'best {model.monitor} = {best_score:.4f}'
         return title
-        
         
     def on_validation_epoch_end(self, model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
@@ -193,9 +167,7 @@ class VisProgress:
         self.mb.update_graph(dfhistory, self.metric, x_bounds = x_bounds, 
                              title = title, figsize = self.figsize)
         self.mb.update(n)
-        if n==1:
-            self.mb.write(dfhistory.columns,table=True)
-        self.mb.write(dfhistory.iloc[n-1],table=True)
+        self.mb.show()
         
     def on_fit_end(self, model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
@@ -203,6 +175,7 @@ class VisProgress:
         self.mb.update_graph(dfhistory, self.metric, 
                              title = title, figsize = self.figsize)
         self.mb.on_iter_end()
+        
         
 class EpochCheckpoint:
     def __init__(self, ckpt_dir= "weights", 
@@ -233,4 +206,3 @@ class EpochCheckpoint:
 
     def on_fit_end(self, model:"KerasModel"):
         pass
-        

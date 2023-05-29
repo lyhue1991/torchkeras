@@ -3,8 +3,9 @@ from transformers import Trainer,TrainingArguments,EarlyStoppingCallback,Trainer
 import numpy as np
 import pandas as pd 
 import os 
-import matplotlib.pyplot as plt   
-
+import matplotlib.pyplot as plt 
+from .utils import is_jupyter
+    
 class HugModel(torch.nn.Module):
     def __init__(self, net=None, loss_fn=None, metrics_dict=None, 
                  label_names = None, feature_names = None):
@@ -78,7 +79,7 @@ class HugModel(torch.nn.Module):
     
     def fit(self, train_data, val_data=None, output_dir='output_dir',
         epochs=10, learning_rate=5e-5, logging_steps=20, 
-        monitor="eval_loss", patience=20, mode="min", 
+        monitor="val_loss", patience=20, mode="min", 
         plot=True, wandb=False, 
         no_cuda=False, use_mps_device =False,
         **kwargs):
@@ -99,6 +100,8 @@ class HugModel(torch.nn.Module):
             self.run_id  = wb.run.id
             self.project_name = wb.run.project_name()
             
+        self.prefix = 'eval' if monitor.startswith('eval') else 'val'
+        monitor_metric = 'e'+monitor if monitor.startswith('val_') else monitor
         
         self.training_args = TrainingArguments(
             output_dir = output_dir,
@@ -107,7 +110,7 @@ class HugModel(torch.nn.Module):
             logging_steps = logging_steps,
             
             evaluation_strategy="steps", #epoch
-            metric_for_best_model= monitor,
+            metric_for_best_model= monitor_metric,
             greater_is_better= False if mode=='min' else True,
             report_to='wandb' if wandb else [],
             
@@ -126,12 +129,10 @@ class HugModel(torch.nn.Module):
             **kwargs
         )
         
-        
-        
         callbacks = [EarlyStoppingCallback(early_stopping_patience= patience)]
         
         if plot and is_jupyter():
-            callbacks.append(VisCallback())
+            callbacks.append(VisCallback(monitor=monitor))
       
         self.trainer = Trainer(
             self,
@@ -157,7 +158,7 @@ class HugModel(torch.nn.Module):
     def evaluate(self,val_data,**kwargs):  
         dl_val = self.trainer.get_eval_dataloader(val_data.dataset)
         out = self.trainer.evaluation_loop(dl_val,
-            description = 'eval',prediction_loss_only= False).metrics 
+            description = self.prefix,prediction_loss_only= False,metric_key_prefix =self.prefix).metrics 
         return out 
     
     
@@ -195,46 +196,49 @@ class HugModel(torch.nn.Module):
 
         print('step5: check trainer.evaluation_loop')
         out = trainer.evaluation_loop(dl_val,
-                 description = 'eval')
+                 description = self.prefix,metric_key_prefix =self.prefix)
         print('metrics:',out.metrics)
 
 
 
 class VisCallback(TrainerCallback):
-    def __init__(self, figsize=(6,4), update_freq=1):
+    def __init__(self, figsize=(6,4), update_freq=1, monitor=None):
         self.figsize = figsize
         self.update_freq = update_freq
+        self.monitor = monitor
 
     def on_train_begin(self, args, state, control, **kwargs):
         metric = args.metric_for_best_model
-        self.metric = metric
+        self.prefix = 'val_' if self.monitor is None or self.monitor.startswith('val_') else 'eval_'
+        self.metric = metric if self.monitor is None else self.monitor
+        
         dfhistory = pd.DataFrame()
-        x_bounds = [0, 100]
-        title = f'best {metric} = ?'
-        self.update_graph(dfhistory, self.metric.replace('eval_',''), 
+        x_bounds = [0, args.logging_steps*10]
+        title = f'best {self.metric} = ?'
+        self.update_graph(dfhistory, self.metric.replace(self.prefix,''), 
                              x_bounds = x_bounds, 
                              title=title, 
                              figsize = self.figsize)
         
     def on_evaluate(self, args, state, control, metrics, **kwargs):
-        
         dfhistory = self.get_history(state)
         n = dfhistory['step'].max()
         if n%self.update_freq==0:
-            x_bounds = [dfhistory['step'].min(), 200+(n//200)*200]
+            x_bounds = [dfhistory['step'].min(), 
+                        10*args.logging_steps+(n//(args.logging_steps*10))*args.logging_steps*10]
             arr_scores = dfhistory[self.metric]
             best_score = np.max(arr_scores) if args.greater_is_better==True else np.min(arr_scores)
 
             title = f'best {self.metric} = {best_score:.4f}'
-            self.update_graph(dfhistory, self.metric.replace('eval_',''), x_bounds = x_bounds, 
-                                 title = title, figsize = self.figsize)
+            self.update_graph(dfhistory, self.metric.replace(self.prefix,''), 
+                              x_bounds = x_bounds, title = title, figsize = self.figsize)
             
     def on_train_end(self, args, state, control, **kwargs):
         dfhistory = self.get_history(state)
         arr_scores = dfhistory[self.metric]
         best_score = np.max(arr_scores) if args.greater_is_better==True else np.min(arr_scores)
         title = f'best {self.metric} = {best_score:.4f}'
-        self.update_graph(dfhistory, self.metric.replace('eval_',''), 
+        self.update_graph(dfhistory, self.metric.replace(self.prefix,''), 
                              title = title, figsize = self.figsize)
         plt.close()
         
@@ -246,6 +250,8 @@ class VisCallback(TrainerCallback):
         dfhistory_train = pd.DataFrame(train_history)
         dfhistory_eval = pd.DataFrame(eval_history)  
         dfhistory = dfhistory_train.merge(dfhistory_eval,on=['step','epoch'])
+        if self.prefix=='val_':
+            dfhistory.columns = [x.replace('eval_','val_') for x in dfhistory.columns]
         return dfhistory
         
     def update_graph(self, dfhistory, metric, x_bounds=None, 
@@ -264,7 +270,7 @@ class VisCallback(TrainerCallback):
             train_metrics = dfhistory[m1]
             self.graph_ax.plot(steps,train_metrics,'bo--',label= m1)
 
-        m2 = 'eval_'+metric
+        m2 = self.prefix+metric
         if m2 in dfhistory.columns:
             val_metrics = dfhistory[m2]
             self.graph_ax.plot(steps,val_metrics,'ro-',label =m2)
@@ -281,11 +287,4 @@ class VisCallback(TrainerCallback):
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
         self.graph_out.update(self.graph_ax.figure);
-        
-def is_jupyter():
-    import contextlib
-    with contextlib.suppress(Exception):
-        from IPython import get_ipython
-        return get_ipython() is not None
-    return False
-        
+    

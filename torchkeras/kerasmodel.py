@@ -5,17 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 from accelerate import Accelerator
-
-def colorful(obj,color="red", display_type="plain"):
-    color_dict = {"black":"30", "red":"31", "green":"32", "yellow":"33",
-                    "blue":"34", "purple":"35","cyan":"36",  "white":"37"}
-    display_type_dict = {"plain":"0","highlight":"1","underline":"4",
-                "shine":"5","inverse":"7","invisible":"8"}
-    s = str(obj)
-    color_code = color_dict.get(color,"")
-    display  = display_type_dict.get(display_type,"")
-    out = '\033[{};{}m'.format(display,color_code)+s+'\033[0m'
-    return out 
+from .utils import colorful
 
 class StepRunner:
     def __init__(self, net, loss_fn, accelerator, stage = "train", metrics_dict = None, 
@@ -123,7 +113,7 @@ class KerasModel(torch.nn.Module):
     
     def fit(self, train_data, val_data=None, epochs=10,ckpt_path='checkpoint.pt',
             patience=5, monitor="val_loss", mode="min", mixed_precision='no', callbacks=None,
-            plot=False, wandb=False, quiet=False):
+            plot=True, wandb=False, quiet=False):
         
         self.__dict__.update(locals())
         self.accelerator = Accelerator(mixed_precision=mixed_precision)
@@ -141,8 +131,11 @@ class KerasModel(torch.nn.Module):
         callbacks = callbacks if callbacks is not None else []
         
         if plot==True:
-            from .kerascallbacks import VisProgress
-            callbacks.append(VisProgress(self))
+            from .utils import is_jupyter
+            if is_jupyter():
+                from .kerascallbacks import VisProgress
+                callbacks.append(VisProgress(self))
+                
         if wandb!=False:
             from .kerascallbacks import WandbCallback
             project = wandb if isinstance(wandb,str) else 'torchkeras'
@@ -155,8 +148,11 @@ class KerasModel(torch.nn.Module):
                 callback_obj.on_fit_start(model = self)
         
         start_epoch = 1 if self.from_scratch else 0
+        quiet_fn = (lambda epoch:quiet) if isinstance(quiet,bool) else (
+            (lambda epoch:epoch>quiet) if isinstance(quiet,int) else quiet)
+            
         for epoch in range(start_epoch,epochs+1):
-            should_quiet = False if quiet==False else (quiet==True or epoch>quiet)
+            should_quiet = quiet_fn(epoch)
             
             if not should_quiet:
                 nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -225,8 +221,6 @@ class KerasModel(torch.nn.Module):
                 
         if self.accelerator.is_local_main_process:   
             dfhistory = pd.DataFrame(self.history)
-            self.accelerator.print(dfhistory)
-            
             for callback_obj in self.callbacks:
                 callback_obj.on_fit_end(model = self)
         

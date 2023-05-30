@@ -137,17 +137,16 @@ class WandbCallback:
 class VisProgress:
     def __init__(self,figsize = (6,4)):
         self.figsize = (6,4)
+        
     
     def on_fit_start(self,model: 'KerasModel'):
-        from .fastprogress import NBMasterBar
-        self.mb = NBMasterBar(range(model.epochs))
         self.metric =  model.monitor.replace('val_','')
         dfhistory = pd.DataFrame(model.history)
         x_bounds = [0, min(10,model.epochs)]
         title = f'best {model.monitor} = ?'
-        self.mb.update_graph(dfhistory, self.metric, x_bounds = x_bounds, title=title, figsize = self.figsize)
-        self.mb.update(0)
-        self.mb.show()
+        self.update_graph(dfhistory, self.metric, x_bounds = x_bounds, title=title, figsize = self.figsize)
+        from .pbar import ProgressBar
+        self.loop = ProgressBar(range(model.epochs))
         
     def on_train_epoch_end(self,model:'KerasModel'):
         pass
@@ -164,17 +163,59 @@ class VisProgress:
         n = len(dfhistory)
         x_bounds = [dfhistory['epoch'].min(), min(10+(n//10)*10,model.epochs)]
         title = self.get_title(model)
-        self.mb.update_graph(dfhistory, self.metric, x_bounds = x_bounds, 
+        self.update_graph(dfhistory, self.metric, x_bounds = x_bounds, 
                              title = title, figsize = self.figsize)
-        self.mb.update(n)
-        self.mb.show()
+        self.loop.update(dfhistory['epoch'].iloc[-1])
+
         
     def on_fit_end(self, model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         title = self.get_title(model)
-        self.mb.update_graph(dfhistory, self.metric, 
+        self.update_graph(dfhistory, self.metric, 
                              title = title, figsize = self.figsize)
-        self.mb.on_iter_end()
+        if dfhistory['epoch'].max()<model.epochs:
+            self.loop.on_update(dfhistory['epoch'].iloc[-1],
+                                self.loop.comment+'[earlystopping]',interrupted=True)
+        self.plt.close()
+
+    def update_graph(self, dfhistory, metric, 
+                     x_bounds=None, y_bounds=None, 
+                     title = None, figsize=(6,4)):
+        import matplotlib.pyplot as plt
+        self.plt = plt
+        if not hasattr(self, 'graph_fig'):
+            self.graph_fig, self.graph_ax = plt.subplots(1, figsize=figsize)
+            self.graph_out = display(self.graph_ax.figure, display_id=True)
+
+        self.graph_ax.clear()
+        epochs = dfhistory['epoch'] if 'epoch' in dfhistory.columns else []
+
+        m1 = "train_"+metric
+        if  m1 in dfhistory.columns:
+            train_metrics = dfhistory[m1]
+            self.graph_ax.plot(epochs,train_metrics,'bo--',label= m1)
+
+        m2 = 'val_'+metric
+        if m2 in dfhistory.columns:
+            val_metrics = dfhistory[m2]
+            self.graph_ax.plot(epochs,val_metrics,'ro-',label =m2)
+
+        if metric in dfhistory.columns:
+            metric_values = dfhistory[metric]
+            self.graph_ax.plot(epochs, metric_values,'go-', label = metric)
+
+        self.graph_ax.set_xlabel("epoch")
+        self.graph_ax.set_ylabel(metric)  
+
+        if title:
+             self.graph_ax.set_title(title)
+
+        if m1 in dfhistory.columns or m2 in dfhistory.columns or metric in dfhistory.columns:
+            self.graph_ax.legend(loc='best')
+
+        if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
+        if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
+        self.graph_out.update(self.graph_ax.figure);
         
         
 class EpochCheckpoint:

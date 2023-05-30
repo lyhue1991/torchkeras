@@ -1,5 +1,5 @@
 import sys,datetime
-from tqdm import tqdm 
+from tqdm import tqdm
 from copy import deepcopy
 import numpy as np
 import pandas as pd
@@ -68,7 +68,7 @@ class EpochRunner:
                     total=n,
                     file=sys.stdout,
                     disable=not self.accelerator.is_local_main_process or self.quiet,
-                    ncols = 100
+                    ncols=100
                    )
         epoch_losses = {}
         for step, batch in loop: 

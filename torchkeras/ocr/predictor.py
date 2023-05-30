@@ -10,15 +10,21 @@ rec_model_path = str(path.parent.parent/"assets"/"ocr_rec.onnx")
 
 class Predictor(object):
     def __init__(self,model_path):
+        
         self.session = ort.InferenceSession(model_path)
         self.output_names = [x.name for x in self.session.get_outputs()]
         self.input_tensor = self.session.get_inputs()[0]
+        
+        #debug 
+        #self.model_path = model_path
 
     def forward(self, x):        
         input_dict = {self.input_tensor.name: x}
         outputs = self.session.run(self.output_names, input_dict)
+        
         #debug
-        #print(x.shape) 
+        #if 'det' in self.model_path:
+        #    print(x.shape) 
         return outputs
         
 def create_predictor(args, mode, logger):

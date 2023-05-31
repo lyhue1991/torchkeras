@@ -174,7 +174,7 @@ class VisProgress:
         self.update_graph(dfhistory, self.metric, 
                              title = title, figsize = self.figsize)
         if dfhistory['epoch'].max()<model.epochs:
-            self.loop.on_update(dfhistory['epoch'].iloc[-1],
+            self.loop.on_update(self.loop.last_v,
                                 self.loop.comment+'[earlystopping]',interrupted=True)
         self.plt.close()
 

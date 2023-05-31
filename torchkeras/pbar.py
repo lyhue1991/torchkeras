@@ -13,18 +13,18 @@ def format_time(t):
 
 html_progress_bar_styles = """
 <style>
-    /* Turns off some styling */
-    progress {
-        /* gets rid of default border in Firefox and Opera. */
-        border: none;
-        /* Needs to be in here for Safari polyfill so background images work as expected. */
-        background-size: auto;
-    }
-    progress:not([value]), progress:not([value])::-webkit-progress-bar {
-        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
-    }
+    /* background: */
+    progress::-webkit-progress-bar {background-color: #CDCDCD; width: 100%;}
+    progress {background-color: #CDCDCD;}
+
+    /* value: */
+    progress::-webkit-progress-value {background-color: #00BFFF  !important;}
+    progress::-moz-progress-bar {background-color: #00BFFF  !important;}
+    progress {color: #00BFFF ;}
+
+    /* optional */
     .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
-        background: #F44336;
+        background: #000000;
     }
 </style>
 """
@@ -86,6 +86,9 @@ class ProgressBar:
         self.progress = html_progress_bar(val, self.total, text, interrupted)
         if self.display: 
             self.out.update(HTML(self.progress))
+            
+    def on_interrupt(self,text='interrupted'):
+        self.on_update(self.last_v,self.comment+f'[{text}]',interrupted=True)
 
     def __iter__(self):
         if self.total != 0: self.update(0)

@@ -32,6 +32,21 @@ def plot_metric(dfhistory, metric):
                             name = 'val_'+metric,marker = dict(size=10,color="red"),
                             line= dict(width=2,color="red",dash="solid"))
     fig = go.Figure(data = [train_scatter,val_scatter])
+    
+    if np.array(val_metrics).argmax()<np.array(val_metrics).argmin():
+        best_metric = np.array(val_metrics).min()
+    else:
+        best_metric = np.array(val_metrics).max()
+    
+    fig.update_layout({"title":"best val_"+metric+"="+f"{best_metric:.4f}",
+          "title_x":0.45,
+          "xaxis.title":"epoch",
+          "yaxis.title":metric,
+          "font.size":15,
+          "height":500,
+          "width":800
+        })
+    
     return fig  
 
 def plot_importance(features, importances, topk=20):

@@ -21,12 +21,10 @@ setup(
     description="pytorch❤️keras",
     long_description=README,
     install_requires=[           
-         #'pandas',
-         #'accelerate',
+         'accelerate',
+         'tqdm',
          #'torch',
          #'torchmetrics',
-         #'tqdm',
-         #'pytorch_lightning',
          #'plotly',
          #'wandb'
        ],

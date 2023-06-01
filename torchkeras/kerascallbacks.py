@@ -133,89 +133,129 @@ class WandbCallback:
         import shutil
         shutil.copy(model.ckpt_path,os.path.join(run_dir,os.path.basename(model.ckpt_path)))
     
-     
+
 class VisProgress:
+    def __init__(self):
+        pass
+        
+    def on_fit_start(self,model: 'KerasModel'):
+        from .pbar import ProgressBar
+        self.loop = ProgressBar(range(model.epochs))
+            
+    def on_train_epoch_end(self,model:'KerasModel'):
+        pass
+    
+    def on_validation_epoch_end(self, model:"KerasModel"):
+        dfhistory = pd.DataFrame(model.history)
+        self.loop.update(dfhistory['epoch'].iloc[-1])
+           
+    def on_fit_end(self,  model:"KerasModel"):
+        dfhistory = pd.DataFrame(model.history)
+        if dfhistory['epoch'].max()<model.epochs:
+            self.loop.on_update(self.loop.last_v,
+                                self.loop.comment+'[earlystopping]',interrupted=True)
+            
+class VisMetric:
     def __init__(self,figsize = (6,4)):
         self.figsize = (6,4)
         
-    
     def on_fit_start(self,model: 'KerasModel'):
         self.metric =  model.monitor.replace('val_','')
         dfhistory = pd.DataFrame(model.history)
         x_bounds = [0, min(10,model.epochs)]
         title = f'best {model.monitor} = ?'
-        self.update_graph(dfhistory, self.metric, x_bounds = x_bounds, title=title, figsize = self.figsize)
-        from .pbar import ProgressBar
-        self.loop = ProgressBar(range(model.epochs))
+        self.update_graph(model, title=title, x_bounds = x_bounds)
         
     def on_train_epoch_end(self,model:'KerasModel'):
         pass
     
-    def get_title(self,model:'KerasModel'):
-        dfhistory = pd.DataFrame(model.history)
-        arr_scores = dfhistory[model.monitor]
-        best_score = np.max(arr_scores) if model.mode=="max" else np.min(arr_scores)
-        title = f'best {model.monitor} = {best_score:.4f}'
-        return title
-        
     def on_validation_epoch_end(self, model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         n = len(dfhistory)
         x_bounds = [dfhistory['epoch'].min(), min(10+(n//10)*10,model.epochs)]
         title = self.get_title(model)
-        self.update_graph(dfhistory, self.metric, x_bounds = x_bounds, 
-                             title = title, figsize = self.figsize)
-        self.loop.update(dfhistory['epoch'].iloc[-1])
-
+        self.update_graph(model, title = title,x_bounds = x_bounds)
         
-    def on_fit_end(self, model:"KerasModel"):
+            
+    def on_fit_end(self,  model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         title = self.get_title(model)
-        self.update_graph(dfhistory, self.metric, 
-                             title = title, figsize = self.figsize)
-        if dfhistory['epoch'].max()<model.epochs:
-            self.loop.on_update(self.loop.last_v,
-                                self.loop.comment+'[earlystopping]',interrupted=True)
+        self.update_graph(model, title = title)
         self.plt.close()
+        
+    def get_title(self,  model:'KerasModel'):
+        dfhistory = pd.DataFrame(model.history)
+        arr_scores = dfhistory[model.monitor]
+        best_score = np.max(arr_scores) if model.mode=="max" else np.min(arr_scores)
+        title = f'best {model.monitor} = {best_score:.4f}'
+        return title
 
-    def update_graph(self, dfhistory, metric, 
-                     x_bounds=None, y_bounds=None, 
-                     title = None, figsize=(6,4)):
+    def update_graph(self, model:'KerasModel', title=None, x_bounds=None, y_bounds=None):
         import matplotlib.pyplot as plt
         self.plt = plt
         if not hasattr(self, 'graph_fig'):
-            self.graph_fig, self.graph_ax = plt.subplots(1, figsize=figsize)
+            self.graph_fig, self.graph_ax = plt.subplots(1, figsize=self.figsize)
             self.graph_out = display(self.graph_ax.figure, display_id=True)
-
         self.graph_ax.clear()
+        
+        dfhistory = pd.DataFrame(model.history)
         epochs = dfhistory['epoch'] if 'epoch' in dfhistory.columns else []
 
-        m1 = "train_"+metric
+        m1 = "train_"+self.metric
         if  m1 in dfhistory.columns:
             train_metrics = dfhistory[m1]
             self.graph_ax.plot(epochs,train_metrics,'bo--',label= m1)
 
-        m2 = 'val_'+metric
+        m2 = 'val_'+self.metric
         if m2 in dfhistory.columns:
             val_metrics = dfhistory[m2]
             self.graph_ax.plot(epochs,val_metrics,'ro-',label =m2)
 
-        if metric in dfhistory.columns:
-            metric_values = dfhistory[metric]
-            self.graph_ax.plot(epochs, metric_values,'go-', label = metric)
+        if self.metric in dfhistory.columns:
+            metric_values = dfhistory[self.metric]
+            self.graph_ax.plot(epochs, metric_values,'go-', label = self.metric)
 
         self.graph_ax.set_xlabel("epoch")
-        self.graph_ax.set_ylabel(metric)  
+        self.graph_ax.set_ylabel(self.metric)  
 
         if title:
              self.graph_ax.set_title(title)
 
-        if m1 in dfhistory.columns or m2 in dfhistory.columns or metric in dfhistory.columns:
+        if m1 in dfhistory.columns or m2 in dfhistory.columns or self.metric in dfhistory.columns:
             self.graph_ax.legend(loc='best')
 
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
         self.graph_out.update(self.graph_ax.figure);
+        
+
+class VisDisplay:
+    def __init__(self,display_fn,model=None):
+        
+        from ipywidgets import widgets 
+        from IPython.display import display
+        
+        self.out = widgets.Output()
+        self.display_fn = display_fn
+        display(self.out)
+        if model is not None:
+            with self.out:
+                self.display_fn(model)
+        
+    def on_fit_start(self,model: 'KerasModel'):
+        pass
+        
+    def on_train_epoch_end(self,model:'KerasModel'):
+        pass
+    
+    def on_validation_epoch_end(self, model:"KerasModel"):
+        self.out.clear_output()
+        with self.out:
+            self.display_fn(model)
+           
+    def on_fit_end(self,  model:"KerasModel"):
+        pass
+    
         
         
 class EpochCheckpoint:

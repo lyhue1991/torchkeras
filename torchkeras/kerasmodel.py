@@ -56,7 +56,8 @@ class EpochRunner:
     def __init__(self,steprunner,quiet=False):
         self.steprunner = steprunner
         self.stage = steprunner.stage
-        self.accelerator = self.steprunner.accelerator
+        self.accelerator = steprunner.accelerator
+        self.net = steprunner.net
         self.quiet = quiet
         
     def __call__(self,dataloader):
@@ -72,24 +73,25 @@ class EpochRunner:
                    )
         epoch_losses = {}
         for step, batch in loop: 
-            step_losses,step_metrics = self.steprunner(batch)   
-            step_log = dict(step_losses,**step_metrics)
-            for k,v in step_losses.items():
-                epoch_losses[k] = epoch_losses.get(k,0.0)+v
-            
-            if step<n:
-                loop.set_postfix(**step_log)
-            elif step==n:
-                epoch_metrics = step_metrics
-                epoch_metrics.update({self.stage+"_"+name:metric_fn.compute().item() 
-                                 for name,metric_fn in self.steprunner.metrics_dict.items()})
-                epoch_losses = {k:v/step for k,v in epoch_losses.items()}
-                epoch_log = dict(epoch_losses,**epoch_metrics)
-                loop.set_postfix(**epoch_log)
-                for name,metric_fn in self.steprunner.metrics_dict.items():
-                    metric_fn.reset()
-            else:
-                break
+            with self.accelerator.accumulate(self.net):
+                step_losses,step_metrics = self.steprunner(batch)   
+                step_log = dict(step_losses,**step_metrics)
+                for k,v in step_losses.items():
+                    epoch_losses[k] = epoch_losses.get(k,0.0)+v
+
+                if step<n:
+                    loop.set_postfix(**step_log)
+                elif step==n:
+                    epoch_metrics = step_metrics
+                    epoch_metrics.update({self.stage+"_"+name:metric_fn.compute().item() 
+                                     for name,metric_fn in self.steprunner.metrics_dict.items()})
+                    epoch_losses = {k:v/step for k,v in epoch_losses.items()}
+                    epoch_log = dict(epoch_losses,**epoch_metrics)
+                    loop.set_postfix(**epoch_log)
+                    for name,metric_fn in self.steprunner.metrics_dict.items():
+                        metric_fn.reset()
+                else:
+                    break
         return epoch_log
 
 class KerasModel(torch.nn.Module):
@@ -111,12 +113,13 @@ class KerasModel(torch.nn.Module):
     def forward(self, x):
         return self.net.forward(x)
     
-    def fit(self, train_data, val_data=None, epochs=10,ckpt_path='checkpoint.pt',
-            patience=5, monitor="val_loss", mode="min", mixed_precision='no', callbacks=None,
-            plot=True, wandb=False, quiet=False):
+    def fit(self, train_data, val_data=None, epochs=10, ckpt_path='checkpoint.pt',
+            patience=5, monitor="val_loss", mode="min", callbacks=None, plot=True, wandb=False, quiet=False, 
+            mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
         
         self.__dict__.update(locals())
-        self.accelerator = Accelerator(mixed_precision=mixed_precision)
+        self.accelerator = Accelerator(mixed_precision=mixed_precision,cpu=cpu,
+            gradient_accumulation_steps=gradient_accumulation_steps)
         device = str(self.accelerator.device)
         device_type = '🐌'  if 'cpu' in device else '⚡️'
         self.accelerator.print(
@@ -133,8 +136,8 @@ class KerasModel(torch.nn.Module):
         if plot==True:
             from .utils import is_jupyter
             if is_jupyter():
-                from .kerascallbacks import VisProgress
-                callbacks.append(VisProgress(self))
+                from .kerascallbacks import VisMetric,VisProgress
+                callbacks.extend([VisMetric(),VisProgress()])
                 
         if wandb!=False:
             from .kerascallbacks import WandbCallback
@@ -230,7 +233,7 @@ class KerasModel(torch.nn.Module):
     
     @torch.no_grad()
     def evaluate(self, val_data, quiet=False):
-        accelerator = Accelerator()
+        accelerator = Accelerator() if not hasattr(self,'accelerator') else self.accelerator
         self.net,self.loss_fn,self.metrics_dict = accelerator.prepare(self.net,self.loss_fn,self.metrics_dict)
         val_data = accelerator.prepare(val_data)
         val_step_runner = self.StepRunner(net = self.net,stage="val",

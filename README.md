@@ -199,8 +199,9 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |图片分类——Resnet|  -  | [Resnet](./examples/ResNet.ipynb) |
 |语义分割——UNet|  - | [UNet](./examples/UNet.ipynb) |
 |目标检测——SSD| -  | [SSD](./examples/SSD.ipynb) |
+|文字识别——CRNN 🔥🔥| -  | [CRNN-CTC](./examples/CRNN-CTC.ipynb) |
 |目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
-|语义分割——DeepLabV3++ 🔥🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
+|语义分割——DeepLabV3++ 🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
 |实例分割——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
 
 ```python

@@ -4,6 +4,9 @@ from PIL import Image,ImageDraw,ImageFont
 from pathlib import Path
 import sys 
 
+simhei_file = str(Path(__file__).parent/"assets/SimHei.ttf")
+
+
 def set_matplotlib_font(font_size=15):
     import matplotlib as mpl
     import matplotlib.pyplot as plt
@@ -33,7 +36,7 @@ def plot_metric(dfhistory, metric):
                             line= dict(width=2,color="red",dash="solid"))
     fig = go.Figure(data = [train_scatter,val_scatter])
     
-    if np.array(val_metrics).argmax()<np.array(val_metrics).argmin():
+    if np.array(train_metrics).argmax()<np.array(train_metrics).argmin():
         best_metric = np.array(val_metrics).min()
     else:
         best_metric = np.array(val_metrics).max()

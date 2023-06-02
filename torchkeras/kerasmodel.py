@@ -61,10 +61,7 @@ class EpochRunner:
         self.quiet = quiet
         
     def __call__(self,dataloader):
-        try:
-            n = len(dataloader)
-        except Exception as err:
-            n = dataloader.size  
+        n = dataloader.size  if hasattr(dataloader,'size') else len(dataloader)
         loop = tqdm(enumerate(dataloader,start=1), 
                     total=n,
                     file=sys.stdout,

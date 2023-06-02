@@ -4,14 +4,13 @@ import datetime
 from copy import deepcopy
 import numpy as np 
 import pandas as pd 
-import wandb
-from torch.utils.tensorboard import SummaryWriter 
 from argparse import Namespace 
 from .plots import plot_metric
 
 class TensorBoardCallback:
     def __init__(self, save_dir= "runs", model_name="model", 
                  log_weight=False, log_weight_freq=5):
+        from torch.utils.tensorboard import SummaryWriter 
         self.__dict__.update(locals())
         nowtime = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
         self.log_path = os.path.join(save_dir,model_name,nowtime)
@@ -85,12 +84,14 @@ class WandbCallback:
             self.config = config.__dict__ 
         if name is None:
             self.name =datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        import wandb 
+        self.wb = wandb
         
     def on_fit_start(self, model:'KerasModel'):
-        if wandb.run is None:
-            wandb.init(project=self.project, config = self.config,
+        if self.wb.run is None:
+            self.wb.init(project=self.project, config = self.config,
                    name = self.name, save_code=self.save_code)
-        model.run_id = wandb.run.id
+        model.run_id = self.wb.run.id
         
     def on_train_epoch_end(self, model:'KerasModel'):
         pass
@@ -100,34 +101,34 @@ class WandbCallback:
         n = len(dfhistory)
         if n==1:
             for m in dfhistory.columns:
-                wandb.define_metric(name=m, step_metric='epoch', hidden=False if m!='epoch' else True)
-            wandb.define_metric(name='best_'+model.monitor,step_metric='epoch')
+                self.wb.define_metric(name=m, step_metric='epoch', hidden=False if m!='epoch' else True)
+            self.wb.define_metric(name='best_'+model.monitor,step_metric='epoch')
         
         dic = dict(dfhistory.iloc[n-1])
         monitor_arr = dfhistory[model.monitor]
         best_monitor_score = monitor_arr.max() if model.mode=='max' else monitor_arr.min()
         dic.update({'best_'+model.monitor:best_monitor_score})
-        wandb.run.summary["best_score"] = best_monitor_score
-        wandb.log(dic)
+        self.wb.run.summary["best_score"] = best_monitor_score
+        self.wb.log(dic)
 
     def on_fit_end(self, model:"KerasModel"):
         
         #save dfhistory
         dfhistory = pd.DataFrame(model.history)
-        dfhistory.to_csv(os.path.join(wandb.run.dir,'dfhistory.csv'),index=None) 
+        dfhistory.to_csv(os.path.join(self.wb.run.dir,'dfhistory.csv'),index=None) 
         
         #save ckpt
         if self.save_ckpt:
-            arti_model = wandb.Artifact('checkpoint', type='model')
+            arti_model = self.wb.Artifact('checkpoint', type='model')
             arti_model.add_file(model.ckpt_path)
-            wandb.log_artifact(arti_model)
+            self.wb.log_artifact(arti_model)
                  
         #plotly metrics
         metrics = [x.replace('train_','').replace('val_','') for x in dfhistory.columns if 'train_' in x] 
         metric_fig = {m+'_curve':plot_metric(dfhistory,m) for m in metrics}
-        wandb.log(metric_fig)
-        run_dir = wandb.run.dir
-        wandb.finish()
+        self.wb.log(metric_fig)
+        run_dir = self.wb.run.dir
+        self.wb.finish()
 
         #local save
         import shutil
@@ -231,11 +232,10 @@ class VisMetric:
 
 class VisDisplay:
     def __init__(self,display_fn,model=None):
-        
-        from ipywidgets import widgets 
+        from ipywidgets import Output 
         from IPython.display import display
         
-        self.out = widgets.Output()
+        self.out = Output()
         self.display_fn = display_fn
         display(self.out)
         if model is not None:
@@ -256,8 +256,7 @@ class VisDisplay:
     def on_fit_end(self,  model:"KerasModel"):
         pass
     
-        
-        
+    
 class EpochCheckpoint:
     def __init__(self, ckpt_dir= "weights", 
                  save_freq=1, max_ckpt=10):

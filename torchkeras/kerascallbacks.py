@@ -141,20 +141,22 @@ class VisProgress:
         
     def on_fit_start(self,model: 'KerasModel'):
         from .pbar import ProgressBar
-        self.loop = ProgressBar(range(model.epochs))
-            
+        self.progress = ProgressBar(range(model.epochs)) 
+        model.EpochRunner.progress = self.progress
+        
     def on_train_epoch_end(self,model:'KerasModel'):
         pass
     
     def on_validation_epoch_end(self, model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
-        self.loop.update(dfhistory['epoch'].iloc[-1])
+        self.progress.update(dfhistory['epoch'].iloc[-1])
+
            
     def on_fit_end(self,  model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         if dfhistory['epoch'].max()<model.epochs:
-            self.loop.on_update(self.loop.last_v,
-                                self.loop.comment+'[earlystopping]',interrupted=True)
+            self.progress.on_update(self.progress.last_v,
+                                self.progress.comment+'[earlystopping]',interrupted=True)
             
 class VisMetric:
     def __init__(self,figsize = (6,4)):
@@ -231,20 +233,21 @@ class VisMetric:
         
 
 class VisDisplay:
-    def __init__(self,display_fn,model=None):
+    def __init__(self,display_fn,model=None,init_display=True):
         from ipywidgets import Output 
-        from IPython.display import display
-        
         self.out = Output()
         self.display_fn = display_fn
-        display(self.out)
-        if model is not None:
+        self.init_display = init_display
+        
+        if self.init_display:
+            self.first_display()
             with self.out:
                 self.display_fn(model)
         
     def on_fit_start(self,model: 'KerasModel'):
-        pass
-        
+        if not self.init_display:
+            self.first_display()
+            
     def on_train_epoch_end(self,model:'KerasModel'):
         pass
     
@@ -255,6 +258,12 @@ class VisDisplay:
            
     def on_fit_end(self,  model:"KerasModel"):
         pass
+    
+    def first_display(self):
+        from IPython.display import display
+        display(self.out)
+        
+        
     
     
 class EpochCheckpoint:

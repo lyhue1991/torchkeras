@@ -45,12 +45,12 @@ class ProgressBar:
     def __init__(self, gen, total=None, 
                  display=True, comment=''):
         self.gen,self.comment = gen,comment
+        self.postfix = ''
         self.total = None if total=='noinfer' else len(gen) if total is None else total
         self.last_v = 0
         self.display = display
         self.last_v = None
         self.update(0)
-        
         
     def update(self, val):
         if self.last_v is None:
@@ -78,7 +78,7 @@ class ProgressBar:
 
     def on_iter_end(self):
         total_time = format_time(time.time() - self.start_t)
-        self.comment = f'Total time: {total_time} <p>' 
+        self.comment = f'[{total_time}]' 
         if hasattr(self, 'out'): 
             self.on_update(self.total,self.comment)
 
@@ -109,7 +109,8 @@ class ProgressBar:
             warn("Your generator is empty.")
             return self.on_update(0, '100% [0/0]')
         if val ==0:
-            return self.on_update(0, f'0% [0/{self.total}]')
+            self.comment = f'0% [0/{self.total}]'
+            return self.on_update(0, self.comment)
         pct = '' if self.total is None else f'{100 * val/self.total:.2f}% '
         tot = '?' if self.total is None else str(self.total)
         elapsed_t = self.last_t - self.start_t
@@ -117,3 +118,16 @@ class ProgressBar:
         elapsed_t = format_time(elapsed_t)
         self.comment = f'{pct}[{val}/{tot} {elapsed_t}{self.lt}{remaining_t}]'
         self.on_update(val, self.comment)
+    
+    def set_postfix(self,**kwargs):
+        postfix = '['
+        for i,(key,value) in enumerate(kwargs.items()):
+            if isinstance(value,float):
+                postfix = postfix+f'{key}={value:.5f},'
+            else:
+                postfix = postfix+f'{key}={value},'
+                
+        if postfix[-1]==',':
+            postfix = postfix[:-1]
+        self.postfix = postfix+']'
+        self.on_update(self.last_v,self.comment+self.postfix)

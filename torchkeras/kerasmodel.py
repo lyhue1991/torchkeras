@@ -78,6 +78,12 @@ class EpochRunner:
 
                 if step<n:
                     loop.set_postfix(**step_log)
+            
+                    if hasattr(self,'progress') and self.quiet:
+                        post_log = dict(**{'step':f'{step}/{n}'},**step_log)
+                        self.progress.set_postfix(**post_log)
+
+                        
                 elif step==n:
                     epoch_metrics = step_metrics
                     epoch_metrics.update({self.stage+"_"+name:metric_fn.compute().item() 
@@ -85,6 +91,11 @@ class EpochRunner:
                     epoch_losses = {k:v/step for k,v in epoch_losses.items()}
                     epoch_log = dict(epoch_losses,**epoch_metrics)
                     loop.set_postfix(**epoch_log)
+                    
+                    if hasattr(self,'progress') and self.quiet:
+                        post_log = dict(**{'step':f'{step}/{n}'},**epoch_log)
+                        self.progress.set_postfix(**post_log)
+                    
                     for name,metric_fn in self.steprunner.metrics_dict.items():
                         metric_fn.reset()
                 else:
@@ -130,11 +141,11 @@ class KerasModel(torch.nn.Module):
         self.history = {}
         callbacks = callbacks if callbacks is not None else []
         
-        if plot==True:
+        if bool(plot)!=False:
             from .utils import is_jupyter
             if is_jupyter():
                 from .kerascallbacks import VisMetric,VisProgress
-                callbacks.extend([VisMetric(),VisProgress()])
+                callbacks = [VisMetric(),VisProgress()]+callbacks
                 
         if wandb!=False:
             from .kerascallbacks import WandbCallback
@@ -153,7 +164,7 @@ class KerasModel(torch.nn.Module):
             
         for epoch in range(start_epoch,epochs+1):
             should_quiet = quiet_fn(epoch)
-            
+        
             if not should_quiet:
                 nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 self.accelerator.print("\n"+"=========="*8 + "%s"%nowtime)

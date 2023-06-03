@@ -36,10 +36,15 @@ def plot_metric(dfhistory, metric):
                             line= dict(width=2,color="red",dash="solid"))
     fig = go.Figure(data = [train_scatter,val_scatter])
     
-    if np.array(train_metrics).argmax()<np.array(train_metrics).argmin():
+    if any([m in metric.lower() for m in ['loss','mse','mae','error','err','l1','l2']]):
         best_metric = np.array(val_metrics).min()
-    else:
+    elif any([m in metric.lower() for m in ['acc','iou','recall','precision','auc']]):
         best_metric = np.array(val_metrics).max()
+    elif train_metrics.argmax()>train_metrics.argmin():
+        best_metric = np.array(val_metrics).max()
+    else:
+        best_metric = np.array(val_metrics).min()
+        
     
     fig.update_layout({"title":"best val_"+metric+"="+f"{best_metric:.4f}",
           "title_x":0.45,

@@ -76,8 +76,7 @@ yolo系列的主要是支持ddp模式的各种风格迥异的Trainer，每个不
 
 
 <br>
-![](./data/梦中情炉宣传页.png)
-
+![](./data/torchkeras.png)
 
 
 ```python

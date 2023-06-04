@@ -1,3 +1,4 @@
+
 '''
 reference from https://github.com/fastai/fastprogress/
 '''
@@ -29,7 +30,7 @@ html_progress_bar_styles = """
 </style>
 """
 
-def html_progress_bar(value, total, label, interrupted=False):
+def html_progress_bar(value, total, label='', postfix='', interrupted=False):
     "Html code for a progress bar `value`/`total` with `label`"
     bar_style = 'progress-bar-interrupted' if interrupted else ''
     val = '' if total is None else f"value='{value}'"
@@ -37,6 +38,8 @@ def html_progress_bar(value, total, label, interrupted=False):
     <div>
       <progress {val} class='{bar_style}' max='{total}' style='width:300px; height:20px; vertical-align: middle;'></progress>
       {label}
+      <br>
+      {postfix}
     </div>
     """
 
@@ -80,15 +83,15 @@ class ProgressBar:
         total_time = format_time(time.time() - self.start_t)
         self.comment = f'[{total_time}]' 
         if hasattr(self, 'out'): 
-            self.on_update(self.total,self.comment)
+            self.on_update(self.total,self.comment,self.postfix)
 
-    def on_update(self, val, text, interrupted=False): 
-        self.progress = html_progress_bar(val, self.total, text, interrupted)
+    def on_update(self, val, comment='', postfix='', interrupted=False): 
+        self.progress = html_progress_bar(val, self.total,comment,postfix,interrupted)
         if self.display: 
             self.out.update(HTML(self.progress))
             
-    def on_interrupt(self,text='interrupted'):
-        self.on_update(self.last_v,self.comment+f'[{text}]',interrupted=True)
+    def on_interrupt(self,msg='interrupted'):
+        self.on_update(self.last_v,self.comment+f'[{msg}]',interrupted=True)
 
     def __iter__(self):
         if self.total != 0: self.update(0)
@@ -117,17 +120,26 @@ class ProgressBar:
         remaining_t = '?' if self.pred_t is None else format_time(self.pred_t - elapsed_t)
         elapsed_t = format_time(elapsed_t)
         self.comment = f'{pct}[{val}/{tot} {elapsed_t}{self.lt}{remaining_t}]'
-        self.on_update(val, self.comment)
+        self.on_update(val, self.comment, self.postfix)
     
     def set_postfix(self,**kwargs):
-        postfix = '['
-        for i,(key,value) in enumerate(kwargs.items()):
-            if isinstance(value,float):
-                postfix = postfix+f'{key}={value:.5f},'
-            else:
-                postfix = postfix+f'{key}={value},'
-                
-        if postfix[-1]==',':
-            postfix = postfix[:-1]
-        self.postfix = postfix+']'
-        self.on_update(self.last_v,self.comment+self.postfix)
+        postfix = ''
+        if 'i' in kwargs and 'n' in kwargs:
+            from tqdm.std import Bar 
+            i,n = kwargs['i'],kwargs['n']
+            kwargs.pop('i')
+            kwargs.pop('n')
+            ratio = i/n
+            postfix+=format(Bar(ratio,default_len=20))
+            postfix+=f'{100 * i/n:.2f}%'
+            postfix+=f' [{i}/{n}] '
+        if kwargs:
+            postfix+='['
+            for i,(key,value) in enumerate(kwargs.items()):
+                if isinstance(value,float):
+                    postfix = postfix+f'{key}={value:.5f},'
+                else:
+                    postfix = postfix+f'{key}={value},'
+            postfix = postfix[:-1]+']'
+        self.postfix = postfix
+        self.on_update(self.last_v,self.comment,self.postfix)

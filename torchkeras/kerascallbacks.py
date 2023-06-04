@@ -155,8 +155,7 @@ class VisProgress:
     def on_fit_end(self,  model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         if dfhistory['epoch'].max()<model.epochs:
-            self.progress.on_update(self.progress.last_v,
-                                self.progress.comment+'[earlystopping]',interrupted=True)
+            self.progress.on_interrupt(msg='earlystopping')
             
 class VisMetric:
     def __init__(self,figsize = (6,4)):
@@ -184,7 +183,6 @@ class VisMetric:
         dfhistory = pd.DataFrame(model.history)
         title = self.get_title(model)
         self.update_graph(model, title = title)
-        self.plt.close()
         
     def get_title(self,  model:'KerasModel'):
         dfhistory = pd.DataFrame(model.history)
@@ -203,7 +201,7 @@ class VisMetric:
         
         dfhistory = pd.DataFrame(model.history)
         epochs = dfhistory['epoch'] if 'epoch' in dfhistory.columns else []
-
+        
         m1 = "train_"+self.metric
         if  m1 in dfhistory.columns:
             train_metrics = dfhistory[m1]
@@ -220,34 +218,33 @@ class VisMetric:
 
         self.graph_ax.set_xlabel("epoch")
         self.graph_ax.set_ylabel(self.metric)  
-
         if title:
              self.graph_ax.set_title(title)
-
         if m1 in dfhistory.columns or m2 in dfhistory.columns or self.metric in dfhistory.columns:
             self.graph_ax.legend(loc='best')
 
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
-        self.graph_out.update(self.graph_ax.figure);
+        self.graph_out.update(self.graph_ax.figure)
+        self.plt.close();
         
 
 class VisDisplay:
     def __init__(self,display_fn,model=None,init_display=True):
         from ipywidgets import Output 
-        self.out = Output()
         self.display_fn = display_fn
         self.init_display = init_display
+        self.out = Output()
         
         if self.init_display:
-            self.first_display()
+            display(self.out)
             with self.out:
                 self.display_fn(model)
         
     def on_fit_start(self,model: 'KerasModel'):
         if not self.init_display:
-            self.first_display()
-            
+            display(self.out)
+
     def on_train_epoch_end(self,model:'KerasModel'):
         pass
     
@@ -258,14 +255,8 @@ class VisDisplay:
            
     def on_fit_end(self,  model:"KerasModel"):
         pass
-    
-    def first_display(self):
-        from IPython.display import display
-        display(self.out)
         
         
-    
-    
 class EpochCheckpoint:
     def __init__(self, ckpt_dir= "weights", 
                  save_freq=1, max_ckpt=10):

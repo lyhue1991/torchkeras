@@ -18,4 +18,4 @@ mnist
 output_dir
 wandb
 *.pt
-
+debug.ipynb

@@ -79,8 +79,8 @@ class EpochRunner:
                 if step<n:
                     loop.set_postfix(**step_log)
             
-                    if hasattr(self,'progress') and self.quiet:
-                        post_log = dict(**{'step':f'{step}/{n}'},**step_log)
+                    if hasattr(self,'progress') and self.quiet and self.accelerator.is_local_main_process:
+                        post_log = dict(**{'i':step,'n':n},**step_log)
                         self.progress.set_postfix(**post_log)
 
                         
@@ -92,8 +92,8 @@ class EpochRunner:
                     epoch_log = dict(epoch_losses,**epoch_metrics)
                     loop.set_postfix(**epoch_log)
                     
-                    if hasattr(self,'progress') and self.quiet:
-                        post_log = dict(**{'step':f'{step}/{n}'},**epoch_log)
+                    if hasattr(self,'progress') and self.quiet and self.accelerator.is_local_main_process:
+                        post_log = dict(**{'i':step,'n':n},**epoch_log)
                         self.progress.set_postfix(**post_log)
                     
                     for name,metric_fn in self.steprunner.metrics_dict.items():
@@ -193,7 +193,7 @@ class KerasModel(torch.nn.Module):
                     callback_obj.on_train_epoch_end(model = self)
 
             # 2，validate -------------------------------------------------
-            if val_dataloader:
+            if val_dataloader is not None:
                 val_step_runner = self.StepRunner(
                     net = self.net,
                     loss_fn = self.loss_fn,

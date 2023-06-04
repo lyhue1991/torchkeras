@@ -90,8 +90,6 @@ Versions when these features are introduced and the libraries which they used  o
 
 You can follow these full examples to get started with torchkeras.
 
-Have fun!😋😋
-
 
 |example| read notebook code     |  run example in kaggle| 
 |:----|:-------------------------|:-----------:|
@@ -100,6 +98,25 @@ Have fun!😋😋
 |③kerasmodel tunning 🔥🔥🔥|[**torchkeras.KerasModel with wandb sweep demo**](./03，kerasmodel_tuning_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-loves-wandb-sweep"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |④kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./04，kerasmodel_tensorboard_demo.ipynb)   |  |
 |⑤kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+
+
+
+### 4, Advanced Examples 
+
+In some using cases, because of the differences  of the model input types, you need to rewrite the StepRunner of 
+KerasModel. Here are some examples.
+
+|example|model library  |notebook |
+|:----|:-----------|:-----------:|
+|ImageClassification——Resnet|  -  | [Resnet](./examples/ResNet.ipynb) |
+|ImageSegmentation——UNet|  - | [UNet](./examples/UNet.ipynb) |
+|ObjectDetection——SSD| -  | [SSD](./examples/SSD.ipynb) |
+|OCR——CRNN 🔥🔥| -  | [CRNN-CTC](./examples/CRNN_CTC.ipynb) |
+|ObjectDetection——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
+|ImageSegmentation——DeepLabV3++ 🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
+|InstanceSegmentation——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
+|ObjectDetection——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
+|TextClassification——BERT 🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**

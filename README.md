@@ -201,6 +201,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |语义分割——DeepLabV3++ 🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
 |实例分割——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
 |目标检测——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
+|文本分类——BERT 🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 
 
 ```python

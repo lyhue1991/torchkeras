@@ -115,16 +115,16 @@ dfhistory=model.fit(train_data=dl_train,
                     ckpt_path='checkpoint.pt',
                     monitor="val_acc",
                     mode="max",
-                    plot=True
+                    plot=True,
+                    
                    )
 
 ```
 
 在jupyter notebook中执行训练代码，你将看到类似下面的训练可视化图像和训练日志进度条。
 
-![](./data/train_fig.png)
+![](./data/torchkeras_plot.gif)
 
-![](./data/train_log.png)
 
 
 

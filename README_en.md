@@ -39,14 +39,12 @@ dfhistory=model.fit(train_data=dl_train,
                     ckpt_path='checkpoint.pt',
                     monitor="val_acc",
                     mode="max",
-                    plot = True
+                    plot=True
                    )
 
 ```
 
-![](./data/train_fig.png)
-
-![](./data/train_log.png)
+![](./data/torchkeras_plot.gif)
 
 
 

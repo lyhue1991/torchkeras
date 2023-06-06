@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import torch
 from accelerate import Accelerator
-from .utils import colorful
+from .utils import colorful,is_jupyter
 
 class StepRunner:
     def __init__(self, net, loss_fn, accelerator, stage = "train", metrics_dict = None, 
@@ -79,7 +79,7 @@ class EpochRunner:
                 if step<n:
                     loop.set_postfix(**step_log)
             
-                    if hasattr(self,'progress') and self.quiet and self.accelerator.is_local_main_process:
+                    if hasattr(self,'progress') and self.accelerator.is_local_main_process:
                         post_log = dict(**{'i':step,'n':n},**step_log)
                         self.progress.set_postfix(**post_log)
 
@@ -92,7 +92,7 @@ class EpochRunner:
                     epoch_log = dict(epoch_losses,**epoch_metrics)
                     loop.set_postfix(**epoch_log)
                     
-                    if hasattr(self,'progress') and self.quiet and self.accelerator.is_local_main_process:
+                    if hasattr(self,'progress') and self.accelerator.is_local_main_process:
                         post_log = dict(**{'i':step,'n':n},**epoch_log)
                         self.progress.set_postfix(**post_log)
                     
@@ -122,7 +122,8 @@ class KerasModel(torch.nn.Module):
         return self.net.forward(x)
     
     def fit(self, train_data, val_data=None, epochs=10, ckpt_path='checkpoint.pt',
-            patience=5, monitor="val_loss", mode="min", callbacks=None, plot=True, wandb=False, quiet=False, 
+            patience=5, monitor="val_loss", mode="min", callbacks=None, 
+            plot=True, wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
         
         self.__dict__.update(locals())
@@ -142,7 +143,6 @@ class KerasModel(torch.nn.Module):
         callbacks = callbacks if callbacks is not None else []
         
         if bool(plot)!=False:
-            from .utils import is_jupyter
             if is_jupyter():
                 from .kerascallbacks import VisMetric,VisProgress
                 callbacks = [VisMetric(),VisProgress()]+callbacks
@@ -159,8 +159,16 @@ class KerasModel(torch.nn.Module):
                 callback_obj.on_fit_start(model = self)
         
         start_epoch = 1 if self.from_scratch else 0
+        
+        if quiet is None:
+            if is_jupyter():
+                quiet = True
+            else:
+                quiet = False
+        
         quiet_fn = (lambda epoch:quiet) if isinstance(quiet,bool) else (
             (lambda epoch:epoch>quiet) if isinstance(quiet,int) else quiet)
+        
             
         for epoch in range(start_epoch,epochs+1):
             should_quiet = quiet_fn(epoch)

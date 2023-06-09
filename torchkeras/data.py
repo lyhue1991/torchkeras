@@ -101,10 +101,10 @@ def download_github_file(url,save_name=None):
 
 
 def download_baidu_pictures(keyword,needed_pics_num=100,save_dir=None):
-    spider = _BaiduPictures(keyword,needed_pics_num,save_dir)
+    spider = BaiduPictures(keyword,needed_pics_num,save_dir)
     spider.run()
      
-class _BaiduPictures:
+class BaiduPictures:
     def __init__(self,keyword,needed_pics_num=100,save_dir=None):
         from fake_useragent import UserAgent 
         
@@ -169,3 +169,66 @@ class _BaiduPictures:
             time.sleep(1.0) 
         loop.close()
         print('saved {} pictures in dir {}'.format(cnt, self.save_dir),file = sys.stderr)
+        
+        
+class ImageCleaner:
+    def __init__(self,img_files, work_dir = 'ImageCleaner'):
+        
+        # img_files can be: 1, a folder; 2, img_path list; 3, folder list; 
+        super().__init__()
+        import fastdup
+        self.img_files = img_files
+        self.fd = fastdup.create(work_dir=work_dir)
+        
+    def run_summary(self, duplicate_similirity =0.99, outlier_percentile=0.02):
+        self.fd.run(input_dir=self.img_files, cc_threshold=duplicate_similirity,
+                    outlier_percentile=outlier_percentile, overwrite=True)
+        return self.fd.summary() 
+    
+    def get_stats(self):
+        return self.fd.img_stats() 
+    
+    def get_duplicates(self,):
+        df = self.fd.connected_components()[0]
+        
+        dfclusters  = df[['component_id','filename','mean_distance',
+           'index']].groupby('component_id').agg({'filename':lambda x:list(x),
+            'mean_distance':np.mean,'index':'count'})
+        
+        dfcluster = dfclusters.reset_index(drop=False)
+        dfcluster.columns = ['component_id','files','mean_distance','len']
+        dfcluster.index = range(len(dfcluster))
+        
+        return dfcluster 
+    
+    def get_outliers(self):
+        return self.fd.outliers() 
+    
+    def delete_duplicates(self,):
+        dfcluster = self.get_duplicates()
+        for files in tqdm(dfcluster['files']):
+            for file in files[1:]:
+                os.remove(file)
+    
+    def delete_outliers(self,):
+        dfoutlier = self.fd.outliers()
+        for file in tqdm(dfoutlier['filename_outlier']):
+            os.remove(file)
+            
+    def vis_duplicates(self):
+        self.fd.vis.duplicates_gallery()
+            
+    def vis_outliers(self,):
+        self.fd.vis.outliers_gallery()
+    
+    def vis_bright(self):
+        self.fd.vis.stats_gallery('bright')
+        
+    def vis_dark(self):
+        self.fd.vis.stats_gallery('dark')
+        
+    def vis_blur(self):
+        self.fd.vis.stats_gallery('blur')
+    
+    def vis_clusters(self):
+        self.fd.vis.component_gallery() 

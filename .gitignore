@@ -19,3 +19,5 @@ output_dir
 wandb
 *.pt
 debug.ipynb
+cats
+ImageCleaner

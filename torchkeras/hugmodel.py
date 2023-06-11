@@ -287,4 +287,3 @@ class VisCallback(TrainerCallback):
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
         self.graph_out.update(self.graph_ax.figure);
-    

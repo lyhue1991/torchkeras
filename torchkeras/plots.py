@@ -75,6 +75,16 @@ def plot_score_distribution(labels,scores):
     )
     return fig
 
+def vis_dataframe(df, img_col='img', 
+                  img_width=100,
+                  img_height=100):
+    
+    from IPython.display import HTML
+    dfshow = df.copy()
+    dfshow[img_col] = [f'<img src="{x}"  width="{img_width}" height="{img_height}" />' 
+                       for x in df[img_col]]
+    return HTML(dfshow.to_html().replace('&lt;img','<img').replace('/&gt;','/>'))
+
 
 class _Colors:
     def __init__(self):

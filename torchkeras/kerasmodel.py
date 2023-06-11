@@ -23,12 +23,15 @@ class StepRunner:
         features,labels = batch 
         
         #loss
-        preds = self.net(features)
-        loss = self.loss_fn(preds,labels)
+        with self.accelerator.autocast():
+            preds = self.net(features)
+            loss = self.loss_fn(preds,labels)
 
         #backward()
         if self.optimizer is not None and self.stage=="train":
             self.accelerator.backward(loss)
+            if self.accelerator.sync_gradients:
+                self.accelerator.clip_grad_norm_(self.net.parameters(), 1.0)
             self.optimizer.step()
             if self.lr_scheduler is not None:
                 self.lr_scheduler.step()
@@ -38,10 +41,10 @@ class StepRunner:
         all_labels = self.accelerator.gather(labels)
         all_loss = self.accelerator.gather(loss).sum()
         
-        #losses
+        #losses (plain metrics)
         step_losses = {self.stage+"_loss":all_loss.item()}
         
-        #metrics
+        #metrics (state metrics)
         step_metrics = {self.stage+"_"+name:metric_fn(all_preds, all_labels).item() 
                         for name,metric_fn in self.metrics_dict.items()}
         
@@ -152,7 +155,7 @@ class KerasModel(torch.nn.Module):
             project = wandb if isinstance(wandb,str) else 'torchkeras'
             callbacks.append(WandbCallback(project=project))
             
-        self.callbacks = self.accelerator.prepare(callbacks)
+        self.callbacks = callbacks
         
         if self.accelerator.is_local_main_process:
             for callback_obj in self.callbacks:

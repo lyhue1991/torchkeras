@@ -245,9 +245,10 @@ class KerasModel(torch.nn.Module):
             dfhistory = pd.DataFrame(self.history)
             for callback_obj in self.callbacks:
                 callback_obj.on_fit_end(model = self)
-        
+            
             self.net = self.accelerator.unwrap_model(self.net)
-            self.net.load_state_dict(torch.load(ckpt_path))
+            self.net.cpu()
+            self.load_ckpt(ckpt_path)
             return dfhistory
     
     @torch.no_grad()

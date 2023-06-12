@@ -219,9 +219,9 @@ class KerasModel(torch.nn.Module):
                 for name, metric in val_metrics.items():
                     self.history[name] = self.history.get(name, []) + [metric]
                 
-                if self.accelerator.is_local_main_process:
-                    for callback_obj in self.callbacks:
-                        callback_obj.on_validation_epoch_end(model = self)
+            if self.accelerator.is_local_main_process:
+                for callback_obj in self.callbacks:
+                    callback_obj.on_validation_epoch_end(model = self)
 
             # 3，early-stopping -------------------------------------------------
             self.accelerator.wait_for_everyone()

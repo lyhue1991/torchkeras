@@ -122,11 +122,7 @@ class WandbCallback:
             arti_model = self.wb.Artifact('checkpoint', type='model')
             arti_model.add_file(model.ckpt_path)
             self.wb.log_artifact(arti_model)
-                 
-        #plotly metrics
-        metrics = [x.replace('train_','').replace('val_','') for x in dfhistory.columns if 'train_' in x] 
-        metric_fig = {m+'_curve':plot_metric(dfhistory,m) for m in metrics}
-        self.wb.log(metric_fig)
+
         run_dir = self.wb.run.dir
         self.wb.finish()
 

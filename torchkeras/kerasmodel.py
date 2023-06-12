@@ -155,7 +155,7 @@ class KerasModel(torch.nn.Module):
             project = wandb if isinstance(wandb,str) else 'torchkeras'
             callbacks.append(WandbCallback(project=project))
             
-        self.callbacks = callbacks
+        self.callbacks = [self.accelerator.prepare(x) for x in callbacks]
         
         if self.accelerator.is_local_main_process:
             for callback_obj in self.callbacks:

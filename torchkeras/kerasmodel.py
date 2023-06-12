@@ -274,4 +274,3 @@ class KerasModel(torch.nn.Module):
         from accelerate import notebook_launcher
         notebook_launcher(self.fit, args, num_processes=num_processes)
         
-        return pd.DataFrame(self.history) 

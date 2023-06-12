@@ -261,3 +261,17 @@ class KerasModel(torch.nn.Module):
         val_epoch_runner = self.EpochRunner(val_step_runner,quiet=quiet)
         val_metrics = val_epoch_runner(val_data)
         return val_metrics
+    
+    def fit_ddp(self,num_processes,train_data,
+            val_data=None, epochs=10, ckpt_path='checkpoint.pt',
+            patience=5, monitor="val_loss", mode="min", callbacks=None, 
+            plot=True, wandb=False, quiet=None, 
+            mixed_precision='no', cpu=False, gradient_accumulation_steps=1
+           ):
+        args = (train_data,val_data,epochs,ckpt_path,patience,monitor,mode,
+            callbacks,plot,wandb,quiet,mixed_precision,cpu,gradient_accumulation_steps)
+    
+        from accelerate import notebook_launcher
+        notebook_launcher(self.fit, args, num_processes=num_processes)
+        
+        return pd.DataFrame(self.history) 

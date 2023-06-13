@@ -8,12 +8,12 @@ from accelerate import Accelerator
 from .utils import colorful,is_jupyter
 
 class StepRunner:
-    def __init__(self, net, loss_fn, accelerator, stage = "train", metrics_dict = None, 
+    def __init__(self, net, loss_fn, accelerator=None, stage = "train", metrics_dict = None, 
                  optimizer = None, lr_scheduler = None
                  ):
         self.net,self.loss_fn,self.metrics_dict,self.stage = net,loss_fn,metrics_dict,stage
         self.optimizer,self.lr_scheduler = optimizer,lr_scheduler
-        self.accelerator = accelerator
+        self.accelerator = accelerator if accelerator is not None else Accelerator() 
         if self.stage=='train':
             self.net.train() 
         else:
@@ -37,14 +37,14 @@ class StepRunner:
                 self.lr_scheduler.step()
             self.optimizer.zero_grad()
             
+        all_loss = self.accelerator.gather(loss).sum()
         all_preds = self.accelerator.gather(preds)
         all_labels = self.accelerator.gather(labels)
-        all_loss = self.accelerator.gather(loss).sum()
         
-        #losses (plain metrics)
+        #losses (or plain metrics that can be averaged)
         step_losses = {self.stage+"_loss":all_loss.item()}
         
-        #metrics (state metrics)
+        #metrics (stateful metrics)
         step_metrics = {self.stage+"_"+name:metric_fn(all_preds, all_labels).item() 
                         for name,metric_fn in self.metrics_dict.items()}
         
@@ -86,7 +86,6 @@ class EpochRunner:
                         post_log = dict(**{'i':step,'n':n},**step_log)
                         self.progress.set_postfix(**post_log)
 
-                        
                 elif step==n:
                     epoch_metrics = step_metrics
                     epoch_metrics.update({self.stage+"_"+name:metric_fn.compute().item() 
@@ -100,7 +99,7 @@ class EpochRunner:
                         self.progress.set_postfix(**post_log)
                     
                     for name,metric_fn in self.steprunner.metrics_dict.items():
-                        metric_fn.reset()
+                        metric_fn.reset()  
                 else:
                     break
         return epoch_log
@@ -113,7 +112,7 @@ class KerasModel(torch.nn.Module):
         super().__init__()
         self.net,self.loss_fn,self.metrics_dict = net, loss_fn, torch.nn.ModuleDict(metrics_dict) 
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(
-            self.net.parameters(), lr=1e-3)
+            self.net.parameters(), lr=3e-4)
         self.lr_scheduler = lr_scheduler
         self.from_scratch = True
         
@@ -133,7 +132,7 @@ class KerasModel(torch.nn.Module):
         self.accelerator = Accelerator(mixed_precision=mixed_precision,cpu=cpu,
             gradient_accumulation_steps=gradient_accumulation_steps)
         device = str(self.accelerator.device)
-        device_type = '🐌'  if 'cpu' in device else '⚡️'
+        device_type = '🐌'  if 'cpu' in device else ('⚡️' if 'cuda' in device else '🚀')
         self.accelerator.print(
             colorful("<<<<<< "+device_type +" "+ device +" is used >>>>>>"))
     
@@ -141,6 +140,10 @@ class KerasModel(torch.nn.Module):
             self.net,self.loss_fn,self.metrics_dict,self.optimizer,self.lr_scheduler)
         
         train_dataloader,val_dataloader = self.accelerator.prepare(train_data,val_data)
+        train_dataloader.size = train_data.size if hasattr(train_data,'size') else len(train_data)
+        if val_data:
+            val_dataloader.size = val_data.size if hasattr(val_data,'size') else len(val_data)
+        
         
         self.history = {}
         callbacks = callbacks if callbacks is not None else []
@@ -158,9 +161,8 @@ class KerasModel(torch.nn.Module):
         self.callbacks = [self.accelerator.prepare(x) for x in callbacks]
         
         if self.accelerator.is_local_main_process:
-            for callback_obj in self.callbacks:
-                callback_obj.on_fit_start(model = self)
-        
+            [cb.on_fit_start(model = self) for cb in self.callbacks if hasattr(cb,'on_fit_start')]
+                
         start_epoch = 1 if self.from_scratch else 0
         
         if quiet is None:
@@ -200,9 +202,9 @@ class KerasModel(torch.nn.Module):
                 self.history[name] = self.history.get(name, []) + [metric]
 
             if self.accelerator.is_local_main_process:
-                for callback_obj in self.callbacks:
-                    callback_obj.on_train_epoch_end(model = self)
-
+                [cb.on_train_epoch_end(model = self) for cb in self.callbacks 
+                 if hasattr(cb,'on_train_epoch_end')]
+                
             # 2，validate -------------------------------------------------
             if val_dataloader is not None:
                 val_step_runner = self.StepRunner(
@@ -220,8 +222,8 @@ class KerasModel(torch.nn.Module):
                     self.history[name] = self.history.get(name, []) + [metric]
                 
             if self.accelerator.is_local_main_process:
-                for callback_obj in self.callbacks:
-                    callback_obj.on_validation_epoch_end(model = self)
+                [cb.on_validation_epoch_end(model = self) for cb in self.callbacks 
+                 if hasattr(cb,'on_validation_epoch_end')]
 
             # 3，early-stopping -------------------------------------------------
             self.accelerator.wait_for_everyone()
@@ -243,9 +245,8 @@ class KerasModel(torch.nn.Module):
                 
         if self.accelerator.is_local_main_process:   
             dfhistory = pd.DataFrame(self.history)
-            for callback_obj in self.callbacks:
-                callback_obj.on_fit_end(model = self)
-            
+            [cb.on_fit_end(model = self) for cb in self.callbacks 
+                 if hasattr(cb,'on_fit_end')]
             self.net = self.accelerator.unwrap_model(self.net)
             self.net.cpu()
             self.load_ckpt(ckpt_path)

@@ -5,7 +5,6 @@ from copy import deepcopy
 import numpy as np 
 import pandas as pd 
 from argparse import Namespace 
-from .plots import plot_metric
 
 class TensorBoardCallback:
     def __init__(self, save_dir= "runs", model_name="model", 
@@ -210,7 +209,7 @@ class VisMetric:
 
         if self.metric in dfhistory.columns:
             metric_values = dfhistory[self.metric]
-            self.graph_ax.plot(epochs, metric_values,'go-', label = self.metric)
+            self.graph_ax.plot(epochs, metric_values,'ro-', label = self.metric)
 
         self.graph_ax.set_xlabel("epoch")
         self.graph_ax.set_ylabel(self.metric)  

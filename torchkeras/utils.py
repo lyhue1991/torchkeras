@@ -23,7 +23,14 @@ def seed_everything(seed=42):
     torch.cuda.manual_seed_all(seed)
     return seed
 
-
+def delete_object(obj):
+    import gc
+    obj = None
+    gc.collect()
+    del obj
+    with torch.no_grad():
+        torch.cuda.empty_cache()
+        
 def colorful(obj,color="red", display_type="plain"):
     # 彩色输出格式：
     # 设置颜色开始 ：\033[显示方式;前景色;背景色m

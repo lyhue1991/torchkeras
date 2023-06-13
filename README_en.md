@@ -115,7 +115,7 @@ KerasModel. Here are some examples.
 |InstanceSegmentation——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
 |ObjectDetection——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
 |TextClassification——BERT 🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
-
+|ImageClassification——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 

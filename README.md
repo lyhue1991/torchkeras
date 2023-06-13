@@ -203,6 +203,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |实例分割——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
 |目标检测——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
 |文本分类——BERT 🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
+|图片分类——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 
 
 ```python

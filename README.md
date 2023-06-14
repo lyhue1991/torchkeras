@@ -165,7 +165,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |:----|:-------------------------|:-----------:|
 |①基础范例 🔥🔥|  [**basic example**](./01，kerasmodel_example.ipynb)  |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/kerasmodel-example"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |②wandb可视化 🔥🔥🔥|[**wandb demo**](./02，kerasmodel_wandb_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/kerasmodel-wandb-example"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-|③wandb自动化调参🔥🔥🔥|[**wandb sweep demo**](./03，kerasmodel_tuning_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-loves-wandb-sweep"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|③wandb自动化调参🔥🔥|[**wandb sweep demo**](./03，kerasmodel_tuning_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-loves-wandb-sweep"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |④tensorboard可视化| [**tensorboard example**](./04，kerasmodel_tensorboard_demo.ipynb)   |  |
 |⑤ddp/tpu训练范例| [**ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 
@@ -175,19 +175,99 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 ## 6，进阶范例 🔥🔥 
 
-下面的范例为torchkeras的进阶使用范例，由于输入数据结构的差异，这些范例有些需要对torchkeras的核心模块StepRunner进行修改。
+在炼丹实践中，遇到的数据集结构或者训练推理逻辑往往会千差万别。
 
-这种修改实际上是非常简单的，保持每个模块的输出与原始实现格式一致就行，中间处理逻辑根据需要灵活调整。
+例如我们可能会遇到多输入多输出结构，或者希望在训练过程中计算并打印一些特定的指标等等。
 
-这里的范例包括了使用torchkeras对一些非常常用的库中的模型进行训练的例子。
+这时候炼丹师可能会倾向于使用最纯粹的pytorch编写自己的训练循环。
+
+实际上，torchkeras提供了极致的灵活性来让炼丹师掌控训练过程的每个细节。
+
+从这个意义上说，torchkeras更像是一个训练代码模版。
+
+这个模版由低到高由StepRunner，EpochRunner 和 KerasModel 三个类组成。
+
+在绝大多数场景下，用户只需要在StepRunner上稍作修改并覆盖掉，就可以实现自己想要的训练推理逻辑。
+
+就像下面这段代码范例，这是一个多输入的例子，并且嵌入了特定的accuracy计算逻辑。
+
+这段代码的完整范例，见examples下的CRNN_CTC验证码识别。
+
+```python
+
+import torch.nn.functional as F 
+from torchkeras import KerasModel
+from accelerate import Accelerator
+
+#我们覆盖KerasModel的StepRunner以实现自定义训练逻辑。
+#注意这里把acc指标的结果写在了step_loss中以便和loss一样在Epoch上求平均，这是一个非常灵活而且有用的写法。
+
+class StepRunner:
+    def __init__(self, net, loss_fn, accelerator=None, stage = "train", metrics_dict = None, 
+                 optimizer = None, lr_scheduler = None
+                 ):
+        self.net,self.loss_fn,self.metrics_dict,self.stage = net,loss_fn,metrics_dict,stage
+        self.optimizer,self.lr_scheduler = optimizer,lr_scheduler
+        self.accelerator = accelerator if accelerator is not None else Accelerator()
+        if self.stage=='train':
+            self.net.train() 
+        else:
+            self.net.eval()
+    
+    def __call__(self, batch):
+        
+        images, targets, input_lengths, target_lengths = batch
+        
+        #loss
+        preds = self.net(images)
+        preds_log_softmax = F.log_softmax(preds, dim=-1)
+        loss = F.ctc_loss(preds_log_softmax, targets, input_lengths, target_lengths)
+        acc = eval_acc(targets,preds)
+            
+
+        #backward()
+        if self.optimizer is not None and self.stage=="train":
+            self.accelerator.backward(loss)
+            self.optimizer.step()
+            if self.lr_scheduler is not None:
+                self.lr_scheduler.step()
+            self.optimizer.zero_grad()
+            
+            
+        all_loss = self.accelerator.gather(loss).sum()
+        
+        #losses （or plain metric）
+        step_losses = {self.stage+"_loss":
+                       all_loss.item(),
+                       self.stage+'_acc':acc}
+        
+        #metrics (stateful metric)
+        step_metrics = {}
+        if self.stage=="train":
+            if self.optimizer is not None:
+                step_metrics['lr'] = self.optimizer.state_dict()['param_groups'][0]['lr']
+            else:
+                step_metrics['lr'] = 0.0
+        return step_losses,step_metrics
+    
+    
+KerasModel.StepRunner = StepRunner 
+
+```
+
+可以看到，这种修改实际上是非常简单并且灵活的，保持每个模块的输出与原始实现格式一致就行，中间处理逻辑根据需要灵活调整。
+
+同理，用户也可以修改并覆盖EpochRunner来实现自己的特定逻辑，但我一般很少遇到有这样需求的场景。
+
+examples目录下的范例库包括了使用torchkeras对一些非常常用的库中的模型进行训练的例子。
 
 例如：
 
 * torchvision
 * transformers
 * segmentation_models_pytorch
-
-更多范例参考项目下的examples目录。
+* ultralytics
+* timm
 
 > 如果你想掌握一个东西，那么就去使用它，如果你想真正理解一个东西，那么尝试去改变它。 ———— 爱因斯坦
 

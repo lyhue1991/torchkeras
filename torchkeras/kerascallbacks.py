@@ -225,10 +225,11 @@ class VisMetric:
         
 
 class VisDisplay:
-    def __init__(self,display_fn,model=None,init_display=True):
+    def __init__(self,display_fn,model=None,init_display=True,dis_period=1):
         from ipywidgets import Output 
         self.display_fn = display_fn
         self.init_display = init_display
+        self.dis_period = dis_period
         self.out = Output()
         
         if self.init_display:
@@ -244,9 +245,10 @@ class VisDisplay:
         pass
     
     def on_validation_epoch_end(self, model:"KerasModel"):
-        self.out.clear_output()
-        with self.out:
-            self.display_fn(model)
+        if len(model.history['epoch'])%self.dis_period==0:
+            self.out.clear_output()
+            with self.out:
+                self.display_fn(model)
            
     def on_fit_end(self,  model:"KerasModel"):
         pass

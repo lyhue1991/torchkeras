@@ -200,7 +200,7 @@ from torchkeras import KerasModel
 from accelerate import Accelerator
 
 #我们覆盖KerasModel的StepRunner以实现自定义训练逻辑。
-#注意这里把acc指标的结果写在了step_loss中以便和loss一样在Epoch上求平均，这是一个非常灵活而且有用的写法。
+#注意这里把acc指标的结果写在了step_losses中以便和loss一样在Epoch上求平均，这是一个非常灵活而且有用的写法。
 
 class StepRunner:
     def __init__(self, net, loss_fn, accelerator=None, stage = "train", metrics_dict = None, 
@@ -236,9 +236,8 @@ class StepRunner:
             
         all_loss = self.accelerator.gather(loss).sum()
         
-        #losses （or plain metric）
-        step_losses = {self.stage+"_loss":
-                       all_loss.item(),
+        #losses （or plain metric that can be averaged）
+        step_losses = {self.stage+"_loss":all_loss.item(),
                        self.stage+'_acc':acc}
         
         #metrics (stateful metric)
@@ -250,7 +249,7 @@ class StepRunner:
                 step_metrics['lr'] = 0.0
         return step_losses,step_metrics
     
-    
+#覆盖掉默认StepRunner 
 KerasModel.StepRunner = StepRunner 
 
 ```
@@ -278,6 +277,8 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 |语义分割——UNet|  - | [UNet](./examples/UNet.ipynb) |
 |目标检测——SSD| -  | [SSD](./examples/SSD.ipynb) |
 |文字识别——CRNN 🔥🔥| -  | [CRNN-CTC](./examples/CRNN_CTC.ipynb) |
+|强化学习——Q-Learning|- |[Q-learning](./examples/Q-learning.ipynb)|
+|强化学习——DQN|- |[DQN](./examples/DQN.ipynb)|
 |目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
 |语义分割——DeepLabV3++ 🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
 |实例分割——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |

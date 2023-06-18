@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 import torch
 from accelerate import Accelerator
-from .utils import colorful,is_jupyter
 
 class StepRunner:
     def __init__(self, net, loss_fn, accelerator=None, stage = "train", metrics_dict = None, 
@@ -125,8 +124,10 @@ class KerasModel(torch.nn.Module):
     
     def fit(self, train_data, val_data=None, epochs=10, ckpt_path='checkpoint.pt',
             patience=5, monitor="val_loss", mode="min", callbacks=None, 
-            plot=True, wandb=False, quiet=None, 
+            plot=True,  wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
+        
+        from torchkeras.utils import colorful,is_jupyter
         
         self.__dict__.update(locals())
         self.accelerator = Accelerator(mixed_precision=mixed_precision,cpu=cpu,
@@ -148,13 +149,12 @@ class KerasModel(torch.nn.Module):
         self.history = {}
         callbacks = callbacks if callbacks is not None else []
         
-        if bool(plot)!=False:
-            if is_jupyter():
-                from .kerascallbacks import VisMetric,VisProgress
-                callbacks = [VisMetric(),VisProgress()]+callbacks
+        if bool(plot) and is_jupyter():
+            from torchkeras.kerascallbacks import VisMetric,VisProgress
+            callbacks = [VisMetric(),VisProgress()]+callbacks
                 
         if wandb!=False:
-            from .kerascallbacks import WandbCallback
+            from torchkeras.kerascallbacks import WandbCallback
             project = wandb if isinstance(wandb,str) else 'torchkeras'
             callbacks.append(WandbCallback(project=project))
             
@@ -272,7 +272,7 @@ class KerasModel(torch.nn.Module):
            ):
         args = (train_data,val_data,epochs,ckpt_path,patience,monitor,mode,
             callbacks,plot,wandb,quiet,mixed_precision,cpu,gradient_accumulation_steps)
-    
+        
         from accelerate import notebook_launcher
         notebook_launcher(self.fit, args, num_processes=num_processes)
         

@@ -110,11 +110,13 @@ KerasModel. Here are some examples.
 |ImageSegmentation——UNet|  - | [UNet](./examples/UNet.ipynb) |
 |ObjectDetection——SSD| -  | [SSD](./examples/SSD.ipynb) |
 |OCR——CRNN 🔥🔥| -  | [CRNN-CTC](./examples/CRNN_CTC.ipynb) |
+|ReinforcementLearning——Q-Learning🔥🔥|- |[Q-learning](./examples/Q-learning.ipynb)|
+|ReinforcementLearning——DQN|- |[DQN](./examples/DQN.ipynb)|
 |ObjectDetection——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
-|ImageSegmentation——DeepLabV3++ 🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
-|InstanceSegmentation——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
+|ImageSegmentation——DeepLabV3++ | segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
+|InstanceSegmentation——MaskRCNN | detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
 |ObjectDetection——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
-|TextClassification——BERT 🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
+|TextClassification——BERT 🔥🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |ImageClassification——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**

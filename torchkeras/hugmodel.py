@@ -67,7 +67,7 @@ class HugModel(torch.nn.Module):
     def get_collate_fn(self, default_fn):
         def collate_fn(examples):
             batch = default_fn(examples)
-            if isinstance(batch,dict):
+            if hasattr(batch,'keys') and hasattr(batch,'pop'):
                 return batch
             elif isinstance(batch, (list,tuple)):
                 if len(batch)==2:

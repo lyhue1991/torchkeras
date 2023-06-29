@@ -115,6 +115,10 @@ class KerasModel(torch.nn.Module):
         self.lr_scheduler = lr_scheduler
         self.from_scratch = True
         
+    def save_ckpt(self, ckpt_path='checkpoint.pt'):
+        net_dict = self.accelerator.get_state_dict(self.net)
+        self.accelerator.save(net_dict,ckpt_path)
+      
     def load_ckpt(self, ckpt_path='checkpoint.pt'):
         self.net.load_state_dict(torch.load(ckpt_path))
         self.from_scratch = False
@@ -231,8 +235,7 @@ class KerasModel(torch.nn.Module):
             best_score_idx = np.argmax(arr_scores) if mode=="max" else np.argmin(arr_scores)
 
             if best_score_idx==len(arr_scores)-1:
-                net_dict = self.accelerator.get_state_dict(self.net)
-                self.accelerator.save(net_dict,ckpt_path)
+                self.save_ckpt(ckpt_path)
                 if not should_quiet:
                     self.accelerator.print(colorful("<<<<<< reach best {0} : {1} >>>>>>".format(
                         monitor,arr_scores[best_score_idx])))

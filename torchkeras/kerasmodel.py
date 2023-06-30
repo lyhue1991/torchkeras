@@ -12,7 +12,7 @@ class StepRunner:
                  ):
         self.net,self.loss_fn,self.metrics_dict,self.stage = net,loss_fn,metrics_dict,stage
         self.optimizer,self.lr_scheduler = optimizer,lr_scheduler
-        self.accelerator = accelerator if accelerator is not None else Accelerator() 
+        self.accelerator = accelerator
         if self.stage=='train':
             self.net.train() 
         else:
@@ -71,6 +71,7 @@ class EpochRunner:
                     ncols=100
                    )
         epoch_losses = {}
+        
         for step, batch in loop: 
             with self.accelerator.accumulate(self.net):
                 step_losses,step_metrics = self.steprunner(batch)   
@@ -115,12 +116,13 @@ class KerasModel(torch.nn.Module):
         self.lr_scheduler = lr_scheduler
         self.from_scratch = True
         
-    def save_ckpt(self, ckpt_path='checkpoint.pt'):
-        net_dict = self.accelerator.get_state_dict(self.net)
-        self.accelerator.save(net_dict,ckpt_path)
+    def save_ckpt(self, ckpt_path='checkpoint.pt', accelerator= None):
+        accelerator = accelerator if accelerator is not None else self.accelerator
+        net_dict = accelerator.get_state_dict(self.net)
+        accelerator.save(net_dict,ckpt_path)
       
     def load_ckpt(self, ckpt_path='checkpoint.pt'):
-        self.net.load_state_dict(torch.load(ckpt_path))
+        self.net.load_state_dict(torch.load(ckpt_path,map_location='cpu'))
         self.from_scratch = False
 
     def forward(self, x):
@@ -130,7 +132,6 @@ class KerasModel(torch.nn.Module):
             patience=5, monitor="val_loss", mode="min", callbacks=None, 
             plot=True,  wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
-        
         from torchkeras.utils import colorful,is_jupyter
         
         self.__dict__.update(locals())
@@ -234,8 +235,8 @@ class KerasModel(torch.nn.Module):
             arr_scores = self.history[monitor]
             best_score_idx = np.argmax(arr_scores) if mode=="max" else np.argmin(arr_scores)
 
-            if best_score_idx==len(arr_scores)-1:
-                self.save_ckpt(ckpt_path)
+            if best_score_idx==len(arr_scores)-1 and self.accelerator.is_local_main_process:
+                self.save_ckpt(ckpt_path,accelerator = self.accelerator)
                 if not should_quiet:
                     self.accelerator.print(colorful("<<<<<< reach best {0} : {1} >>>>>>".format(
                         monitor,arr_scores[best_score_idx])))
@@ -253,18 +254,22 @@ class KerasModel(torch.nn.Module):
             self.net = self.accelerator.unwrap_model(self.net)
             self.net.cpu()
             self.load_ckpt(ckpt_path)
+            torch.save(dfhistory,'dfhistory.pt')
             return dfhistory
-    
-    @torch.no_grad()
+        
     def evaluate(self, val_data, quiet=False):
         accelerator = Accelerator() if not hasattr(self,'accelerator') else self.accelerator
-        self.net,self.loss_fn,self.metrics_dict = accelerator.prepare(self.net,self.loss_fn,self.metrics_dict)
+        self.net,self.loss_fn,self.metrics_dict = accelerator.prepare(
+            self.net,self.loss_fn,self.metrics_dict)
         val_data = accelerator.prepare(val_data)
         val_step_runner = self.StepRunner(net = self.net,stage="val",
                     loss_fn = self.loss_fn,metrics_dict=deepcopy(self.metrics_dict),
                     accelerator = accelerator)
         val_epoch_runner = self.EpochRunner(val_step_runner,quiet=quiet)
-        val_metrics = val_epoch_runner(val_data)
+        with torch.no_grad():
+            val_metrics = val_epoch_runner(val_data)
+        if accelerator.is_local_main_process:
+            torch.save(val_metrics,'val_metrics.pt')
         return val_metrics
     
     def fit_ddp(self,num_processes,train_data,
@@ -273,9 +278,29 @@ class KerasModel(torch.nn.Module):
             plot=True, wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1
            ):
+        from accelerate import notebook_launcher
+        train_size = train_data.size if hasattr(train_data,'size') else len(train_data)
+        train_data.size = train_size//num_processes
+        if val_data:
+            val_size = val_data.size if hasattr(val_data,'size') else len(val_data)
+            val_data.size = val_size//num_processes
+            
         args = (train_data,val_data,epochs,ckpt_path,patience,monitor,mode,
             callbacks,plot,wandb,quiet,mixed_precision,cpu,gradient_accumulation_steps)
-        
-        from accelerate import notebook_launcher
         notebook_launcher(self.fit, args, num_processes=num_processes)
+        dfhistory = torch.load('dfhistory.pt')
         
+        train_data.size = train_size 
+        if val_data:
+            val_data.size = val_size 
+        return dfhistory
+    
+    def evaluate_ddp(self, num_processes, val_data, quiet=False):
+        from accelerate import notebook_launcher
+        val_size = val_data.size if hasattr(val_data,'size') else len(val_data)
+        val_data.size = val_size//num_processes
+        args = (val_data,quiet)
+        notebook_launcher(self.evaluate, args, num_processes=num_processes)
+        val_metrics = torch.load('val_metrics.pt')
+        val_data.size = val_size
+        return val_metrics

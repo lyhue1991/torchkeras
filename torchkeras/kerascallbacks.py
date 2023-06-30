@@ -179,11 +179,16 @@ class VisMetric:
         title = self.get_title(model)
         self.update_graph(model, title = title)
         
-    def get_title(self,  model:'KerasModel'):
+    def get_best_score(self, model:'KerasModel'):
         dfhistory = pd.DataFrame(model.history)
         arr_scores = dfhistory[model.monitor]
         best_score = np.max(arr_scores) if model.mode=="max" else np.min(arr_scores)
-        title = f'best {model.monitor} = {best_score:.4f}'
+        best_epoch = dfhistory.loc[arr_scores==best_score,'epoch'].tolist()[0]
+        return (best_epoch, best_score)
+        
+    def get_title(self,  model:'KerasModel'):
+        best_epoch,best_score = self.get_best_score(model)
+        title = f'best {model.monitor} = {best_score:.4f} (@epoch {best_epoch})'
         return title
 
     def update_graph(self, model:'KerasModel', title=None, x_bounds=None, y_bounds=None):
@@ -205,11 +210,11 @@ class VisMetric:
         m2 = 'val_'+self.metric
         if m2 in dfhistory.columns:
             val_metrics = dfhistory[m2]
-            self.graph_ax.plot(epochs,val_metrics,'ro-',label =m2)
+            self.graph_ax.plot(epochs,val_metrics,'co-',label =m2)
 
         if self.metric in dfhistory.columns:
             metric_values = dfhistory[self.metric]
-            self.graph_ax.plot(epochs, metric_values,'ro-', label = self.metric)
+            self.graph_ax.plot(epochs, metric_values,'co-', label = self.metric)
 
         self.graph_ax.set_xlabel("epoch")
         self.graph_ax.set_ylabel(self.metric)  
@@ -217,6 +222,10 @@ class VisMetric:
              self.graph_ax.set_title(title)
         if m1 in dfhistory.columns or m2 in dfhistory.columns or self.metric in dfhistory.columns:
             self.graph_ax.legend(loc='best')
+            
+        if len(epochs)>0:
+            best_epoch, best_score = self.get_best_score(model)
+            self.graph_ax.plot(best_epoch,best_score,'r*',markersize=15)
 
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)

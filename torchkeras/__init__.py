@@ -1,4 +1,4 @@
-__version__="3.8.9"
+__version__="3.9.0"
 
 import sys
 from .kerasmodel import KerasModel

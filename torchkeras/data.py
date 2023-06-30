@@ -74,9 +74,9 @@ def merge_dataset_folders(from_folders, to_folder, rename_file=True):
 
 
 def get_example_image(img_name='park.jpg'):
-    'name can be bus.jpg / park.jpg / zidane.jpg'
+    'name can be park.jpg / zidane.jpg'
     img_path = str(path.parent/f"assets/{img_name}")
-    assert os.path.exists(img_path), 'img_name can only be bus.jpg / park.jpg / zidane.jpg'
+    assert os.path.exists(img_path), 'img_name can only be  park.jpg / zidane.jpg'
     return Image.open(img_path)
 
 def get_url_img(url):

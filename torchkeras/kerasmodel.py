@@ -116,19 +116,26 @@ class KerasModel(torch.nn.Module):
         self.lr_scheduler = lr_scheduler
         self.from_scratch = True
         
-    def save_ckpt(self, ckpt_path='checkpoint.pt', accelerator= None):
+    def save_ckpt(self, ckpt_path='checkpoint', accelerator= None):
         accelerator = accelerator if accelerator is not None else self.accelerator
-        net_dict = accelerator.get_state_dict(self.net)
-        accelerator.save(net_dict,ckpt_path)
+        if hasattr(self.net,'save_pretrained')
+            unwrap_net = accelerator.unwrap_model(self.net)
+            unwrap_net.save_pretrained(ckpt_path)
+        else:
+            net_dict = accelerator.get_state_dict(self.net)
+            accelerator.save(net_dict,ckpt_path)
       
-    def load_ckpt(self, ckpt_path='checkpoint.pt'):
-        self.net.load_state_dict(torch.load(ckpt_path,map_location='cpu'))
+    def load_ckpt(self, ckpt_path='checkpoint'):
+        if hasattr(self.net,'from_pretrained'):
+            self.net = self.net.from_pretrained(self.net,ckpt_path)
+        else:
+            self.net.load_state_dict(torch.load(ckpt_path,map_location='cpu'))
         self.from_scratch = False
 
     def forward(self, x):
         return self.net.forward(x)
     
-    def fit(self, train_data, val_data=None, epochs=10, ckpt_path='checkpoint.pt',
+    def fit(self, train_data, val_data=None, epochs=10, ckpt_path='checkpoint',
             patience=5, monitor="val_loss", mode="min", callbacks=None, 
             plot=True,  wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
@@ -273,7 +280,7 @@ class KerasModel(torch.nn.Module):
         return val_metrics
     
     def fit_ddp(self,num_processes,train_data,
-            val_data=None, epochs=10, ckpt_path='checkpoint.pt',
+            val_data=None, epochs=10, ckpt_path='checkpoint',
             patience=5, monitor="val_loss", mode="min", callbacks=None, 
             plot=True, wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1

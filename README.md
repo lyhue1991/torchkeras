@@ -285,6 +285,7 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 |目标检测——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
 |文本分类——BERT 🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |命名实体识别——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
+|LLM微调——ChatGLM2 🔥🔥🔥| transformers |  [ChatGLM2](./examples/ChatGLM2——transformers.ipynb) |
 |图片分类——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 
 

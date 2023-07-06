@@ -151,6 +151,7 @@ class VisProgress:
         dfhistory = pd.DataFrame(model.history)
         if dfhistory['epoch'].max()<model.epochs:
             self.progress.on_interrupt(msg='earlystopping')
+        self.progress.display=False
             
 class VisMetric:
     def __init__(self,figsize = (6,4)):

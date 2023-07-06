@@ -10,6 +10,8 @@ examples/datasets/
 examples/*.pt
 examples/wandb/
 torchkeras/ocr/__pycache__/
+torchkeras/chat/__pycache__/
+torchkeras/tools/__pycache__/
 examples/.ipynb_checkpoints
 examples/__pycache__/
 torchkeras/chatgpt/__pycache__/

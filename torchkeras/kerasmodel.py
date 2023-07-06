@@ -78,10 +78,10 @@ class EpochRunner:
                 step_log = dict(step_losses,**step_metrics)
                 for k,v in step_losses.items():
                     epoch_losses[k] = epoch_losses.get(k,0.0)+v
-
+                    
                 if step<n:
                     loop.set_postfix(**step_log)
-            
+                    
                     if hasattr(self,'progress') and self.accelerator.is_local_main_process:
                         post_log = dict(**{'i':step,'n':n},**step_log)
                         self.progress.set_postfix(**post_log)
@@ -93,6 +93,7 @@ class EpochRunner:
                     epoch_losses = {k:v/step for k,v in epoch_losses.items()}
                     epoch_log = dict(epoch_losses,**epoch_metrics)
                     loop.set_postfix(**epoch_log)
+            
                     
                     if hasattr(self,'progress') and self.accelerator.is_local_main_process:
                         post_log = dict(**{'i':step,'n':n},**epoch_log)
@@ -118,18 +119,11 @@ class KerasModel(torch.nn.Module):
         
     def save_ckpt(self, ckpt_path='checkpoint', accelerator= None):
         accelerator = accelerator if accelerator is not None else self.accelerator
-        if hasattr(self.net,'save_pretrained')
-            unwrap_net = accelerator.unwrap_model(self.net)
-            unwrap_net.save_pretrained(ckpt_path)
-        else:
-            net_dict = accelerator.get_state_dict(self.net)
-            accelerator.save(net_dict,ckpt_path)
+        net_dict = accelerator.get_state_dict(self.net)
+        accelerator.save(net_dict,ckpt_path)
       
     def load_ckpt(self, ckpt_path='checkpoint'):
-        if hasattr(self.net,'from_pretrained'):
-            self.net = self.net.from_pretrained(self.net,ckpt_path)
-        else:
-            self.net.load_state_dict(torch.load(ckpt_path,map_location='cpu'))
+        self.net.load_state_dict(torch.load(ckpt_path,map_location='cpu'))
         self.from_scratch = False
 
     def forward(self, x):

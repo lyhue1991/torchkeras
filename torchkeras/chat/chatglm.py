@@ -28,8 +28,9 @@ class ChatGLM(object):
 
     
     def __call__(self,query):
-        if len(self.history)>=self.max_chat_rounds+1:
-            self.history = [self.history[0]]+self.history[2:]
+        len_his = len(self.history)
+        if len_his>=self.max_chat_rounds+1:
+            self.history = self.history[len_his-self.max_chat_rounds:]
             
         response,self.history  = self.model.chat(self.tokenizer,
             query,self.history,self.max_length,self.num_beams,

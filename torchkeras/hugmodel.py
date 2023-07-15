@@ -1,11 +1,13 @@
 import torch
 from transformers import Trainer,TrainingArguments,EarlyStoppingCallback,TrainerCallback
+from transformers.modeling_utils import PreTrainedModel
+from transformers.utils import is_peft_available
 import numpy as np
 import pandas as pd 
 import os 
 import matplotlib.pyplot as plt 
-from .utils import is_jupyter
-    
+from torchkeras.utils import is_jupyter
+
 class HugModel(torch.nn.Module):
     def __init__(self, net=None, loss_fn=None, metrics_dict=None, 
                  label_names = None, feature_names = None):
@@ -51,7 +53,7 @@ class HugModel(torch.nn.Module):
             return out 
 
     
-    #==========================================================================================        
+    #========================================================================================== 
     #The codes below usually need not be changed... 
     #==========================================================================================
     
@@ -145,16 +147,17 @@ class HugModel(torch.nn.Module):
         )
         
         self.trainer.train()
+        
+        #save best ckpt
+        self.ckpt_path = os.path.join(output_dir,'best')
+        self.save_ckpt(self.ckpt_path)
                 
         if wandb:
-            ckpt_path = os.path.join(output_dir,'best.ckpt')
-            self.save_ckpt(ckpt_path)
             arti_model = wb.Artifact('checkpoint', type='model')
-            arti_model.add_file(ckpt_path)
+            arti_model.add_file(self.ckpt_path)
             wb.log_artifact(arti_model)
             wb.finish()
             
-        
     def evaluate(self,val_data,**kwargs):  
         dl_val = self.trainer.get_eval_dataloader(val_data.dataset)
         out = self.trainer.evaluation_loop(dl_val,
@@ -163,11 +166,25 @@ class HugModel(torch.nn.Module):
     
     
     def save_ckpt(self, ckpt_path):
-        torch.save(self.net.state_dict(),ckpt_path)
-        
+        supported_classes = [PreTrainedModel]
+        if is_peft_available():
+            from peft import PeftModel
+            supported_classes.append(PeftModel)
+        supported_classes = tuple(supported_classes)
+        if isinstance(self.net,supported_classes) and self.trainer is not None:
+            self.trainer.save_model(ckpt_path)
+        else:
+            torch.save(self.net.state_dict(),ckpt_path)
+     
     def load_ckpt(self, ckpt_path):
-        self.net.load_state_dict(torch.load(ckpt_path))
-    
+        if is_peft_available():
+            from peft import PeftModel
+            if isinstance(self.net, PeftModel):
+                self.net = self.net.from_pretrained(self.net.base_model.model,ckpt_path)
+        elif isinstance(self.net,PreTrainedModel):
+            self.net = self.net.from_pretrained(ckpt_path)
+        else:
+            self.net.load_state_dict(torch.load(ckpt_path))
     
     def debug(self):
         # if it raises some errors when fitting model,  these codes are useful to debug.
@@ -199,8 +216,6 @@ class HugModel(torch.nn.Module):
                  description = self.prefix,metric_key_prefix =self.prefix)
         print('metrics:',out.metrics)
 
-
-
 class VisCallback(TrainerCallback):
     def __init__(self, figsize=(6,4), update_freq=1, monitor=None):
         self.figsize = figsize
@@ -209,15 +224,14 @@ class VisCallback(TrainerCallback):
 
     def on_train_begin(self, args, state, control, **kwargs):
         metric = args.metric_for_best_model
+        self.greater_is_better = args.greater_is_better 
         self.prefix = 'val_' if self.monitor is None or self.monitor.startswith('val_') else 'eval_'
         self.metric = metric if self.monitor is None else self.monitor
         
         dfhistory = pd.DataFrame()
         x_bounds = [0, args.logging_steps*10]
-        title = f'best {self.metric} = ?'
         self.update_graph(dfhistory, self.metric.replace(self.prefix,''), 
                              x_bounds = x_bounds, 
-                             title=title, 
                              figsize = self.figsize)
         
     def on_evaluate(self, args, state, control, metrics, **kwargs):
@@ -226,21 +240,13 @@ class VisCallback(TrainerCallback):
         if n%self.update_freq==0:
             x_bounds = [dfhistory['step'].min(), 
                         10*args.logging_steps+(n//(args.logging_steps*10))*args.logging_steps*10]
-            arr_scores = dfhistory[self.metric]
-            best_score = np.max(arr_scores) if args.greater_is_better==True else np.min(arr_scores)
-
-            title = f'best {self.metric} = {best_score:.4f}'
             self.update_graph(dfhistory, self.metric.replace(self.prefix,''), 
-                              x_bounds = x_bounds, title = title, figsize = self.figsize)
+                              x_bounds = x_bounds, figsize = self.figsize)
             
     def on_train_end(self, args, state, control, **kwargs):
         dfhistory = self.get_history(state)
-        arr_scores = dfhistory[self.metric]
-        best_score = np.max(arr_scores) if args.greater_is_better==True else np.min(arr_scores)
-        title = f'best {self.metric} = {best_score:.4f}'
         self.update_graph(dfhistory, self.metric.replace(self.prefix,''), 
-                             title = title, figsize = self.figsize)
-        plt.close()
+                             figsize = self.figsize)
         
     def get_history(self,state):
         log_history = state.log_history  
@@ -253,9 +259,15 @@ class VisCallback(TrainerCallback):
         if self.prefix=='val_':
             dfhistory.columns = [x.replace('eval_','val_') for x in dfhistory.columns]
         return dfhistory
-        
+    
+    def get_best_score(self, dfhistory):
+        arr_scores = dfhistory[self.metric]
+        best_score = np.max(arr_scores) if self.greater_is_better==True else np.min(arr_scores)
+        best_step = dfhistory.loc[arr_scores==best_score,'step'].tolist()[0]
+        return (best_step, best_score)
+
     def update_graph(self, dfhistory, metric, x_bounds=None, 
-                     y_bounds=None, title = None, figsize=(6,4)):
+                     y_bounds=None, figsize=(6,4)):
         
         from IPython.display import display
         if not hasattr(self, 'graph_fig'):
@@ -268,22 +280,29 @@ class VisCallback(TrainerCallback):
         m1 = metric
         if  m1 in dfhistory.columns:
             train_metrics = dfhistory[m1]
-            self.graph_ax.plot(steps,train_metrics,'bo--',label= m1)
+            self.graph_ax.plot(steps,train_metrics,'bo--',label= m1,clip_on=False)
 
         m2 = self.prefix+metric
         if m2 in dfhistory.columns:
             val_metrics = dfhistory[m2]
-            self.graph_ax.plot(steps,val_metrics,'ro-',label =m2)
+            self.graph_ax.plot(steps,val_metrics,'co-',label =m2,clip_on=False)
 
         self.graph_ax.set_xlabel("step")
         self.graph_ax.set_ylabel(metric)  
 
-        if title:
-             self.graph_ax.set_title(title)
-
         if m1 in dfhistory.columns or m2 in dfhistory.columns or metric in dfhistory.columns:
             self.graph_ax.legend(loc='best')
-
+            
+        if len(steps)>0:
+            best_step, best_score = self.get_best_score(dfhistory)
+            self.graph_ax.plot(best_step,best_score,'r*',markersize=15,clip_on=False)
+            title = f'best {self.metric} = {best_score:.4f} (@step {best_step})'
+            self.graph_ax.set_title(title)
+        else:
+            title = f'best {self.metric} = ?'
+            self.graph_ax.set_title(title)
+            
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
         self.graph_out.update(self.graph_ax.figure);
+        plt.close();

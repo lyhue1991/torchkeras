@@ -206,16 +206,16 @@ class VisMetric:
         m1 = "train_"+self.metric
         if  m1 in dfhistory.columns:
             train_metrics = dfhistory[m1]
-            self.graph_ax.plot(epochs,train_metrics,'bo--',label= m1)
+            self.graph_ax.plot(epochs,train_metrics,'bo--',label= m1,clip_on=False)
 
         m2 = 'val_'+self.metric
         if m2 in dfhistory.columns:
             val_metrics = dfhistory[m2]
-            self.graph_ax.plot(epochs,val_metrics,'co-',label =m2)
+            self.graph_ax.plot(epochs,val_metrics,'co-',label =m2,clip_on=False)
 
         if self.metric in dfhistory.columns:
             metric_values = dfhistory[self.metric]
-            self.graph_ax.plot(epochs, metric_values,'co-', label = self.metric)
+            self.graph_ax.plot(epochs, metric_values,'co-', label = self.metric,clip_on=False)
 
         self.graph_ax.set_xlabel("epoch")
         self.graph_ax.set_ylabel(self.metric)  
@@ -226,7 +226,7 @@ class VisMetric:
             
         if len(epochs)>0:
             best_epoch, best_score = self.get_best_score(model)
-            self.graph_ax.plot(best_epoch,best_score,'r*',markersize=15)
+            self.graph_ax.plot(best_epoch,best_score,'r*',markersize=15,clip_on=False)
 
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)

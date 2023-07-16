@@ -106,22 +106,24 @@ KerasModel. Here are some examples.
 
 |example|model library  |notebook |
 |:----|:-----------|:-----------:|
+|ReinforcementLearning——Q-Learning🔥🔥|- |[Q-learning](./examples/Q-learning.ipynb)|
+|ReinforcementLearning——DQN|- |[DQN](./examples/DQN.ipynb)|
 |ImageClassification——Resnet|  -  | [Resnet](./examples/ResNet.ipynb) |
 |ImageSegmentation——UNet|  - | [UNet](./examples/UNet.ipynb) |
 |ObjectDetection——SSD| -  | [SSD](./examples/SSD.ipynb) |
 |OCR——CRNN 🔥🔥| -  | [CRNN-CTC](./examples/CRNN_CTC.ipynb) |
-|ReinforcementLearning——Q-Learning🔥🔥|- |[Q-learning](./examples/Q-learning.ipynb)|
-|ReinforcementLearning——DQN|- |[DQN](./examples/DQN.ipynb)|
 |ObjectDetection——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
 |ImageSegmentation——DeepLabV3++ | segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
 |InstanceSegmentation——MaskRCNN | detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
 |ObjectDetection——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
+|ImageClassification——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 |TextClassification——BERT 🔥🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |TokenClassification——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2 🔥🔥🔥| transformers |  [ChatGLM2](./examples/ChatGLM2——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_LoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
-|ImageClassification——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
+|FinetuneLLM——ChatGLM2_QLoRA_Kaggle 🔥🔥🔥| transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
+
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**
 

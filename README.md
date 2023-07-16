@@ -273,21 +273,22 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 
 |example|使用模型库  |notebook |
 |:----|:-----------|:-----------:|
+|强化学习——Q-Learning 🔥🔥|- |[Q-learning](./examples/Q-learning.ipynb)|
+|强化学习——DQN|- |[DQN](./examples/DQN.ipynb)|
 |图片分类——Resnet|  -  | [Resnet](./examples/ResNet.ipynb) |
 |语义分割——UNet|  - | [UNet](./examples/UNet.ipynb) |
 |目标检测——SSD| -  | [SSD](./examples/SSD.ipynb) |
 |文字识别——CRNN 🔥🔥| -  | [CRNN-CTC](./examples/CRNN_CTC.ipynb) |
-|强化学习——Q-Learning|- |[Q-learning](./examples/Q-learning.ipynb)|
-|强化学习——DQN|- |[DQN](./examples/DQN.ipynb)|
 |目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
-|语义分割——DeepLabV3++ 🔥| segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
-|实例分割——MaskRCNN 🔥🔥| detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
+|语义分割——DeepLabV3++ | segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
+|实例分割——MaskRCNN | detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
 |目标检测——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
-|文本分类——BERT 🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
-|命名实体识别——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
-|LLM微调——ChatGLM2_LoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
-|LLM微调——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
 |图片分类——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
+|文本分类——BERT🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
+|命名实体识别——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
+|LLM微调——ChatGLM2_LoRA 🔥🔥🔥| transformers |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
+|LLM微调——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
+|LLM微调——ChatGLM2_QLoRA_Kaggle 🔥🔥🔥| transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
 
 
 ```python

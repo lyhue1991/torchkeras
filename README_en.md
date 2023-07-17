@@ -122,7 +122,7 @@ KerasModel. Here are some examples.
 |FinetuneLLM——ChatGLM2 🔥🔥🔥| transformers |  [ChatGLM2](./examples/ChatGLM2——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_LoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
-|FinetuneLLM——ChatGLM2_QLoRA_Kaggle 🔥🔥🔥| transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
+|FinetuneLLM——ChatGLM2_QLoRA 🔥🔥🔥| transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
 
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**

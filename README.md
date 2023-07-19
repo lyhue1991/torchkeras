@@ -273,6 +273,7 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 
 |example|使用模型库  |notebook |
 |:----|:-----------|:-----------:|
+||||
 |**RL**|||
 |强化学习——Q-Learning 🔥🔥|- |[Q-learning](./examples/Q-learning.ipynb)|
 |强化学习——DQN|- |[DQN](./examples/DQN.ipynb)|
@@ -294,6 +295,7 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 |LLM微调——ChatGLM2_LoRA 🔥🔥🔥| transformers |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
 |LLM微调——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
 |LLM微调——ChatGLM2_QLoRA 🔥🔥🔥| transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
+|LLM微调——BaiChuan13B_QLoRA 🔥🔥🔥| transformers |  [BaiChuan13B_QLoRA](./examples/BaiChuan13B_QLoRA——transformers.ipynb) |
 
 
 ```python

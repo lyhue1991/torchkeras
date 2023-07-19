@@ -5,12 +5,19 @@ reference from https://github.com/fastai/fastprogress/
 import time
 from IPython.display import clear_output, display, HTML
 
+
 def format_time(t):
     "Format `t` (in seconds) to (h):mm:ss"
     t = int(t)
     h,m,s = t//3600, (t//60)%60, t%60
     if h!= 0: return f'{h}:{m:02d}:{s:02d}'
     else:     return f'{m:02d}:{s:02d}'
+
+def format_number(x):
+    if abs(x)<1e-4 or abs(x)>=1e5:
+        return "{:.4e}".format(x)
+    else:
+        return "{:.4f}".format(x)
 
 html_progress_bar_styles = """
 <style>
@@ -137,7 +144,7 @@ class ProgressBar:
             postfix+='['
             for i,(key,value) in enumerate(kwargs.items()):
                 if isinstance(value,float):
-                    postfix = postfix+f'{key}={value:.5f},'
+                    postfix = postfix+f'{key}={format_number(value)},'
                 else:
                     postfix = postfix+f'{key}={value},'
             postfix = postfix[:-1]+']'

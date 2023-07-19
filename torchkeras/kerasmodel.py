@@ -27,7 +27,7 @@ class StepRunner:
             loss = self.loss_fn(preds,labels)
 
         #backward()
-        if self.optimizer is not None and self.stage=="train":
+        if self.stage=="train" and self.optimizer is not None:
             self.accelerator.backward(loss)
             if self.accelerator.sync_gradients:
                 self.accelerator.clip_grad_norm_(self.net.parameters(), 1.0)

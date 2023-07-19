@@ -110,7 +110,7 @@ def namespace2dict(namespace):
             for v_key,v_value in v_dic.items():
                 result[k+"."+v_key] = v_value
     return result 
-
+  
 
 def is_jupyter():
     import contextlib

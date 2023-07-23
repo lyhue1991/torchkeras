@@ -5,6 +5,7 @@ from copy import deepcopy
 import numpy as np 
 import pandas as pd 
 from argparse import Namespace 
+from torchkeras.utils import is_jupyter
 
 class TensorBoardCallback:
     def __init__(self, save_dir= "runs", model_name="model", 
@@ -154,8 +155,11 @@ class VisProgress:
         self.progress.display=False
             
 class VisMetric:
-    def __init__(self,figsize = (6,4)):
+    def __init__(self,figsize = (6,4),
+                 save_path='history.png'):
         self.figsize = (6,4)
+        self.save_path = save_path
+        self.in_jupyter = is_jupyter()
         
     def on_fit_start(self,model: 'KerasModel'):
         self.metric =  model.monitor.replace('val_','')
@@ -197,7 +201,8 @@ class VisMetric:
         self.plt = plt
         if not hasattr(self, 'graph_fig'):
             self.graph_fig, self.graph_ax = plt.subplots(1, figsize=self.figsize)
-            self.graph_out = display(self.graph_ax.figure, display_id=True)
+            if self.in_jupyter:
+                self.graph_out = display(self.graph_ax.figure, display_id=True)
         self.graph_ax.clear()
         
         dfhistory = pd.DataFrame(model.history)
@@ -230,7 +235,10 @@ class VisMetric:
 
         if x_bounds is not None: self.graph_ax.set_xlim(*x_bounds)
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
-        self.graph_out.update(self.graph_ax.figure)
+        if self.in_jupyter:
+            self.graph_out.update(self.graph_ax.figure)
+        else:
+            self.graph_fig.savefig(self.save_path)
         self.plt.close();
         
 

@@ -155,10 +155,13 @@ class KerasModel(torch.nn.Module):
         self.history = {}
         callbacks = callbacks if callbacks is not None else []
         
-        if bool(plot) and is_jupyter():
-            from torchkeras.kerascallbacks import VisMetric,VisProgress
-            callbacks = [VisMetric(),VisProgress()]+callbacks
-                
+        if bool(plot):
+            if is_jupyter():
+                from torchkeras.kerascallbacks import VisProgress
+                callbacks = [VisProgress()]+callbacks
+            from torchkeras.kerascallbacks import VisMetric
+            callbacks = [VisMetric()]+callbacks
+            
         if wandb!=False:
             from torchkeras.kerascallbacks import WandbCallback
             project = wandb if isinstance(wandb,str) else 'torchkeras'

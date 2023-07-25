@@ -2,9 +2,12 @@
 '''
 reference from https://github.com/fastai/fastprogress/
 '''
-import time
+import time,sys
 from IPython.display import clear_output, display, HTML
+from torchkeras.utils import is_jupyter
 
+from tqdm.utils import _term_move_up
+move_up = _term_move_up()
 
 def format_time(t):
     "Format `t` (in seconds) to (h):mm:ss"
@@ -50,17 +53,26 @@ def html_progress_bar(value, total, label='', postfix='', interrupted=False):
     </div>
     """
 
+def text_progress_bar(value, total, label='', postfix='', interrupted=False):
+    bar_style = "🟥" if interrupted else "⬜️"  #"🟥","⬜️" "○", "*"
+    percentage = round(value / total * 50)
+    finished = "🟩" * (percentage)  #"🟩","●"
+    unfinished = bar_style * (50 - percentage)
+    bar = "\r{}{} {}".format(finished,unfinished,label)+" "*20+"\t"*50+f"{postfix}"+" "*20+"\t"*50
+    return bar
+
 class ProgressBar:
     update_every,first_its,lt = 0.2,5,'<'
-    def __init__(self, gen, total=None, 
-                 display=True, comment=''):
+    def __init__(self, gen, total=None, comment=''):
         self.gen,self.comment = gen,comment
         self.postfix = ''
         self.total = None if total=='noinfer' else len(gen) if total is None else total
         self.last_v = 0
-        self.display = display
         self.last_v = None
+        self.display = True
+        self.in_jupyter = is_jupyter()
         self.update(0)
+        
         
     def update(self, val):
         if self.last_v is None:
@@ -76,30 +88,44 @@ class ProgressBar:
             self.wait_for = max(int(self.update_every / (avg_t+1e-8)),1)
             self.pred_t = None if self.total is None else avg_t * self.total
             self.last_v,self.last_t = val,cur_t
-            self.update_bar(val)
             if self.total is not None and val >= self.total:
                 self.on_iter_end()
-                self.last_v = None
+                self.last_v = self.total
+            else:
+                self.update_bar(val)
                 
     def on_iter_begin(self):
-        self.html_code = '\n'.join([html_progress_bar(0, self.total, ""), ""])
-        display(HTML(html_progress_bar_styles))
-        self.out = display(HTML(self.html_code), display_id=True)
+        if self.in_jupyter:
+            self.html_code = '\n'.join([html_progress_bar(0, self.total, ""), ""])
+            display(HTML(html_progress_bar_styles))
+            self.out = display(HTML(self.html_code), display_id=True)
+        else:
+            print('\n')
 
     def on_iter_end(self):
         total_time = format_time(time.time() - self.start_t)
-        self.comment = f'[{total_time}]' 
-        if hasattr(self, 'out'): 
-            self.on_update(self.total,self.comment,self.postfix)
+        self.comment = f'100% [{self.total}/{self.total}] [{total_time}]'   
+        self.on_update(self.total,self.comment,self.postfix,False,1)
+        self.display = False
+        if not self.in_jupyter:
+            print('\n')
 
-    def on_update(self, val, comment='', postfix='', interrupted=False): 
-        self.progress = html_progress_bar(val, self.total,comment,postfix,interrupted)
-        if self.display: 
-            self.out.update(HTML(self.progress))
-            
+    def on_update(self, val, comment='', postfix='', interrupted=False, up=1): 
+        if not self.display:
+            return 
+        if self.in_jupyter:
+                self.progress = html_progress_bar(val, self.total,comment,postfix,interrupted)
+                self.out.update(HTML(self.progress))
+        else:
+            progress = text_progress_bar(val, self.total, comment, postfix, interrupted)
+            print(move_up*up+progress,end='')
+                
     def on_interrupt(self,msg='interrupted'):
-        self.on_update(self.last_v,self.comment+f'[{msg}]',interrupted=True)
-
+        self.on_update(self.last_v,self.comment+f' [{msg}]',self.postfix,interrupted=True,up=1)
+        self.display = False
+        if not self.in_jupyter:
+            print('\n')
+        
     def __iter__(self):
         if self.total != 0: self.update(0)
         try:
@@ -121,15 +147,17 @@ class ProgressBar:
         if val ==0:
             self.comment = f'0% [0/{self.total}]'
             return self.on_update(0, self.comment)
-        pct = '' if self.total is None else f'{100 * val/self.total:.2f}% '
+        pct = '' if self.total is None else f'{100 * val/self.total:.2f}%'
         tot = '?' if self.total is None else str(self.total)
         elapsed_t = self.last_t - self.start_t
         remaining_t = '?' if self.pred_t is None else format_time(self.pred_t - elapsed_t)
         elapsed_t = format_time(elapsed_t)
-        self.comment = f'{pct}[{val}/{tot} {elapsed_t}{self.lt}{remaining_t}]'
+        self.comment = f'{pct} [{val}/{tot}] [{elapsed_t}{self.lt}{remaining_t}]'
         self.on_update(val, self.comment, self.postfix)
     
     def set_postfix(self,**kwargs):
+        if not self.display:
+            return 
         postfix = ''
         if 'i' in kwargs and 'n' in kwargs:
             from tqdm.std import Bar 
@@ -139,14 +167,14 @@ class ProgressBar:
             ratio = i/n
             postfix+=format(Bar(ratio,default_len=20))
             postfix+=f'{100 * i/n:.2f}%'
-            postfix+=f' [{i}/{n}] '
+            postfix+=f' [{i}/{n}]'
         if kwargs:
-            postfix+='['
+            postfix+=' ['
             for i,(key,value) in enumerate(kwargs.items()):
                 if isinstance(value,float):
-                    postfix = postfix+f'{key}={format_number(value)},'
+                    postfix = postfix+f'{key}={format_number(value)}, '
                 else:
-                    postfix = postfix+f'{key}={value},'
-            postfix = postfix[:-1]+']'
+                    postfix = postfix+f'{key}={value}, '
+            postfix = postfix[:-2]+']'
         self.postfix = postfix
         self.on_update(self.last_v,self.comment,self.postfix)

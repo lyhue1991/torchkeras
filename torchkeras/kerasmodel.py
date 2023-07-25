@@ -156,11 +156,8 @@ class KerasModel(torch.nn.Module):
         callbacks = callbacks if callbacks is not None else []
         
         if bool(plot):
-            if is_jupyter():
-                from torchkeras.kerascallbacks import VisProgress
-                callbacks = [VisProgress()]+callbacks
-            from torchkeras.kerascallbacks import VisMetric
-            callbacks = [VisMetric()]+callbacks
+            from torchkeras.kerascallbacks import VisProgress,VisMetric
+            callbacks = [VisMetric(),VisProgress()]+callbacks
             
         if wandb!=False:
             from torchkeras.kerascallbacks import WandbCallback
@@ -174,16 +171,12 @@ class KerasModel(torch.nn.Module):
                 
         start_epoch = 1 if self.from_scratch else 0
         
-        if quiet is None:
-            if is_jupyter():
-                quiet = True
-            else:
-                quiet = False
+        if is_jupyter() or bool(plot) or quiet is None:
+            quiet = True
         
         quiet_fn = (lambda epoch:quiet) if isinstance(quiet,bool) else (
             (lambda epoch:epoch>quiet) if isinstance(quiet,int) else quiet)
         
-            
         for epoch in range(start_epoch,epochs+1):
             should_quiet = quiet_fn(epoch)
         
@@ -246,15 +239,16 @@ class KerasModel(torch.nn.Module):
                         monitor,arr_scores[best_score_idx])))
 
             if len(arr_scores)-best_score_idx>patience:
-                self.accelerator.print(colorful(
-                    "<<<<<< {} without improvement in {} epoch,""early stopping >>>>>>"
-                ).format(monitor,patience))
-                break; 
+                break
                 
         if self.accelerator.is_local_main_process:   
             dfhistory = pd.DataFrame(self.history)
             [cb.on_fit_end(model = self) for cb in self.callbacks 
                  if hasattr(cb,'on_fit_end')]
+            if epoch<epochs:
+                self.accelerator.print(colorful(
+                        "<<<<<< {} without improvement in {} epoch,""early stopping >>>>>> \n"
+                    ).format(monitor,patience))
             self.net = self.accelerator.unwrap_model(self.net)
             self.net.cpu()
             self.load_ckpt(ckpt_path)

@@ -97,21 +97,18 @@ ckpt_path='checkpoint.pt'
 #model.load_ckpt(ckpt_path) #load trained ckpt and continue training
 dfhistory=model.fit(train_data=dl_train, 
                     val_data=dl_val, 
-                    epochs=10, 
-                    patience=5, 
+                    epochs=100, 
+                    patience=10, 
                     monitor="val_acc",
                     mode="max",
                     ckpt_path=ckpt_path,
                     plot=True,
                     wandb=False,
                     mixed_precision='fp16',
-                    cpu=True   
+                    cpu=True
                    )
 
 model.evaluate(dl_val,quiet=False)
-
-
-
 
 # ### 5, use the model
 

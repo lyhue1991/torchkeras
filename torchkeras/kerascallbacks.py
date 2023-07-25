@@ -147,7 +147,6 @@ class VisProgress:
         dfhistory = pd.DataFrame(model.history)
         self.progress.update(dfhistory['epoch'].iloc[-1])
 
-           
     def on_fit_end(self,  model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         if dfhistory['epoch'].max()<model.epochs:
@@ -160,6 +159,8 @@ class VisMetric:
         self.figsize = (6,4)
         self.save_path = save_path
         self.in_jupyter = is_jupyter()
+        if not self.in_jupyter:
+            print('\nView dynamic loss/metric plot: \n'+os.path.abspath(self.save_path))
         
     def on_fit_start(self,model: 'KerasModel'):
         self.metric =  model.monitor.replace('val_','')

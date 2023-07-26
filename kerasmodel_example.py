@@ -16,7 +16,6 @@ import torchkeras
 
 # ### 1, prepare data 
 
-
 import torchvision 
 from torchvision import transforms
 

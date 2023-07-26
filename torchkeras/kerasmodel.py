@@ -148,9 +148,11 @@ class KerasModel(torch.nn.Module):
         
         train_dataloader,val_dataloader = self.accelerator.prepare(train_data,val_data)
         train_dataloader.size = train_data.size if hasattr(train_data,'size') else len(train_data)
+        train_dataloader.size = min(train_dataloader.size,len(train_dataloader))
+        
         if val_data:
             val_dataloader.size = val_data.size if hasattr(val_data,'size') else len(val_data)
-        
+            val_dataloader.size = min(val_dataloader.size,len(val_dataloader))
         
         self.history = {}
         callbacks = callbacks if callbacks is not None else []
@@ -277,28 +279,15 @@ class KerasModel(torch.nn.Module):
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1
            ):
         from accelerate import notebook_launcher
-        train_size = train_data.size if hasattr(train_data,'size') else len(train_data)
-        train_data.size = train_size//num_processes
-        if val_data:
-            val_size = val_data.size if hasattr(val_data,'size') else len(val_data)
-            val_data.size = val_size//num_processes
-            
         args = (train_data,val_data,epochs,ckpt_path,patience,monitor,mode,
             callbacks,plot,wandb,quiet,mixed_precision,cpu,gradient_accumulation_steps)
         notebook_launcher(self.fit, args, num_processes=num_processes)
         dfhistory = torch.load('dfhistory.pt')
-        
-        train_data.size = train_size 
-        if val_data:
-            val_data.size = val_size 
         return dfhistory
     
     def evaluate_ddp(self, num_processes, val_data, quiet=False):
         from accelerate import notebook_launcher
-        val_size = val_data.size if hasattr(val_data,'size') else len(val_data)
-        val_data.size = val_size//num_processes
         args = (val_data,quiet)
         notebook_launcher(self.evaluate, args, num_processes=num_processes)
         val_metrics = torch.load('val_metrics.pt')
-        val_data.size = val_size
         return val_metrics

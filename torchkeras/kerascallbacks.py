@@ -159,10 +159,10 @@ class VisMetric:
         self.figsize = (6,4)
         self.save_path = save_path
         self.in_jupyter = is_jupyter()
-        if not self.in_jupyter:
-            print('\nView dynamic loss/metric plot: \n'+os.path.abspath(self.save_path))
         
     def on_fit_start(self,model: 'KerasModel'):
+        if not self.in_jupyter:
+            print('\nView dynamic loss/metric plot: \n'+os.path.abspath(self.save_path))
         self.metric =  model.monitor.replace('val_','')
         dfhistory = pd.DataFrame(model.history)
         x_bounds = [0, min(10,model.epochs)]

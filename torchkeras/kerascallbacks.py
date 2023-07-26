@@ -150,7 +150,7 @@ class VisProgress:
     def on_fit_end(self,  model:"KerasModel"):
         dfhistory = pd.DataFrame(model.history)
         if dfhistory['epoch'].max()<model.epochs:
-            self.progress.on_interrupt(msg='earlystopping')
+            self.progress.on_interrupt(msg='')
         self.progress.display=False
             
 class VisMetric:
@@ -194,7 +194,7 @@ class VisMetric:
         
     def get_title(self,  model:'KerasModel'):
         best_epoch,best_score = self.get_best_score(model)
-        title = f'best {model.monitor} = {best_score:.4f} (@epoch {best_epoch})'
+        title = f'best {model.monitor}={best_score:.4f} (@epoch {best_epoch})'
         return title
 
     def update_graph(self, model:'KerasModel', title=None, x_bounds=None, y_bounds=None):
@@ -226,7 +226,9 @@ class VisMetric:
         self.graph_ax.set_xlabel("epoch")
         self.graph_ax.set_ylabel(self.metric)  
         if title:
-             self.graph_ax.set_title(title)
+            self.graph_ax.set_title(title)
+            if not self.in_jupyter and hasattr(model.EpochRunner,'progress'):
+                model.EpochRunner.progress.comment_tail = title
         if m1 in dfhistory.columns or m2 in dfhistory.columns or self.metric in dfhistory.columns:
             self.graph_ax.legend(loc='best')
             
@@ -238,8 +240,7 @@ class VisMetric:
         if y_bounds is not None: self.graph_ax.set_ylim(*y_bounds)
         if self.in_jupyter:
             self.graph_out.update(self.graph_ax.figure)
-        else:
-            self.graph_fig.savefig(self.save_path)
+        self.graph_fig.savefig(self.save_path)
         self.plt.close();
         
 

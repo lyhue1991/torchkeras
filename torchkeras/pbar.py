@@ -53,18 +53,19 @@ def html_progress_bar(value, total, label='', postfix='', interrupted=False):
     </div>
     """
 
+
 def text_progress_bar(value, total, label='', postfix='', interrupted=False):
-    bar_style = "🟥" if interrupted else "⬜️"  #"🟥","⬜️" "○", "*"
-    percentage = round(value / total * 50)
+    bar_style = "🟦" if interrupted else "⬜️"  #"🟥","⬜️" "○", "*"'🟦''⬛️'
+    percentage = round(value / total * 20)
     finished = "🟩" * (percentage)  #"🟩","●"
-    unfinished = bar_style * (50 - percentage)
+    unfinished = bar_style * (20 - percentage)
     bar = "\r{}{} {}".format(finished,unfinished,label)+" "*20+"\t"*50+f"{postfix}"+" "*20+"\t"*50
     return bar
 
 class ProgressBar:
     update_every,first_its,lt = 0.2,5,'<'
-    def __init__(self, gen, total=None, comment=''):
-        self.gen,self.comment = gen,comment
+    def __init__(self, gen, total=None, comment='', comment_tail=''):
+        self.gen,self.comment,self.comment_tail = gen,comment,comment_tail
         self.postfix = ''
         self.total = None if total=='noinfer' else len(gen) if total is None else total
         self.last_v = 0
@@ -114,14 +115,17 @@ class ProgressBar:
         if not self.display:
             return 
         if self.in_jupyter:
-                self.progress = html_progress_bar(val, self.total,comment,postfix,interrupted)
+                self.progress = html_progress_bar(val,self.total,comment,postfix,interrupted)
                 self.out.update(HTML(self.progress))
         else:
+            if self.comment_tail:
+                comment = comment+f' [{self.comment_tail}]'
             progress = text_progress_bar(val, self.total, comment, postfix, interrupted)
             print(move_up*up+progress,end='')
                 
     def on_interrupt(self,msg='interrupted'):
-        self.on_update(self.last_v,self.comment+f' [{msg}]',self.postfix,interrupted=True,up=1)
+        comment = self.comment+f' [{msg}]' if msg else self.comment
+        self.on_update(self.last_v,comment,self.postfix,interrupted=True,up=1)
         self.display = False
         if not self.in_jupyter:
             print('\n')

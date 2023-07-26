@@ -8,6 +8,8 @@ torchkeras/__pycache__/
 torchkeras/models/__pycache__/
 examples/datasets/
 examples/*.pt
+examples/*.png
+examples/*.md 
 examples/wandb/
 torchkeras/ocr/__pycache__/
 torchkeras/chat/__pycache__/

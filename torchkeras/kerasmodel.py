@@ -117,13 +117,15 @@ class KerasModel(torch.nn.Module):
         self.lr_scheduler = lr_scheduler
         self.from_scratch = True
         
-    def save_ckpt(self, ckpt_path='checkpoint', accelerator= None):
+    def save_ckpt(self, ckpt_path=None, accelerator= None):
         accelerator = accelerator if accelerator is not None else self.accelerator
         net_dict = accelerator.get_state_dict(self.net)
-        accelerator.save(net_dict,ckpt_path)
+        accelerator.save(net_dict,ckpt_path if ckpt_path is not None else self.ckpt_path)
       
-    def load_ckpt(self, ckpt_path='checkpoint'):
-        self.net.load_state_dict(torch.load(ckpt_path,map_location='cpu'))
+    def load_ckpt(self, ckpt_path=None):
+        self.net.load_state_dict(
+            torch.load(ckpt_path if ckpt_path is not None else self.ckpt_path,
+            map_location='cpu'))
         self.from_scratch = False
 
     def forward(self, x):
@@ -134,7 +136,6 @@ class KerasModel(torch.nn.Module):
             plot=True,  wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
         from torchkeras.utils import colorful,is_jupyter
-        
         self.__dict__.update(locals())
         self.accelerator = Accelerator(mixed_precision=mixed_precision,cpu=cpu,
             gradient_accumulation_steps=gradient_accumulation_steps)
@@ -173,7 +174,7 @@ class KerasModel(torch.nn.Module):
                 
         start_epoch = 1 if self.from_scratch else 0
         
-        if is_jupyter() or bool(plot) or quiet is None:
+        if bool(plot) or quiet is None:
             quiet = True
         
         quiet_fn = (lambda epoch:quiet) if isinstance(quiet,bool) else (
@@ -254,7 +255,6 @@ class KerasModel(torch.nn.Module):
             self.net = self.accelerator.unwrap_model(self.net)
             self.net.cpu()
             self.load_ckpt(ckpt_path)
-            torch.save(dfhistory,'dfhistory.pt')
             return dfhistory
         
     def evaluate(self, val_data, quiet=False):
@@ -268,8 +268,6 @@ class KerasModel(torch.nn.Module):
         val_epoch_runner = self.EpochRunner(val_step_runner,quiet=quiet)
         with torch.no_grad():
             val_metrics = val_epoch_runner(val_data)
-        if accelerator.is_local_main_process:
-            torch.save(val_metrics,'val_metrics.pt')
         return val_metrics
     
     def fit_ddp(self,num_processes,train_data,
@@ -282,12 +280,8 @@ class KerasModel(torch.nn.Module):
         args = (train_data,val_data,epochs,ckpt_path,patience,monitor,mode,
             callbacks,plot,wandb,quiet,mixed_precision,cpu,gradient_accumulation_steps)
         notebook_launcher(self.fit, args, num_processes=num_processes)
-        dfhistory = torch.load('dfhistory.pt')
-        return dfhistory
     
     def evaluate_ddp(self, num_processes, val_data, quiet=False):
         from accelerate import notebook_launcher
         args = (val_data,quiet)
         notebook_launcher(self.evaluate, args, num_processes=num_processes)
-        val_metrics = torch.load('val_metrics.pt')
-        return val_metrics

@@ -1,10 +1,3 @@
-
-# # KerasModel Example
-
-import sys 
-sys.path.append("..")
-
-
 import numpy as np 
 import pandas as pd 
 from matplotlib import pyplot as plt
@@ -103,29 +96,13 @@ dfhistory=model.fit(train_data=dl_train,
                     ckpt_path=ckpt_path,
                     plot=True,
                     wandb=False,
-                    mixed_precision='fp16',
-                    cpu=True
+                    mixed_precision='fp16'
                    )
 
 model.evaluate(dl_val,quiet=False)
 
-# ### 5, use the model
 
-net = model.net
-net.eval();
-
-tensor,label = ds_train[1]
-
-y_pred = torch.argmax(net(tensor[None,...])) 
-y_prob = torch.softmax(net(tensor[None,...]),dim=-1).max() 
-
-print('y_pred = ', y_pred.item())
-print('y_prob = ', y_prob.item())
-
-
-
-
-# ### 6, save the model
+# ### 5, save the model
 
 net_clone = create_net() 
 

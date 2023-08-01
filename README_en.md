@@ -123,7 +123,8 @@ KerasModel. Here are some examples.
 |ImageClassification——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 ||||
 |**NLP**|||
-|TextClassification——BERT 🔥🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
+|Seq2Seq——Transformer🔥🔥| - |  [Transformer](./examples/Dive_into_Transformer.ipynb) |
+|TextClassification——BERT | transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |TokenClassification——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_LoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |

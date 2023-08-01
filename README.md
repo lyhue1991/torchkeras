@@ -290,7 +290,8 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 |图片分类——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 ||||
 |**NLP**|||
-|文本分类——BERT🔥| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
+|序列翻译——Transformer🔥🔥| - |  [Transformer](./examples/Dive_into_Transformer.ipynb) |
+|文本分类——BERT| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |命名实体识别——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
 |LLM微调——ChatGLM2_LoRA 🔥🔥🔥| transformers |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
 |LLM微调——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |

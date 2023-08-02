@@ -120,17 +120,24 @@ class WandbCallback:
         #save ckpt
         if self.save_ckpt:
             arti_model = self.wb.Artifact('checkpoint', type='model')
-            arti_model.add_file(model.ckpt_path)
+            if os.path.isdir(model.ckpt_path):
+                arti_model.add_dir(model.ckpt_path)
+            else:
+                arti_model.add_file(model.ckpt_path)
             self.wb.log_artifact(arti_model)
 
         run_dir = self.wb.run.dir
         self.wb.finish()
 
         #local save
-        import shutil
-        shutil.copy(model.ckpt_path,os.path.join(run_dir,os.path.basename(model.ckpt_path)))
-    
-
+        try:
+            import shutil
+            copy_fn = shutil.copytree if os.path.isdir(model.ckpt_path) else shutil.copy
+            copy_fn(model.ckpt_path,os.path.join(run_dir,os.path.basename(model.ckpt_path)))
+        except Exception as err:
+            print(err)
+            
+            
 class VisProgress:
     def __init__(self):
         pass
@@ -152,6 +159,7 @@ class VisProgress:
         if dfhistory['epoch'].max()<model.epochs:
             self.progress.on_interrupt(msg='')
         self.progress.display=False
+            
             
 class VisMetric:
     def __init__(self,figsize = (6,4),

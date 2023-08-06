@@ -26,3 +26,6 @@ debug.ipynb
 cats
 ImageCleaner
 runs 
+checkpoint
+*.jpg
+*.png

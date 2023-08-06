@@ -291,12 +291,13 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 ||||
 |**NLP**|||
 |序列翻译——Transformer🔥🔥| - |  [Transformer](./examples/Dive_into_Transformer.ipynb) |
+|文本生成——Llama🔥| - |  [Llama](./examples/Dive_into_Llama.ipynb) |
 |文本分类——BERT| transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |命名实体识别——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
 |LLM微调——ChatGLM2_LoRA 🔥🔥🔥| transformers |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
-|LLM微调——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
-|LLM微调——ChatGLM2_QLoRA 🔥🔥🔥| transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
-|LLM微调——BaiChuan13B_QLoRA 🔥🔥🔥| transformers |  [BaiChuan13B_QLoRA](./examples/BaiChuan13B_QLoRA——transformers.ipynb) |
+|LLM微调——ChatGLM2_AdaLoRA 🔥| transformers |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
+|LLM微调——ChatGLM2_QLoRA | transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
+|LLM微调——BaiChuan13B_QLoRA | transformers |  [BaiChuan13B_QLoRA](./examples/BaiChuan13B_QLoRA——transformers.ipynb) |
 |LLM微调——BaiChuan13B_NER 🔥🔥🔥| transformers |  [BaiChuan13B_NER](./examples/BaiChuan13B_NER——transformers.ipynb) |
 
 

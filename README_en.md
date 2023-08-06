@@ -124,6 +124,7 @@ KerasModel. Here are some examples.
 ||||
 |**NLP**|||
 |Seq2Seq——Transformer🔥🔥| - |  [Transformer](./examples/Dive_into_Transformer.ipynb) |
+|TextGeneration——Llama🔥| - |  [Llama](./examples/Dive_into_Llama.ipynb) |
 |TextClassification——BERT | transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |TokenClassification——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_LoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |

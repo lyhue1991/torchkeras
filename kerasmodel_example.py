@@ -95,8 +95,7 @@ dfhistory=model.fit(train_data=dl_train,
                     mode="max",
                     ckpt_path=ckpt_path,
                     plot=True,
-                    wandb=False,
-                    mixed_precision='fp16'
+                    wandb=False
                    )
 
 model.evaluate(dl_val,quiet=False)

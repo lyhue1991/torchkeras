@@ -8,7 +8,7 @@ class ChatGLM(object):
                  history=None,
                  max_length=8192,
                  num_beams=1,
-                 do_sample=True,s
+                 do_sample=True,
                  temperature=0.8,
                  logits_processor=None
                 ):

@@ -1,4 +1,4 @@
 from .chatgpt import ChatGPT
 from .chatglm import ChatGLM
 from .conversations import get_conv_template, conv_templates
-from .pipeline import Pipeline
+from .chatllm import ChatLLM

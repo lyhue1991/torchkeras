@@ -2,6 +2,7 @@ import torch
 import sys 
 from copy import deepcopy
 from .conversations import conv_templates, get_conv_template 
+from .data import build_inputs_labels
 
 #chat tool for chatglm2-6b,baichuan-13b,internlm-chat-7b,qwen-7b-chat and more...
 class ChatLLM:
@@ -14,6 +15,10 @@ class ChatLLM:
                 ):
         self.model = model
         self.tokenizer = tokenizer
+        
+        if not self.tokenizer.eos_token_id:
+            self.tokenizer.eos_token_id =  (model.config.eos_token_id 
+                or model.generation_config.eos_token_id)
         self.model_type = model_type if model_type else self.get_model_type() 
         conv = get_conv_template(self.model_type)
         self.stop_words_ids = [[w] for w in conv.stop_token_ids] if conv.stop_token_ids else []
@@ -68,8 +73,8 @@ class ChatLLM:
         if query is not None:
             messages.append({"role": "user", "content": query})
         return messages
-    
-    def build_prompt(self,messages):
+
+    def build_conversations(self,messages):
         model = self.model
         if not hasattr(model,'conv_template'):
             model_type = self.get_model_type()
@@ -86,16 +91,25 @@ class ChatLLM:
                 conv.append_message(conv.roles[1], d['content'])
             else:
                 raise Exception('role must be one of (system,user,assistant)')
-
         if d['role']!='assistant':
             conv.append_message(conv.roles[1], None)
+        return conv
+        
+    def build_prompt(self,messages):
+        conv = self.build_conversations(messages)
         return conv.get_prompt()
+
+    def build_inputs_labels(self,messages,multi_rounds=True):
+        conv = self.build_conversations(messages)
+        inputs,labels = build_inputs_labels(
+            conv,self.tokenizer, multi_rounds=multi_rounds)
+        return inputs,labels
         
     def chat(self, messages, stream=False, generation_config=None):
         model,tokenizer = self.model,self.tokenizer
         prompt = self.build_prompt(messages)
+        inputs = tokenizer([prompt],add_special_tokens=False)
         
-        inputs = tokenizer([prompt])
         inputs = {k: torch.tensor(v).to(model.device) for k, v in inputs.items()}
         if generation_config is not None:
             generation_config = deepcopy(model.generation_config.update(**generation_config))

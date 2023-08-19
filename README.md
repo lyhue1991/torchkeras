@@ -113,11 +113,10 @@ dfhistory=model.fit(train_data=dl_train,
                     val_data=dl_val, 
                     epochs=20, 
                     patience=3, 
-                    ckpt_path='checkpoint.pt',
+                    ckpt_path='checkpoint',
                     monitor="val_acc",
                     mode="max",
-                    plot=True,
-                    
+                    plot=True
                    )
 
 ```

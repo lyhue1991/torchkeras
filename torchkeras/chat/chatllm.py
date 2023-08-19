@@ -2,7 +2,7 @@ import torch
 import sys 
 from copy import deepcopy
 from .conversations import conv_templates, get_conv_template 
-from .data import build_inputs_labels
+from .text2ids import build_inputs_labels
 
 #chat tool for chatglm2-6b,baichuan-13b,internlm-chat-7b,qwen-7b-chat and more...
 class ChatLLM:
@@ -19,8 +19,11 @@ class ChatLLM:
         if not self.tokenizer.eos_token_id:
             self.tokenizer.eos_token_id =  (model.config.eos_token_id 
                 or model.generation_config.eos_token_id)
+            
         self.model_type = model_type if model_type else self.get_model_type() 
         conv = get_conv_template(self.model_type)
+        self.conv_template = conv
+        
         self.stop_words_ids = [[w] for w in conv.stop_token_ids] if conv.stop_token_ids else []
         self.model.generation_config.stop_words_ids = self.stop_words_ids
         self.model.generation_config.max_new_tokens = max_new_tokens
@@ -75,15 +78,10 @@ class ChatLLM:
         return messages
 
     def build_conversations(self,messages):
-        model = self.model
-        if not hasattr(model,'conv_template'):
-            model_type = self.get_model_type()
-            model.conv_template =get_conv_template(model_type)
-        conv = deepcopy(model.conv_template)
+        conv = deepcopy(self.conv_template)
         msgs_sys = [d for d in messages if d['role']=='system']
         if msgs_sys:
             conv.set_system_message(msgs_sys[0]['content'])
-
         for d in messages:
             if d['role']=='user':
                 conv.append_message(conv.roles[0], d['content'])
@@ -102,7 +100,7 @@ class ChatLLM:
     def build_inputs_labels(self,messages,multi_rounds=True):
         conv = self.build_conversations(messages)
         inputs,labels = build_inputs_labels(
-            conv,self.tokenizer, multi_rounds=multi_rounds)
+            conv, self.tokenizer, multi_rounds=multi_rounds)
         return inputs,labels
         
     def chat(self, messages, stream=False, generation_config=None):
@@ -141,7 +139,9 @@ class ChatLLM:
             from .stream_generate  import NewGenerationMixin, StreamGenerationConfig
             model.__class__.generate = NewGenerationMixin.generate
             model.__class__.sample_stream = NewGenerationMixin.sample_stream
-            stream_config = StreamGenerationConfig(**generation_config.to_dict(),do_stream=True)
+            config_dic = generation_config.to_dict()
+            config_dic.update({'do_stream':True})
+            stream_config = StreamGenerationConfig(**config_dic)
             
             def stream_generator():
                 outputs = []
@@ -175,7 +175,6 @@ class ChatLLM:
             clear_output(wait=True)
         self.history.append((query,response))
         return response
-    
     
     def register_magic(self):
         import IPython

@@ -12,7 +12,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
             if message:
                 pre,msg,post = [encode_fn(x) for x in [role + ": ",message,self.sep]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -32,7 +32,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
             if message:
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + ": ",message,seps[i % 2]]]
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -52,7 +52,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + ": ",message,self.sep]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -75,7 +75,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + "\n",message,self.sep]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -98,7 +98,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role,message,self.sep]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -118,7 +118,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
             if message:
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role,message,seps[i % 2]]]
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -138,7 +138,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 message = message.replace("\r\n", "\n").replace("\n\n", "\n")
                 pre,msg,post = [encode_fn(x) for x in [role+': ',message,"\n\n"]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -164,7 +164,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                     pre,msg,post = [encode_fn(x) 
                                 for x in [role + " ",message,seps[i % 2]]]
                     
-                    if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                    if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                         inputs += (pre + msg + post)
                         labels+= ignore_fn(pre + msg + post)
                     else:
@@ -191,7 +191,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
             if message:
                 pre,msg,post = [encode_fn(x) 
                                 for x in [f"{role}：",message,self.sep]]
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -215,7 +215,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + "\n", message, self.sep + "\n"]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -242,7 +242,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
             if message:
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + ":", message, seps[i % 2] + "\n"]]
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg +  post)
                 else:
@@ -265,7 +265,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + ":\n", message, seps[i % 2]]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -293,7 +293,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + ": " + "<s>", message, "</s>"]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:
@@ -316,7 +316,7 @@ def build_inputs_labels(self, tokenizer, multi_rounds=True):
                 pre,msg,post = [encode_fn(x) 
                                 for x in [role + ":\n", message, self.sep]]
                 
-                if role==self.roles[0] or (multi_rounds and i<len(self.messages)-1):
+                if role==self.roles[0] or (not multi_rounds and i<len(self.messages)-1):
                     inputs += (pre + msg + post)
                     labels+= ignore_fn(pre + msg + post)
                 else:

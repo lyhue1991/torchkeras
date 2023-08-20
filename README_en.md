@@ -128,10 +128,11 @@ KerasModel. Here are some examples.
 |TextClassification——BERT | transformers |  [BERT](./examples/BERT——transformers.ipynb) |
 |TokenClassification——BERT | transformers |  [BERT_NER](./examples/BERT_NER——transformers.ipynb) |
 |FinetuneLLM——ChatGLM2_LoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_LoRA](./examples/ChatGLM2_LoRA——transformers.ipynb) |
-|FinetuneLLM——ChatGLM2_AdaLoRA 🔥🔥🔥| transformers,peft |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
-|FinetuneLLM——ChatGLM2_QLoRA 🔥🔥🔥| transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
-|FinetuneLLM——BaiChuan13B_QLoRA 🔥🔥🔥| transformers |  [BaiChuan13B_QLoRA](./examples/BaiChuan13B_QLoRA——transformers.ipynb) |
+|FinetuneLLM——ChatGLM2_AdaLoRA 🔥| transformers,peft |  [ChatGLM2_AdaLoRA](./examples/ChatGLM2_AdaLoRA——transformers.ipynb) |
+|FinetuneLLM——ChatGLM2_QLoRA🔥 | transformers |  [ChatGLM2_QLoRA_Kaggle](./examples/ChatGLM2_QLoRA_Kaggle——transformers.ipynb) |
+|FinetuneLLM——BaiChuan13B_QLoRA🔥 | transformers |  [BaiChuan13B_QLoRA](./examples/BaiChuan13B_QLoRA——transformers.ipynb) |
 |FinetuneLLM——BaiChuan13B_NER 🔥🔥🔥| transformers |  [BaiChuan13B_NER](./examples/BaiChuan13B_NER——transformers.ipynb) |
+|FinetuneLLM——BaiChuan13B_MultiRounds 🔥| transformers |  [BaiChuan13B_MultiRounds](./examples/BaiChuan13B_MultiRounds——transformers.ipynb) |
 
 
 

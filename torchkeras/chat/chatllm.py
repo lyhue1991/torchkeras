@@ -105,10 +105,11 @@ class ChatLLM:
         
     def chat(self, messages, stream=False, generation_config=None):
         model,tokenizer = self.model,self.tokenizer
-        prompt = self.build_prompt(messages)
-        inputs = tokenizer([prompt],add_special_tokens=False)
+        #prompt = self.build_prompt(messages)
+        #inputs = tokenizer([prompt],add_special_tokens=False)
+        input_ids,labels = self.build_inputs_labels(messages)
         
-        inputs = {k: torch.tensor(v).to(model.device) for k, v in inputs.items()}
+        inputs = {'input_ids': torch.tensor(input_ids).to(model.device)}
         if generation_config is not None:
             generation_config = deepcopy(model.generation_config.update(**generation_config))
         else:

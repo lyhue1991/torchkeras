@@ -8,10 +8,11 @@ from accelerate import Accelerator
 
 class StepRunner:
     def __init__(self, net, loss_fn, accelerator=None, stage = "train", metrics_dict = None, 
-                 optimizer = None, lr_scheduler = None
+                 optimizer = None, lr_scheduler = None, **kwargs,
                  ):
         self.net,self.loss_fn,self.metrics_dict,self.stage = net,loss_fn,metrics_dict,stage
         self.optimizer,self.lr_scheduler = optimizer,lr_scheduler
+        self.kwargs = kwargs
         self.accelerator = accelerator
         if self.stage=='train':
             self.net.train() 
@@ -109,12 +110,13 @@ class KerasModel(torch.nn.Module):
     
     StepRunner,EpochRunner = StepRunner,EpochRunner
     
-    def __init__(self,net,loss_fn,metrics_dict=None,optimizer=None,lr_scheduler = None):
+    def __init__(self,net,loss_fn,metrics_dict=None,optimizer=None,lr_scheduler = None,**kwargs):
         super().__init__()
         self.net,self.loss_fn,self.metrics_dict = net, loss_fn, torch.nn.ModuleDict(metrics_dict) 
         self.optimizer = optimizer if optimizer is not None else torch.optim.Adam(
             self.net.parameters(), lr=3e-4)
         self.lr_scheduler = lr_scheduler
+        self.kwargs = kwargs
         self.from_scratch = True
         
     def save_ckpt(self, ckpt_path=None, accelerator= None):
@@ -137,8 +139,10 @@ class KerasModel(torch.nn.Module):
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
         from torchkeras.utils import colorful,is_jupyter
         self.__dict__.update(locals())
+        
         self.accelerator = Accelerator(mixed_precision=mixed_precision,cpu=cpu,
             gradient_accumulation_steps=gradient_accumulation_steps)
+        
         device = str(self.accelerator.device)
         device_type = '🐌'  if 'cpu' in device else ('⚡️' if 'cuda' in device else '🚀')
         self.accelerator.print(
@@ -146,6 +150,9 @@ class KerasModel(torch.nn.Module):
     
         self.net,self.loss_fn,self.metrics_dict,self.optimizer,self.lr_scheduler= self.accelerator.prepare(
             self.net,self.loss_fn,self.metrics_dict,self.optimizer,self.lr_scheduler)
+
+        for key in self.kwargs:
+            self.kwargs[key] = self.accelerator.prepare(self.kwargs[key])
         
         train_dataloader,val_dataloader = self.accelerator.prepare(train_data,val_data)
         train_dataloader.size = train_data.size if hasattr(train_data,'size') else len(train_data)
@@ -196,7 +203,8 @@ class KerasModel(torch.nn.Module):
                     stage="train",
                     metrics_dict=deepcopy(self.metrics_dict),
                     optimizer = self.optimizer if epoch>0 else None,
-                    lr_scheduler = self.lr_scheduler if epoch>0 else None
+                    lr_scheduler = self.lr_scheduler if epoch>0 else None,
+                    **self.kwargs
             )
 
             train_epoch_runner = self.EpochRunner(train_step_runner,should_quiet)
@@ -217,7 +225,8 @@ class KerasModel(torch.nn.Module):
                     loss_fn = self.loss_fn,
                     accelerator = self.accelerator,
                     stage="val",
-                    metrics_dict= deepcopy(self.metrics_dict)
+                    metrics_dict= deepcopy(self.metrics_dict),
+                    **self.kwargs
                 )
                 val_epoch_runner = self.EpochRunner(val_step_runner,should_quiet)
                 with torch.no_grad():

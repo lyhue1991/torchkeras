@@ -11,7 +11,8 @@ class ChatLLM:
                  max_chat_rounds=20,
                  max_new_tokens=512,
                  stream=True,
-                 history=None
+                 history=None,
+                 stop_words_ids=None
                 ):
         self.model = model
         self.tokenizer = tokenizer
@@ -23,8 +24,11 @@ class ChatLLM:
         self.model_type = model_type if model_type else self.get_model_type() 
         conv = get_conv_template(self.model_type)
         self.conv_template = conv
+
+        stop_words_ids = stop_words_ids if stop_words_ids else []
+        stop_token_ids = [[w] for w in conv.stop_token_ids] if conv.stop_token_ids else []
+        self.stop_words_ids = stop_token_ids + stop_words_ids
         
-        self.stop_words_ids = [[w] for w in conv.stop_token_ids] if conv.stop_token_ids else []
         self.model.generation_config.stop_words_ids = self.stop_words_ids
         self.model.generation_config.max_new_tokens = max_new_tokens
         self.model.eval()
@@ -114,8 +118,7 @@ class ChatLLM:
         else:
             generation_config =  deepcopy(model.generation_config)
 
-        stop_words_ids = model.generation_config.stop_words_ids
-        stop_set = set([x for a in stop_words_ids for x in a])
+        stop_words_ids = self.stop_words_ids
 
         if not stream:
             from transformers import PreTrainedModel
@@ -128,9 +131,14 @@ class ChatLLM:
             )
             output_ids = output_ids[0][len(inputs["input_ids"][0]):]
             end_token_idx = 0
+            should_stop = False
             for end_token_idx in range(len(output_ids)):
-                if output_ids[end_token_idx].item() in stop_set:
-                    break
+                for stop_ids in stop_words_ids:
+                    if output_ids[end_token_idx-len(stop_ids):end_token_idx].tolist()==stop_ids:
+                        should_stop = True
+                        break
+                if should_stop:
+                    break      
             outputs = tokenizer.decode(
                 output_ids[:end_token_idx], skip_special_tokens=True
             )
@@ -153,8 +161,13 @@ class ChatLLM:
                                            ):
                     token_idx = token.item()
                     outputs.append(token_idx)
-                    if token_idx in stop_set:
-                        break 
+                    should_stop = False
+                    for stop_ids in stop_words_ids:
+                        if outputs[-len(stop_ids):]==stop_ids:
+                            should_stop = True
+                            break
+                    if should_stop:
+                        break
                     yield tokenizer.decode(outputs, skip_special_tokens=True)
             return stream_generator()
         

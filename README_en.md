@@ -133,7 +133,7 @@ KerasModel. Here are some examples.
 |FinetuneLLM——BaiChuan13B_QLoRA🔥 | transformers |  [BaiChuan13B_QLoRA](./examples/BaiChuan13B_QLoRA——transformers.ipynb) |
 |FinetuneLLM——BaiChuan13B_NER 🔥🔥🔥| transformers |  [BaiChuan13B_NER](./examples/BaiChuan13B_NER——transformers.ipynb) |
 |FinetuneLLM——BaiChuan13B_MultiRounds 🔥| transformers |  [BaiChuan13B_MultiRounds](./examples/BaiChuan13B_MultiRounds——transformers.ipynb) |
-
+|FinetuneLLM——Qwen7B_MultiRounds 🔥🔥🔥| transformers |  [Qwen7B_MultiRounds](./examples/Qwen7B_MultiRounds——transformers.ipynb) |
 
 
 **If you want to understand or modify some details of this project, feel free to read and change the source code!!!**

@@ -285,8 +285,9 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 |目标检测——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
 |语义分割——DeepLabV3++ | segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
 |实例分割——MaskRCNN | detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
-|目标检测——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
 |图片分类——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
+|目标检测——YOLOv8 🔥🔥🔥| ultralytics |  [YOLOv8_Detect](./examples/YOLOV8_Detect——ultralytics.ipynb) |
+|实例分割——YOLOv8 🔥🔥🔥| ultralytics |  [YOLOv8_Segment](./examples/YOLOV8_Segment——ultralytics.ipynb) |
 ||||
 |**NLP**|||
 |序列翻译——Transformer🔥🔥| - |  [Transformer](./examples/Dive_into_Transformer.ipynb) |

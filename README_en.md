@@ -116,11 +116,12 @@ KerasModel. Here are some examples.
 |ImageSegmentation——UNet|  - | [UNet](./examples/UNet.ipynb) |
 |ObjectDetection——SSD| -  | [SSD](./examples/SSD.ipynb) |
 |OCR——CRNN 🔥🔥| -  | [CRNN-CTC](./examples/CRNN_CTC.ipynb) |
+|ImageClassification——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
 |ObjectDetection——FasterRCNN| torchvision  |  [FasterRCNN](./examples/FasterRCNN——vision.ipynb) | 
 |ImageSegmentation——DeepLabV3++ | segmentation_models_pytorch |  [Deeplabv3++](./examples/Deeplabv3plus——smp.ipynb) |
 |InstanceSegmentation——MaskRCNN | detectron2 |  [MaskRCNN](./examples/MaskRCNN——detectron2.ipynb) |
-|ObjectDetection——YOLOv8 🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOv8——ultralytics.ipynb) |
-|ImageClassification——SwinTransformer|timm| [Swin](./examples/SwinTransformer——timm.ipynb)|
+|ObjectDetection——YOLOv8 🔥🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOV8_Detect——ultralytics.ipynb) |
+|InstanceSegmentation——YOLOv8 🔥🔥🔥| ultralytics |  [YOLOv8](./examples/YOLOV8_Segment——ultralytics.ipynb) |
 ||||
 |**NLP**|||
 |Seq2Seq——Transformer🔥🔥| - |  [Transformer](./examples/Dive_into_Transformer.ipynb) |

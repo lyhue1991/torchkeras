@@ -45,7 +45,7 @@ class ChatLLM:
             self.history = self.history[:-1]
         except Exception as err:
             print('register magic %%chat failed ...',file=sys.stderr)
-            raise err 
+            
         
     def get_model_type(self):
         model_cls = str(self.model.__class__).split('.')[-1].lower()[:-2] 

@@ -301,6 +301,7 @@ examples目录下的范例库包括了使用torchkeras对一些非常常用的�
 |LLM微调——BaiChuan13B_NER 🔥🔥🔥| transformers |  [BaiChuan13B_NER](./examples/BaiChuan13B_NER——transformers.ipynb) |
 |LLM微调——BaiChuan13B_MultiRounds 🔥| transformers |  [BaiChuan13B_MultiRounds](./examples/BaiChuan13B_MultiRounds——transformers.ipynb) |
 |LLM微调——Qwen7B_MultiRounds 🔥🔥🔥| transformers |  [Qwen7B_MultiRounds](./examples/Qwen7B_MultiRounds——transformers.ipynb) |
+|LLM微调——BaiChuan2_13B 🔥| transformers |  [BaiChuan2_13B](./examples/BaiChuan2_13B——transformers.ipynb) |
 
 
 ```python

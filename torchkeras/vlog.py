@@ -54,6 +54,9 @@ class VLog:
         dfhistory = pd.DataFrame(self.history)
         title = self.get_title()
         self.update_graph(title = title)
+        self.progress.display = True
+        self.progress.set_postfix()
+        self.progress.display = False
         
     def get_best_score(self):
         dfhistory = pd.DataFrame(self.history)
@@ -119,18 +122,16 @@ class VLog:
 if __name__=='__main__':
     import time
     import math,random
-    epochs = 10
-    batchs = 100
+    epochs = 5
+    batchs = 30
     vlog = VLog(epochs,monitor_metric='val_loss', monitor_mode='min')
     vlog.log_start() 
 
     for epoch in range(epochs):
-        
         #train
         for step in range(batchs):
             vlog.log_step({'train_loss':100-2.5*epoch+math.sin(2*step/batchs)})
             time.sleep(0.05)
-            
         #eval
         for step in range(20):
             vlog.log_step({'val_loss':100-2*epoch+math.sin(2*step/batchs)},training=False)

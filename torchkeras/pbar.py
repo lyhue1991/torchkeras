@@ -126,7 +126,6 @@ class ProgressBar:
     def on_interrupt(self,msg='interrupted'):
         comment = self.comment+f' [{msg}]' if msg else self.comment
         self.on_update(self.last_v,comment,self.postfix,interrupted=True,up=1)
-        self.display = False
         if not self.in_jupyter:
             print('\n')
         

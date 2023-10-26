@@ -51,11 +51,15 @@ class VLog:
         self.progress.set_postfix(**post_log)
         
     def log_end(self):
-        dfhistory = pd.DataFrame(self.history)
         title = self.get_title()
         self.update_graph(title = title)
         self.progress.display = True
         self.progress.set_postfix()
+        
+        dfhistory = pd.DataFrame(self.history)
+        if dfhistory['epoch'].max()<self.epochs:
+            self.progress.on_interrupt(msg='early-stopped')
+            
         self.progress.display = False
         
     def get_best_score(self):
@@ -122,7 +126,7 @@ class VLog:
 if __name__=='__main__':
     import time
     import math,random
-    epochs = 5
+    epochs = 10
     batchs = 30
     vlog = VLog(epochs,monitor_metric='val_loss', monitor_mode='min')
     vlog.log_start() 
@@ -138,4 +142,6 @@ if __name__=='__main__':
             time.sleep(0.05)
         vlog.log_epoch({'val_loss':100 - 2*epoch+2*random.random()-1,
                         'train_loss':100-2.5*epoch+2*random.random()-1})
+        #if epoch==5:
+        #    break      
     vlog.log_end()

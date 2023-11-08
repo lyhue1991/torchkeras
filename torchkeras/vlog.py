@@ -1,8 +1,7 @@
 import os 
 import numpy as np 
 import pandas as pd 
-from torchkeras.utils import is_jupyter
-from torchkeras.pbar import ProgressBar
+from torchkeras.pbar import ProgressBar,is_jupyter
 
 class VLog:
     def __init__(self, epochs, monitor_metric='val_loss', monitor_mode='min',  
@@ -42,7 +41,7 @@ class VLog:
     def log_step(self, info, training=True):
         if training:
             self.step+=1
-            if self.batchs is not None:
+            if self.batchs:
                 post_log = dict(**{'i':self.step,'n':self.batchs},**info)
             else:
                 post_log = dict(**{'step':self.step},**info)
@@ -61,6 +60,7 @@ class VLog:
             self.progress.on_interrupt(msg='early-stopped')
             
         self.progress.display = False
+        return dfhistory 
         
     def get_best_score(self):
         dfhistory = pd.DataFrame(self.history)
@@ -142,6 +142,6 @@ if __name__=='__main__':
             time.sleep(0.05)
         vlog.log_epoch({'val_loss':100 - 2*epoch+2*random.random()-1,
                         'train_loss':100-2.5*epoch+2*random.random()-1})
-        #if epoch==5:
-        #    break      
+        if epoch==5:
+            break      
     vlog.log_end()

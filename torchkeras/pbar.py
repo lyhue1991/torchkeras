@@ -1,13 +1,18 @@
-
 '''
 reference from https://github.com/fastai/fastprogress/
 '''
 import time,sys
 from IPython.display import clear_output, display, HTML
-from torchkeras.utils import is_jupyter
-
 from tqdm.utils import _term_move_up
+
 move_up = _term_move_up()
+
+def is_jupyter():
+    import contextlib
+    with contextlib.suppress(Exception):
+        from IPython import get_ipython
+        return get_ipython() is not None
+    return False
 
 def format_time(t):
     "Format `t` (in seconds) to (h):mm:ss"
@@ -21,6 +26,8 @@ def format_number(x):
         return "{:.4e}".format(x)
     else:
         return "{:.4f}".format(x)
+    
+
 
 html_progress_bar_styles = """
 <style>

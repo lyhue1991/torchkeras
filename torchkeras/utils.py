@@ -4,9 +4,7 @@ from copy import deepcopy
 import random
 import numpy as np 
 import pandas as pd 
-from PIL import Image, ImageFont, ImageDraw
 from pathlib import Path 
-from argparse import Namespace
 import os 
 
 def printlog(info):
@@ -91,6 +89,7 @@ def prettydf(df,nrows=20,ncols=20,str_len=9,show=True):
     return table
 
 def text_to_image(text):
+    from PIL import Image, ImageFont, ImageDraw
     path = Path(__file__)
     simhei = path.parent/"assets/SimHei.ttf"
     lines  = len(text.split("\n")) 
@@ -101,6 +100,7 @@ def text_to_image(text):
     return image
 
 def namespace2dict(namespace):
+    from argparse import Namespace
     result = {}
     for k,v in vars(namespace).items():
         if not isinstance(v,Namespace):
@@ -111,7 +111,6 @@ def namespace2dict(namespace):
                 result[k+"."+v_key] = v_value
     return result 
   
-
 def is_jupyter():
     import contextlib
     with contextlib.suppress(Exception):

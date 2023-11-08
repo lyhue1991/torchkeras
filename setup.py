@@ -21,8 +21,8 @@ setup(
     description="pytorch❤️keras",
     long_description=README,
     install_requires=[           
-         'accelerate>=0.20.3',
-         'tqdm',
+         #'accelerate>=0.20.3',
+         #'tqdm',
          #'torch',
          #'torchmetrics',
          #'plotly',
@@ -37,6 +37,6 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    keywords="machine-learning, deep-learning, ML, DL, pytorch, torch, keras",
+    keywords="vlog, deep-learning, DL, pytorch, torch, keras",
     python_requires='>=3.5'
 )

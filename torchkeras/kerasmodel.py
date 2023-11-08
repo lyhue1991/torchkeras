@@ -4,7 +4,6 @@ from copy import deepcopy
 import numpy as np
 import pandas as pd
 import torch
-from accelerate import Accelerator
 
 class StepRunner:
     def __init__(self, net, loss_fn, accelerator=None, stage = "train", metrics_dict = None, 
@@ -137,8 +136,10 @@ class KerasModel(torch.nn.Module):
             patience=5, monitor="val_loss", mode="min", callbacks=None, 
             plot=True,  wandb=False, quiet=None, 
             mixed_precision='no', cpu=False, gradient_accumulation_steps=1):
-        from torchkeras.utils import colorful,is_jupyter
+        
         self.__dict__.update(locals())
+        from accelerate import Accelerator
+        from torchkeras.utils import colorful,is_jupyter
         
         self.accelerator = Accelerator(mixed_precision=mixed_precision,cpu=cpu,
             gradient_accumulation_steps=gradient_accumulation_steps)

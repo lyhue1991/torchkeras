@@ -5,9 +5,10 @@ from torchkeras.pbar import ProgressBar,is_jupyter
 
 class VLog:
     def __init__(self, epochs, monitor_metric='val_loss', monitor_mode='min',  
-                 save_path='history.png', figsize = (6,4)):
+                 save_path='history.png', figsize = (6,4), bar=True):
         self.figsize = (6,4)
         self.save_path = save_path
+        self.bar = bar
         self.metric_name = monitor_metric
         self.metric_mode = monitor_mode
         self.in_jupyter = is_jupyter()
@@ -23,7 +24,8 @@ class VLog:
         x_bounds = [0, min(10,self.epochs)]
         title = f'best {self.metric_name} = ?'
         self.update_graph(title=title, x_bounds = x_bounds)
-        self.progress = ProgressBar(range(self.epochs))
+        if self.bar:
+            self.progress = ProgressBar(range(self.epochs))
         
     def log_epoch(self, info):
         self.epoch+=1
@@ -34,32 +36,36 @@ class VLog:
         n = len(dfhistory)
         x_bounds = [dfhistory['epoch'].min(), min(10+(n//10)*10,self.epochs)]
         title = self.get_title()
-        self.progress.update(dfhistory['epoch'].iloc[-1])
+        if self.bar:
+            self.progress.update(dfhistory['epoch'].iloc[-1])
+            self.step,self.batchs = 0,self.step
         self.update_graph(title = title,x_bounds = x_bounds)
-        self.step,self.batchs = 0,self.step
+        
         
     def log_step(self, info, training=True):
-        if training:
-            self.step+=1
-            if self.batchs:
-                post_log = dict(**{'i':self.step,'n':self.batchs},**info)
+        if self.bar:
+            if training:
+                self.step+=1
+                if self.batchs:
+                    post_log = dict(**{'i':self.step,'n':self.batchs},**info)
+                else:
+                    post_log = dict(**{'step':self.step},**info)
+                self.progress.set_postfix(**post_log)
             else:
-                post_log = dict(**{'step':self.step},**info)
-        else:
-            post_log = info
-        self.progress.set_postfix(**post_log)
-        
+                if self.in_jupyter:
+                    post_log = info
+                    self.progress.set_postfix(**post_log)
+                    
     def log_end(self):
         title = self.get_title()
         self.update_graph(title = title)
-        self.progress.display = True
-        self.progress.set_postfix()
-        
         dfhistory = pd.DataFrame(self.history)
-        if dfhistory['epoch'].max()<self.epochs:
-            self.progress.on_interrupt(msg='early-stopped')
-            
-        self.progress.display = False
+        if self.bar and self.in_jupyter:
+            self.progress.display = True
+            self.progress.set_postfix()
+            if dfhistory['epoch'].max()<self.epochs:
+                self.progress.on_interrupt(msg='early-stopped')
+            self.progress.display = False
         return dfhistory 
         
     def get_best_score(self):
@@ -86,8 +92,7 @@ class VLog:
         dfhistory = pd.DataFrame(self.history)
         epochs = dfhistory['epoch'] if 'epoch' in dfhistory.columns else []
         
-        metric_name = self.metric_name.replace('valid_','').replace(
-            'val_','').replace('train_','').replace('test_','')
+        metric_name = self.metric_name.replace('val_','').replace('train_','')
         
         m1 = "train_"+metric_name
         if  m1 in dfhistory.columns:

@@ -152,7 +152,6 @@ class ProgressBar:
 
     def update_bar(self, val):
         if self.total == 0:
-            warn("Your generator is empty.")
             return self.on_update(0, '100% [0/0]')
         if val ==0:
             self.comment = f'0% [0/{self.total}]'

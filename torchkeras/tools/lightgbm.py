@@ -29,7 +29,7 @@ if __name__=='__main__':
     from sklearn import datasets
     from sklearn.model_selection import train_test_split
     from sklearn.metrics import accuracy_score
-    #from torchkeras.tools.lightgbm import VLogCallback 
+    from torchkeras.tools.lightgbm import VLogCallback 
 
     def printlog(info):
         nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

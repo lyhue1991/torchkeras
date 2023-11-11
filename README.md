@@ -121,9 +121,56 @@ dfhistory=model.fit(train_data=dl_train,
 
 ```
 
-在jupyter notebook中执行训练代码，你将看到类似下面的训练可视化图像和训练日志进度条。
+在jupyter notebook中执行训练代码，你将看到类似下面的动态可视化图像和训练日志进度条。
 
 ![](./data/torchkeras_plot.gif)
+
+
+
+除此之外，torchkeras还提供了一个VLog类，方便你在任意的训练逻辑中使用动态可视化图像和日志进度条。
+
+```python
+import time
+import math,random
+from torchkeras import VLog
+
+epochs = 10
+batchs = 30
+
+#0, 指定监控北极星指标，以及指标优化方向
+vlog = VLog(epochs, monitor_metric='val_loss', monitor_mode='min') 
+
+#1, log_start 初始化动态图表
+vlog.log_start() 
+
+for epoch in range(epochs):
+    
+    #train
+    for step in range(batchs):
+        
+        #2, log_step 更新step级别日志信息，打日志，并用小进度条显示进度
+        vlog.log_step({'train_loss':100-2.5*epoch+math.sin(2*step/batchs)}) 
+        time.sleep(0.05)
+        
+    #eval    
+    for step in range(20):
+        
+        #3, log_step 更新step级别日志信息，指定training=False说明在验证模式，只打日志不更新小进度条
+        vlog.log_step({'val_loss':100-2*epoch+math.sin(2*step/batchs)},training=False)
+        time.sleep(0.05)
+        
+    #4, log_epoch 更新epoch级别日志信息，每个epoch刷新一次动态图表和大进度条进度
+    vlog.log_epoch({'val_loss':100 - 2*epoch+2*random.random()-1,
+                    'train_loss':100-2.5*epoch+2*random.random()-1})  
+
+# 5, log_end 调整坐标轴范围，输出最终指标可视化图表
+vlog.log_end()
+
+```
+
+
+
+
 
 
 
@@ -132,8 +179,6 @@ dfhistory=model.fit(train_data=dl_train,
 
 
 torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版本以及这些功能借鉴或者依赖的库的来源见下表。
-
-
 
 
 |功能| 稳定支持起始版本 | 依赖或借鉴库 |
@@ -147,6 +192,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |✅ fp16/bf16 training|   3.6.0  | 依赖accelerate|
 |✅ tensorboard callback |   3.7.0  |依赖tensorboard |
 |✅ wandb callback |  3.7.0 |依赖wandb |
+|✅ VLog |  3.9.5 | 依赖matplotlib|
 
 ```python
 
@@ -157,7 +203,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 以下范例是torchkeras的基础范例，演示了torchkeras的主要功能。
 
-包括基础训练，使用wandb可视化，使用wandb调参，使用tensorboard可视化，使用多GPU的ddp模式训练等。
+包括基础训练，使用wandb可视化，使用wandb调参，使用tensorboard可视化，使用多GPU的ddp模式训练，通用的VLog动态日志可视化等。
 
 
 |example| notebook    |  kaggle链接| 
@@ -167,6 +213,7 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 |③wandb自动化调参🔥🔥|[**wandb sweep demo**](./03，kerasmodel_tuning_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-loves-wandb-sweep"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |④tensorboard可视化| [**tensorboard example**](./04，kerasmodel_tensorboard_demo.ipynb)   |  |
 |⑤ddp/tpu训练范例| [**ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
+|⑥VLog动态日志可视化范例🔥🔥🔥| [**VLog example**](./10，vlog_example.ipynb)   |  |
 
 ```python
 

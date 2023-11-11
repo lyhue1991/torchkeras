@@ -116,7 +116,7 @@ if __name__ =='__main__':
     import plotly.graph_objs as go 
     import plotly.express as px 
 
-    #from torchkeras.tools.catboost import VLogCallback 
+    from torchkeras.tools.catboost import VLogCallback 
 
     def printlog(info):
         nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')

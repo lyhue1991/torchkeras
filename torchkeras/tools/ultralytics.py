@@ -7,14 +7,15 @@ class VLogCallback:
         self.vlog.log_step(trainer.label_loss_items(trainer.tloss, prefix='train'))
 
     def on_fit_epoch_end(self,trainer):
-        metrics = {k.split('/')[-1]:v for k,v in trainer.metrics.items()}
+        metrics = {k.split('/')[-1]:v for k,v in trainer.metrics.items() if 'loss' not in k}
         self.vlog.log_epoch(metrics)
+
         
 if __name__=='__main__':
     import os,shutil
     import torch 
     from ultralytics import YOLO 
-    #from torchkeras.tools.ultralytics import VLogCallback
+    from torchkeras.tools.ultralytics import VLogCallback
 
     # 1,prepare data
     data_url = 'https://github.com/lyhue1991/torchkeras/releases/download/v3.7.2/cats_vs_dogs.zip'
@@ -31,6 +32,7 @@ if __name__=='__main__':
 
 
     #================================================================================
+    
     # 3,train model
     epochs = 100
     vlog_cb = VLogCallback(epochs = epochs,

@@ -99,6 +99,7 @@ class VLogCallback(TrainerCallback):
         plt.close();
         
 if __name__=='__main__':
+    import os
     import numpy as np 
     import pandas as pd 
     import torch 
@@ -110,7 +111,7 @@ if __name__=='__main__':
 
     from tqdm import tqdm 
     from transformers import AdamW, get_scheduler
-    #from torchkeras.tools.transformers import VLogCallback 
+    from torchkeras.tools.transformers import VLogCallback 
     
     #================================================================================
     # 1,prepare data

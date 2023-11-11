@@ -26,7 +26,6 @@ The main code of use torchkeras is like below.
 import torch 
 import torchkeras
 
-#use torchkeras.KerasModel 
 model = torchkeras.KerasModel(net,
                               loss_fn = nn.BCEWithLogitsLoss(),
                               optimizer= torch.optim.Adam(net.parameters(),lr = 0.001),
@@ -36,7 +35,7 @@ dfhistory=model.fit(train_data=dl_train,
                     val_data=dl_val, 
                     epochs=20, 
                     patience=3, 
-                    ckpt_path='checkpoint.pt',
+                    ckpt_path='checkpoint',
                     monitor="val_acc",
                     mode="max",
                     plot=True
@@ -46,6 +45,47 @@ dfhistory=model.fit(train_data=dl_train,
 
 ![](./data/torchkeras_plot.gif)
 
+
+Besides，You can use torchkeras.VLog to get the dynamic training visualization any where as you like ~
+
+```python
+import time
+import math,random
+from torchkeras import VLog
+
+epochs = 10
+batchs = 30
+
+#0, init vlog
+vlog = VLog(epochs, monitor_metric='val_loss', monitor_mode='min') 
+
+#1, log_start 
+vlog.log_start() 
+
+for epoch in range(epochs):
+    
+    #train
+    for step in range(batchs):
+        
+        #2, log_step (for training step)
+        vlog.log_step({'train_loss':100-2.5*epoch+math.sin(2*step/batchs)}) 
+        time.sleep(0.05)
+        
+    #eval    
+    for step in range(20):
+        
+        #3, log_step (for eval step)
+        vlog.log_step({'val_loss':100-2*epoch+math.sin(2*step/batchs)},training=False)
+        time.sleep(0.05)
+        
+    #4, log_epoch
+    vlog.log_epoch({'val_loss':100 - 2*epoch+2*random.random()-1,
+                    'train_loss':100-2.5*epoch+2*random.random()-1})  
+
+# 5, log_end
+vlog.log_end()
+
+```
 
 
 **This project seems somehow powerful, but the source code is very simple.**
@@ -78,6 +118,7 @@ Versions when these features are introduced and the libraries which they used  o
 |✅ fp16/bf16 training|   3.6.0  | use accelerate|
 |✅ tensorboard callback |   3.7.0  |use tensorboard |
 |✅ wandb callback |  3.7.0 |use wandb |
+|✅ VLog |  3.9.5 | use matplotlib|
 
 
 ```python
@@ -96,7 +137,7 @@ You can follow these full examples to get started with torchkeras.
 |③kerasmodel tunning 🔥🔥🔥|[**torchkeras.KerasModel with wandb sweep demo**](./03，kerasmodel_tuning_demo.ipynb)   |  <br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-loves-wandb-sweep"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
 |④kerasmodel tensorboard | [**torchkeras.KerasModel with tensorboard example**](./04，kerasmodel_tensorboard_demo.ipynb)   |  |
 |⑤kerasmodel ddp/tpu | [**torchkeras.KerasModel  ddp tpu examples**](https://www.kaggle.com/code/lyhue1991/torchkeras-ddp-tpu-examples)   |<br><div></a><a href="https://www.kaggle.com/lyhue1991/torchkeras-ddp-tpu-examples"><img src="https://kaggle.com/static/images/open-in-kaggle.svg" alt="Open In Kaggle"></a></div><br>  |
-
+|⑥ VLog for lightgbm/ultralytics/transformers🔥🔥🔥| [**VLog example**](./10，vlog_example.ipynb)   |  |
 
 
 ### 4, Advanced Examples 

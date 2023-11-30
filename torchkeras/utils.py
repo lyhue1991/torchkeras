@@ -9,13 +9,13 @@ import os
 from typing import Dict
 """
 @author : lyhue1991
-@description : 工具类
+@description : tool class
 """
 def printlog(info: str) -> None:
     """
-        打印日志
+        print log with datetime
     Args:
-        info: 日志信息
+        info: log info
 
     Returns:
         None
@@ -27,9 +27,9 @@ def printlog(info: str) -> None:
 
 def seed_everything(seed=42) -> int:
     """
-        随机获取一个种子
+        get a random seed
     Args:
-        seed:输入一个seed
+        seed: int class seed
 
     Returns:
         seed
@@ -45,9 +45,9 @@ def seed_everything(seed=42) -> int:
 
 def delete_object(obj: object) -> None:
     """
-        删除一个对象
+        delete object
     Args:
-        obj: object对象
+        obj: object instance
 
     Returns:
         None
@@ -95,13 +95,13 @@ def colorful(obj, color="red", display_type="plain"):
 
 def prettydf(df, nrows=20, ncols=20, str_len=9, show=True) -> None:
     """
-        展示好看一点的dataframe
+        dataframe display beautiful
     Args:
         df: DataFrame
-        nrows: 行数
-        ncols: 列数
-        str_len: 字符串长度
-        show: 是否展示
+        nrows: rows
+        ncols: cols
+        str_len: string lenght
+        show: weather show
 
     Returns:
         None
@@ -135,9 +135,9 @@ def prettydf(df, nrows=20, ncols=20, str_len=9, show=True) -> None:
 
 def text_to_image(text: str) -> object:
     """
-        文本转成图片
+        text convert to image
     Args:
-        text: 文本字符串
+        text: text string
 
     Returns:
         Image
@@ -155,9 +155,9 @@ def text_to_image(text: str) -> object:
 
 def namespace2dict(namespace: str) -> Dict:
     """
-        空格转成字典
+        blank str convert dict
     Args:
-        namespace: 字符串
+        namespace: string
 
     Returns:
         dict
@@ -176,7 +176,7 @@ def namespace2dict(namespace: str) -> Dict:
 
 def is_jupyter() -> bool:
     """
-        判断是否是jupyter
+        weather is jupyter
     Returns:
         bool
     """

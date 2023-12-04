@@ -258,12 +258,6 @@ class KS(nn.Module):
         self.tp.data.zero_()
         self.fp.data.zero_()
 
-
-import torch
-import torch.nn as nn
-import sys
-
-
 class IOU(nn.Module):
     """
     IOU calculation for segmentation task (both binary and multiclass).

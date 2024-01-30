@@ -5,8 +5,8 @@ from torchkeras.pbar import ProgressBar,is_jupyter
 
 class VLog:
     def __init__(self, epochs, monitor_metric='val_loss', monitor_mode='min',  
-                 save_path='history.png', figsize = (6,4), bar=True):
-        self.figsize = (6,4)
+                 save_path='history.png', figsize = (8,6), bar=True):
+        self.figsize = figsize
         self.save_path = save_path
         self.bar = bar
         self.metric_name = monitor_metric

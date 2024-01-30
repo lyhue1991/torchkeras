@@ -61,33 +61,10 @@ def colorful(obj,color="red", display_type="plain"):
     out = '\033[{};{}m'.format(display,color_code)+s+'\033[0m'
     return out 
 
-def prettydf(df,nrows=20,ncols=20,str_len=9,show=True):
-    from prettytable import PrettyTable
-    if len(df)>nrows:
-        df = df.head(nrows).copy()
-        df.loc[len(df)] = '...'
-    if len(df.columns)>ncols:
-        df = df.iloc[:,:ncols].copy()
-        df['...'] = '...'
-        
-    def fmt(x):
-        if isinstance(x, (float,np.float64)):
-            return str(round(x,4))
-        else:
-            s = str(x) if len(str(x))<str_len else str(x)[:str_len-3]+'...'
-            for char in ['\n','\r','\t','\v','\b']:
-                s = s.replace(char,' ')
-            return s
-        
-    df = df.applymap(fmt)
-    table = PrettyTable()
-    table.field_names = df.columns.tolist()
-    rows =  df.values.tolist()
-    table.add_rows(rows)
-    if show:
-        print(table)
-    return table
-
+def prettydf(df):
+    from tabulate import tabulate
+    return tabulate(df,headers=df.columns, tablefmt="pretty")
+    
 def text_to_image(text):
     from PIL import Image, ImageFont, ImageDraw
     path = Path(__file__)
@@ -117,6 +94,18 @@ def is_jupyter():
         from IPython import get_ipython
         return get_ipython() is not None
     return False
+
+
+def parse_args(parser,use_default = is_jupyter()):
+    import argparse
+    parser.add_help = not use_default
+    if not use_default:
+        return parser.parse_args()
+    else:
+        args_dict = {}
+        for action in parser._actions:
+            args_dict[action.dest] = action.default
+        return argparse.Namespace(**args_dict)
 
     
   

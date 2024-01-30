@@ -182,9 +182,11 @@ class KerasModel(torch.nn.Module):
                 
         start_epoch = 1 if self.from_scratch else 0
         
-        if bool(plot) or quiet is None:
+        if bool(plot):
             quiet = True
-        
+        elif quiet is None:
+            quiet = False
+    
         quiet_fn = (lambda epoch:quiet) if isinstance(quiet,bool) else (
             (lambda epoch:epoch>quiet) if isinstance(quiet,int) else quiet)
         
@@ -268,6 +270,7 @@ class KerasModel(torch.nn.Module):
             return dfhistory
         
     def evaluate(self, val_data, quiet=False):
+        from accelerate import Accelerator
         accelerator = Accelerator() if not hasattr(self,'accelerator') else self.accelerator
         self.net,self.loss_fn,self.metrics_dict = accelerator.prepare(
             self.net,self.loss_fn,self.metrics_dict)

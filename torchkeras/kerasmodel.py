@@ -392,6 +392,7 @@ class KerasModel(torch.nn.Module):
         # Prepare model, loss function, and metrics for evaluation
         self.net, self.loss_fn, self.metrics_dict = accelerator.prepare(
             self.net, self.loss_fn, self.metrics_dict)
+
         val_data = accelerator.prepare(val_data)
 
         # Initialize StepRunner for validation

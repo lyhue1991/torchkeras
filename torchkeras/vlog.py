@@ -5,7 +5,7 @@ from torchkeras.pbar import ProgressBar,is_jupyter
 
 class VLog:
     def __init__(self, epochs, monitor_metric='val_loss', monitor_mode='min',
-                 save_path='history.png', figsize=(6, 4), bar=True):
+                 save_path='history.png', figsize=(8, 6), bar=True):
         """
         Initializes the VLog class.
 
@@ -17,6 +17,7 @@ class VLog:
         - figsize (tuple): Figure size for the plot.
         - bar (bool): Whether to display a progress bar.
         """
+
         self.figsize = figsize
         self.save_path = save_path
         self.bar = bar

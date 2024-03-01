@@ -1,31 +1,35 @@
 import os,sys
-import datetime
-import numpy as np 
-import pandas as pd 
+import numpy as np
 import torch
 from collections import OrderedDict
 
 layer_modules = (torch.nn.MultiheadAttention, )
 
 
-def summary(model,input_data = None,input_data_args = None,input_shape=None,input_dtype = torch.FloatTensor, batch_size=-1, 
-            *args, **kwargs):
+def summary(model, input_data=None, input_data_args=None, input_shape=None, input_dtype=torch.FloatTensor, batch_size=-1, *args, **kwargs):
     """
-    give example input data as least one way like below:
-    ① input_data ---> model.forward(input_data) 
-    ② input_data_args ---> model.forward(*input_data_args)
-    ③ input_shape & input_dtype ---> model.forward(*[torch.rand(2, *size).type(input_dtype) for size in input_shape])
+    Summarizes PyTorch model information including layers, output shapes, and parameters.
+
+    Args:
+    - model (torch.nn.Module): The PyTorch model to summarize.
+    - input_data (torch.Tensor): Example input data for the model.
+    - input_data_args (tuple): Additional input data arguments if needed.
+    - input_shape (tuple or list of tuples): Shape(s) of the input data.
+    - input_dtype (torch.dtype): Data type for input data.
+    - batch_size (int): Batch size for input data.
+    - *args, **kwargs: Additional arguments to pass to the model.
+
+    Returns:
+    - str: Summary information as a string.
     """
-    
+
     hooks = []
     summary = OrderedDict()
-    
+
     def register_hook(module):
         def hook(module, inputs, outputs):
-            
             class_name = str(module.__class__).split(".")[-1].split("'")[0]
             module_idx = len(summary)
-
             key = "%s-%i" % (class_name, module_idx + 1)
 
             info = OrderedDict()
@@ -34,12 +38,11 @@ def summary(model,input_data = None,input_data_args = None,input_shape=None,inpu
                 try:
                     info["out"] = [batch_size] + list(outputs[0].size())[1:]
                 except AttributeError:
-                    # pack_padded_seq and pad_packed_seq store feature into data attribute
                     info["out"] = [batch_size] + list(outputs[0].data.size())[1:]
             else:
                 info["out"] = [batch_size] + list(outputs.size())[1:]
 
-            info["params_nt"], info["params"] = 0, 0 
+            info["params_nt"], info["params"] = 0, 0
             for name, param in module.named_parameters():
                 info["params"] += param.nelement() * param.requires_grad
                 info["params_nt"] += param.nelement() * (not param.requires_grad)
@@ -49,14 +52,13 @@ def summary(model,input_data = None,input_data_args = None,input_shape=None,inpu
         # ignore Sequential and ModuleList and other containers
         if isinstance(module, layer_modules) or not module._modules:
             hooks.append(module.register_forward_hook(hook))
-        
 
     model.apply(register_hook)
-    
+
     # multiple inputs to the network
     if isinstance(input_shape, tuple):
         input_shape = [input_shape]
-        
+
     if input_data is not None:
         x = [input_data]
     elif input_shape is not None:
@@ -70,13 +72,13 @@ def summary(model,input_data = None,input_data_args = None,input_shape=None,inpu
         with torch.no_grad():
             model(*x) if not (kwargs or args) else model(*x, *args, **kwargs)
     except Exception:
-        # This can be usefull for debugging
+        # This can be useful for debugging
         print("Failed to run summary...")
         raise
     finally:
         for hook in hooks:
             hook.remove()
-    summary_logs = []     
+    summary_logs = []
     summary_logs.append("--------------------------------------------------------------------------")
     line_new = "{:<30}  {:>20} {:>20}".format("Layer (type)", "Output Shape", "Param #")
     summary_logs.append(line_new)
@@ -89,16 +91,16 @@ def summary(model,input_data = None,input_data_args = None,input_shape=None,inpu
         line_new = "{:<30}  {:>20} {:>20}".format(
             layer,
             str(summary[layer]["out"]),
-            "{0:,}".format(summary[layer]["params"]+summary[layer]["params_nt"])
+            "{0:,}".format(summary[layer]["params"] + summary[layer]["params_nt"])
         )
-        total_params += (summary[layer]["params"]+summary[layer]["params_nt"])
+        total_params += (summary[layer]["params"] + summary[layer]["params_nt"])
         total_output += np.prod(summary[layer]["out"])
         trainable_params += summary[layer]["params"]
         summary_logs.append(line_new)
 
     # assume 4 bytes/number
     if input_data is not None:
-        total_input_size = abs(sys.getsizeof(input_data)/(1024 ** 2.))
+        total_input_size = abs(sys.getsizeof(input_data) / (1024 ** 2.))
     elif input_shape is not None:
         total_input_size = abs(np.prod(input_shape) * batch_size * 4. / (1024 ** 2.))
     else:
@@ -117,16 +119,26 @@ def summary(model,input_data = None,input_data_args = None,input_shape=None,inpu
     summary_logs.append("Params size (MB): %0.6f" % total_params_size)
     summary_logs.append("Estimated Total Size (MB): %0.6f" % total_size)
     summary_logs.append("--------------------------------------------------------------------------")
-    
+
     summary_info = "\n".join(summary_logs)
-    
+
     print(summary_info)
     return summary_info
 
 
-def flop_summary(model,input_data):
-    from fvcore import nn as fnn 
-    print(fnn.flop_count_table(fnn.FlopCountAnalysis(model,input_data)))
+def flop_summary(model, input_data):
+    """
+    Computes and prints the FLOP (Floating Point Operations) count summary for a PyTorch model.
+
+    Args:
+    - model: The PyTorch model for which FLOP count needs to be computed.
+    - input_data: Example input data for the model.
+
+    Returns:
+    - None: Prints the FLOP count summary.
+    """
+    from fvcore import nn as fnn
+    print(fnn.flop_count_table(fnn.FlopCountAnalysis(model, input_data)))
     
     
 

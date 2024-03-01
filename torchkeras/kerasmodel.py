@@ -77,11 +77,12 @@ class StepRunner:
                         for name, metric_fn in self.metrics_dict.items()}
 
         # Include learning rate in metrics if available
-        if self.stage == "train":
-            step_metrics['lr'] = self.optimizer.state_dict()['param_groups'][0]['lr']
-        else:
-            step_metrics['lr'] = 0.0
-
+        if self.stage=="train":
+            if self.optimizer is not None:
+                step_metrics['lr'] = self.optimizer.state_dict()['param_groups'][0]['lr']
+            else:
+                step_metrics['lr'] = 0.0
+                
         return step_losses, step_metrics
 
 

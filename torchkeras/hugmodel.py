@@ -42,6 +42,33 @@ class HugModel(torch.nn.Module):
             dict: Output dictionary containing logits and loss.
         """
         # Model forward pass logic
+        if self.loss_fn is None:
+            return self.net(**batch)
+        
+        elif set(batch.keys())=={'features','labels'}:
+            features = batch['features']
+            labels = batch['labels']
+            logits = self.net.forward(features)
+            loss = self.loss_fn(logits,labels)
+            out = {'logits':logits,'loss':loss}
+            return out 
+        
+        else:
+            if len(self.feature_names)==1:
+                features = batch[self.feature_names[0]]
+                logits = self.net.forward(features)
+            else:
+                features = {k:batch[k] for k in self.feature_names}
+                logits = self.net.forward(**features)
+            
+            if len(self.label_names)==1:
+                labels = batch[self.label_names[0]]
+            else:
+                labels = {k:batch[k] for k in self.label_names}
+                
+            loss = self.loss_fn(logits,labels)
+            out = {'logits':logits,'loss':loss}
+            return out 
 
     def compute_metrics(self, eval_preds):
         """Compute evaluation metrics.
@@ -104,7 +131,78 @@ class HugModel(torch.nn.Module):
             use_mps_device: Whether to use Mixed Precision Training.
             **kwargs: Additional keyword arguments.
         """
-        # Training logic using PyTorch Lightning Trainer
+        self.train_data,self.val_data,self.monitor,self.mode = train_data,val_data,monitor,mode
+        
+        if wandb ==False:
+            os.environ["WANDB_DISABLED"] = "true"
+        else:
+            os.environ["WANDB_DISABLED"] = "false"
+            import wandb as wb
+            import datetime
+            name =datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            wb.init(
+                    project=wandb if isinstance(wandb,str) else "HugModel",
+                    name = name,save_code=True
+                )
+            self.run_id  = wb.run.id
+            self.project_name = wb.run.project_name()
+            
+        self.prefix = 'eval' if monitor.startswith('eval') else 'val'
+        monitor_metric = 'e'+monitor if monitor.startswith('val_') else monitor
+        
+        self.training_args = TrainingArguments(
+            output_dir = output_dir,
+            num_train_epochs = epochs,
+            learning_rate = learning_rate,
+            logging_steps = logging_steps,
+            
+            evaluation_strategy="steps", #epoch
+            metric_for_best_model= monitor_metric,
+            greater_is_better= False if mode=='min' else True,
+            report_to='wandb' if wandb else [],
+            
+            load_best_model_at_end= True,
+            remove_unused_columns = False,
+            label_names = self.label_names,
+            
+            per_device_train_batch_size = train_data.batch_size,
+            per_device_eval_batch_size = val_data.batch_size,
+            dataloader_drop_last=train_data.drop_last,
+            dataloader_num_workers = train_data.num_workers,
+            dataloader_pin_memory = train_data.pin_memory,
+            
+            no_cuda = no_cuda, 
+            use_mps_device = use_mps_device,
+            **kwargs
+        )
+        
+        callbacks = [EarlyStoppingCallback(early_stopping_patience= patience)]
+        
+        if plot and is_jupyter():
+            callbacks.append(VisCallback(monitor=monitor))
+      
+        self.trainer = Trainer(
+            self,
+            self.training_args,
+            train_dataset=train_data.dataset,
+            eval_dataset=val_data.dataset,
+            compute_metrics=self.compute_metrics,
+            callbacks = callbacks,
+            data_collator=self.get_collate_fn(train_data.collate_fn)
+        )
+        
+        self.trainer.train()
+        
+        #save best ckpt
+        self.ckpt_path = os.path.join(output_dir,'best')
+        self.save_ckpt(self.ckpt_path)
+                
+        if wandb:
+            arti_model = wb.Artifact('checkpoint', type='model')
+            arti_model.add_file(self.ckpt_path)
+            wb.log_artifact(arti_model)
+            wb.finish()
+    
 
     def evaluate(self, val_data, **kwargs):
         """Evaluate the model on validation data.

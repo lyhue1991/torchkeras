@@ -1,4 +1,5 @@
 from torchkeras import VLog
+
 class VLogCallback:
     def __init__(self, num_boost_round, 
                  monitor_metric='val_loss',

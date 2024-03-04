@@ -6,6 +6,11 @@ import sys
 
 simhei_file = str(Path(__file__).parent/"assets/SimHei.ttf")
 
+"""
+@author : lyhue1991
+@description : keras plot code
+"""
+
 def set_matplotlib_font(font_size=15):
     """
     Set the font style and size for Matplotlib plots.

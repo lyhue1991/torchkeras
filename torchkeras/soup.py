@@ -3,6 +3,11 @@ from tqdm import tqdm
 import torch
 from .utils import printlog, prettydf
 
+"""
+@author : lyhue1991
+@description : keras soup code
+"""
+
 def merge_state(state_list, weights=None):
     """
     Merges states from multiple checkpoints with optional weights.

@@ -5,6 +5,10 @@ from collections import OrderedDict
 
 layer_modules = (torch.nn.MultiheadAttention, )
 
+"""
+@author : lyhue1991
+@description : keras summary code
+"""
 
 def summary(model, input_data=None, input_data_args=None, input_shape=None, input_dtype=torch.FloatTensor, batch_size=-1, *args, **kwargs):
     """

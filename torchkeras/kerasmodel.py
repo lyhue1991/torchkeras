@@ -5,6 +5,10 @@ import numpy as np
 import pandas as pd
 import torch
 
+"""
+@author : lyhue1991
+@description : keras core code
+"""
 class StepRunner:
     def __init__(self, net, loss_fn, accelerator=None, stage="train", metrics_dict=None,
                  optimizer=None, lr_scheduler=None, **kwargs):

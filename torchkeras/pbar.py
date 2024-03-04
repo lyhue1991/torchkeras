@@ -5,6 +5,11 @@ import time,sys
 from IPython.display import clear_output, display, HTML
 from tqdm.utils import _term_move_up
 
+"""
+@author : lyhue1991
+@description : pbar
+"""
+
 move_up = _term_move_up()
 
 def is_jupyter():

@@ -3,6 +3,10 @@ import numpy as np
 import pandas as pd 
 from torchkeras.pbar import ProgressBar,is_jupyter
 
+"""
+@author : lyhue1991
+@description : vlog description
+"""
 class VLog:
     def __init__(self, epochs, monitor_metric='val_loss', monitor_mode='min',
                  save_path='history.png', figsize=(8, 6), bar=True):

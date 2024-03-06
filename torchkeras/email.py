@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 def send_msg(receivers,subject,msg=""):
     
     """
-    Examples:
+         Examples:
     ---------
     >> subject = "info@train_model.py" #邮件主题
     >> msg = "auc=0.98" #邮件内容
@@ -46,7 +46,7 @@ def send_msg(receivers,subject,msg=""):
 
 def monitor_run(function,receivers):
     """
-    Examples:
+       Examples:
     ---------
     >> receivers = ["265011xxxx@qq.com"] #收件人
     >> def f():

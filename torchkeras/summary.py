@@ -15,16 +15,16 @@ def summary(model, input_data=None, input_data_args=None, input_shape=None, inpu
     Summarizes PyTorch model information including layers, output shapes, and parameters.
 
     Args:
-    - model (torch.nn.Module): The PyTorch model to summarize.
-    - input_data (torch.Tensor): Example input data for the model.
-    - input_data_args (tuple): Additional input data arguments if needed.
-    - input_shape (tuple or list of tuples): Shape(s) of the input data.
-    - input_dtype (torch.dtype): Data type for input data.
-    - batch_size (int): Batch size for input data.
-    - *args, **kwargs: Additional arguments to pass to the model.
+        model (torch.nn.Module): The PyTorch model to summarize.
+        input_data (torch.Tensor): Example input data for the model.
+        input_data_args (tuple): Additional input data arguments if needed.
+        input_shape (tuple or list of tuples): Shape(s) of the input data.
+        input_dtype (torch.dtype): Data type for input data.
+        batch_size (int): Batch size for input data.
+        *args, **kwargs: Additional arguments to pass to the model.
 
     Returns:
-    - str: Summary information as a string.
+        str: Summary information as a string.
     """
 
     hooks = []
@@ -135,11 +135,11 @@ def flop_summary(model, input_data):
     Computes and prints the FLOP (Floating Point Operations) count summary for a PyTorch model.
 
     Args:
-    - model: The PyTorch model for which FLOP count needs to be computed.
-    - input_data: Example input data for the model.
+        model: The PyTorch model for which FLOP count needs to be computed.
+        input_data: Example input data for the model.
 
     Returns:
-    - None: Prints the FLOP count summary.
+        None: Prints the FLOP count summary.
     """
     from fvcore import nn as fnn
     print(fnn.flop_count_table(fnn.FlopCountAnalysis(model, input_data)))

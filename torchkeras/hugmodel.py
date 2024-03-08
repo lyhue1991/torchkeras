@@ -8,6 +8,11 @@ import os
 import matplotlib.pyplot as plt 
 from torchkeras.utils import is_jupyter
 
+"""
+@author : lyhue1991
+@description : hud model code
+"""
+
 class HugModel(torch.nn.Module):
     """Custom PyTorch module for training and evaluating models using the Hugging Face Transformers library."""
 

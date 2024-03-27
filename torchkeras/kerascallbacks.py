@@ -14,10 +14,10 @@ class TensorBoardCallback:
         TensorBoard callback for logging training progress.
 
         Args:
-        - save_dir (str): Directory to save TensorBoard logs.
-        - model_name (str): Name of the model.
-        - log_weight (bool): Whether to log model weights.
-        - log_weight_freq (int): Frequency of logging model weights during training.
+        -  save_dir (str): Directory to save TensorBoard logs.
+        -  model_name (str): Name of the model.
+        -  log_weight (bool): Whether to log model weights.
+        -  log_weight_freq (int): Frequency of logging model weights during training.
         """
         from torch.utils.tensorboard import SummaryWriter
         self.__dict__.update(locals())

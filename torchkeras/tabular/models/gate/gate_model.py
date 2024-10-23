@@ -3,7 +3,6 @@
 # For license information, see LICENSE.TXT
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from ..common.heads import blocks
 from ..common.layers import Add, Embedding1dLayer, GatedFeatureLearningUnit, NeuralDecisionTree
@@ -150,13 +149,9 @@ class GatedAdditiveTreesBackbone(nn.Module):
 class CustomHead(nn.Module):
     """Custom Head for GATE.
 
-    Args:
-        input_dim (int): Input dimension of the head
-        hparams (DictConfig): Config of the model
-
     """
 
-    def __init__(self, input_dim: int, hparams: DictConfig):
+    def __init__(self, input_dim: int, hparams):
         super().__init__()
         self.hparams = hparams
         self.input_dim = input_dim
@@ -202,7 +197,7 @@ class CustomHead(nn.Module):
 
 
 class GatedAdditiveTreeEnsembleModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

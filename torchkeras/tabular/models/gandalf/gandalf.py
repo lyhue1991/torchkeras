@@ -3,7 +3,6 @@
 # For license information, see LICENSE.TXT
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from ..common.layers import Add, Embedding1dLayer, GatedFeatureLearningUnit
 from ..common.layers.activations import t_softmax
@@ -65,7 +64,7 @@ class GANDALFBackbone(nn.Module):
 
 
 class GANDALFModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

@@ -3,8 +3,7 @@ from torch import nn
 from torch import nn,Tensor 
 import torch.nn.functional as F 
 
-from omegaconf import DictConfig
-from typing import Any, Dict, List, Optional, Union
+from typing import Any,  List, Optional, Union
 
 from ..base_model import BaseModel
 from ..common.layers import Embedding1dLayer
@@ -133,7 +132,7 @@ class MLP(nn.Module):
 
 
 class PeMLPBackbone(nn.Module):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__()
         self.hparams = config
 
@@ -171,7 +170,7 @@ class PeMLPBackbone(nn.Module):
         return self.mlp(x)
         
 class PeMLPModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property
@@ -191,7 +190,7 @@ class PeMLPModel(BaseModel):
         self._embedding_layer = self._backbone._build_embedding_layer()
         self.head = self._get_head_from_config()
         
-    def forward(self, x: Dict) -> Dict[str, Any]:
+    def forward(self, x):
         x = self.embed_input(x)
         x = self.compute_backbone(x)
         return self.compute_head(x)

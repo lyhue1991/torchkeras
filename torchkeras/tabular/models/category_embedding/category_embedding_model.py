@@ -4,7 +4,6 @@
 """Category Embedding Model."""
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from torchkeras.tabular.models.common.layers import Embedding1dLayer
 from torchkeras.tabular.utils import _initialize_layers, _linear_dropout_bn
@@ -13,7 +12,7 @@ from ..base_model import BaseModel
 
 
 class CategoryEmbeddingBackbone(nn.Module):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__()
         self.hparams = config
         self._build_network()
@@ -56,7 +55,7 @@ class CategoryEmbeddingBackbone(nn.Module):
 
 
 class CategoryEmbeddingModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

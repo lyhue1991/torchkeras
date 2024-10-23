@@ -6,7 +6,6 @@ from collections import OrderedDict
 
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from ..common.layers.batch_norm import BatchNorm1d
 
@@ -15,7 +14,7 @@ from ..common.layers import AppendCLSToken, Embedding2dLayer, TransformerEncoder
 
 
 class FTTransformerBackbone(nn.Module):
-    def __init__(self, config: DictConfig):
+    def __init__(self, config):
         super().__init__()
         assert config.share_embedding_strategy in [
             "add",
@@ -95,7 +94,7 @@ class FTTransformerBackbone(nn.Module):
 
 
 class FTTransformerModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

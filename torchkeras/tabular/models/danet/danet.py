@@ -7,7 +7,6 @@ import warnings
 
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from torchkeras.tabular.models.common.layers.embeddings import Embedding1dLayer
 
@@ -77,25 +76,9 @@ class DANetBackbone(nn.Module):
             out = layer(x, pre_out=out)
         return out
 
-    # Not Tested Properly
-    # def _calculate_feature_importance(self):
-    #     n, h, f, _ = self.attention_weights_[0].shape
-    #     device = self.attention_weights_[0].device
-    #     L = len(self.attention_weights_)
-    #     self.local_feature_importance = torch.zeros((n, f), device=device)
-    #     for attn_weights in self.attention_weights_:
-    #         self.local_feature_importance += attn_weights[:, :, :, -1].sum(dim=1)
-    #     self.local_feature_importance = (1 / (h * L)) * self.local_feature_importance[
-    #         :, :-1
-    #     ]
-    #     self.feature_importance_ = (
-    #         self.local_feature_importance.mean(dim=0).detach().cpu().numpy()
-    #     )
-    # self.feature_importance_count_+=attn_weights.shape[0]
-
 
 class DANetModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

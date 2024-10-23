@@ -5,18 +5,14 @@
 """AutomaticFeatureInteraction Model."""
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from ..common.layers import Embedding2dLayer
 from torchkeras.tabular.utils import _initialize_layers, _linear_dropout_bn
 from ..base_model import BaseModel
 
 class AutoIntBackbone(nn.Module):
-    def __init__(self, config: DictConfig):
+    def __init__(self, config):
         """Automatic Feature Interaction Network.
-
-        Args:
-            config (DictConfig): config of the model
 
         """
         super().__init__()
@@ -107,7 +103,7 @@ class AutoIntBackbone(nn.Module):
 
 
 class AutoIntModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

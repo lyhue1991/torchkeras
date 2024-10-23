@@ -1,9 +1,8 @@
 import os
 import re
 import numpy as np 
-from dataclasses import MISSING, dataclass, field
+from dataclasses import dataclass,MISSING, make_dataclass, fields, field, asdict
 from typing import Any, Dict, Iterable, List, Optional
-from omegaconf import OmegaConf,DictConfig
 from torchkeras.tabular.models.common import heads
 
 def get_inferred_config(ds):
@@ -38,20 +37,32 @@ def get_inferred_config(ds):
         embedding_dims=embedding_dims
     )
     
-def safe_merge_config(config: DictConfig, inferred_config: DictConfig) -> DictConfig:
+def safe_merge_config(config, inferred_config):
     """Merge two configurations.
 
     Args:
         config: The base configuration.
         inferred_config: The custom configuration.
-
     Returns:
         The merged configuration.
-
     """
     # using base config values if exist
     inferred_config.embedding_dims = config.embedding_dims or inferred_config.embedding_dims
-    merged_config = OmegaConf.merge(OmegaConf.to_container(config), OmegaConf.to_container(inferred_config))
+
+    fields_list1 = fields(config.__class__)
+    fields_list2 = fields(inferred_config.__class__)
+    
+    fields_info1 = [(f.name,f.type) for f in fields_list1]
+    name1_list = [x[0] for x in fields_info1]
+    fields_info2 = [(f.name,f.type)
+                    for f in fields_list2 if f.name not in name1_list]
+    fields_info = fields_info1 + fields_info2
+    MergedConfig = make_dataclass('MergedConfig', fields_info)
+    
+    merged_dict = asdict(config)
+    merged_dict.update(asdict(inferred_config))
+    
+    merged_config = MergedConfig(**merged_dict)
     return merged_config
 
 @dataclass
@@ -247,8 +258,7 @@ class ModelConfig:
             
     def merge_dataset_config(self,ds):
         inferred_config = get_inferred_config(ds)
-        merged_config = safe_merge_config(OmegaConf.structured(self),
-                        OmegaConf.structured(inferred_config))
+        merged_config = safe_merge_config(self,inferred_config)
         return merged_config
         
 

@@ -11,7 +11,7 @@ import numpy as np
 import pandas as pd 
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import DictConfig
 
 from torch import Tensor
 from torch.optim import Optimizer

@@ -1,14 +1,12 @@
 import math
 
 import torch
-from omegaconf import DictConfig
 from torch import nn
 from torch.autograd import Variable
 from torch.distributions import Categorical
 
 from torchkeras.tabular.models.common.heads import config as head_config
 from torchkeras.tabular.utils import _initialize_layers, _linear_dropout_bn
-
 
 def config_link(r):
     """This is a helper function decorator to link the config to the head."""
@@ -73,7 +71,7 @@ LOG2PI = math.log(2 * math.pi)
 class MixtureDensityHead(nn.Module):
     _config_template = head_config.MixtureDensityHeadConfig
 
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         self.hparams = config
         super().__init__()
         self._build_network()
@@ -157,27 +155,3 @@ class MixtureDensityHead(nn.Module):
             y_hat = torch.median(samples, dim=-1).values
         return y_hat.unsqueeze(1)
 
-
-# @config_link(head_config.LinearHeadConfig)
-# def linear_head(in_units: int, config: DictConfig):
-#     # Linear Layers
-#     _layers = []
-#     _curr_units = in_units
-#     for units in config.layers.split("-"):
-#         _layers.extend(
-#             _linear_dropout_bn(
-#                 config.activation,
-#                 config.initialization,
-#                 config.use_batch_norm,
-#                 _curr_units,
-#                 int(units),
-#                 config.dropout,
-#             )
-#         )
-#         _curr_units = int(units)
-#     linear_layers = nn.Sequential(*_layers)
-#     return Head(
-#         layers=linear_layers,
-#         output_dim=_curr_units,
-#         config_template=head_config.LinearHeadConfig,
-#     )

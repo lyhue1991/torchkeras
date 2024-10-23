@@ -21,8 +21,6 @@ setup(
     description="pytorch❤️keras",
     long_description=README,
     install_requires=[     
-        'einops',
-        'omegaconf',
          #'accelerate>=0.20.3',
          #'tqdm',
          #'torch',

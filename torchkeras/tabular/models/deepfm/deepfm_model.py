@@ -3,7 +3,6 @@ from torch import nn
 from torch import nn,Tensor 
 import torch.nn.functional as F 
 
-from omegaconf import DictConfig
 from typing import Dict,Any
 from ..base_model import BaseModel
 
@@ -116,7 +115,7 @@ class MultiLayerPerceptron(nn.Module):
 
 
 class DeepFMBackbone(nn.Module):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__()
         self.hparams = config
         
@@ -188,7 +187,7 @@ class DeepFMBackbone(nn.Module):
         
 
 class DeepFMModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

@@ -6,12 +6,11 @@ from typing import Dict
 
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 from ..base_model import BaseModel
 
 
 class TabNetBackbone(nn.Module):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__()
         self.hparams = config
         self._build_network()
@@ -73,7 +72,7 @@ class TabNetBackbone(nn.Module):
 
 
 class TabNetModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

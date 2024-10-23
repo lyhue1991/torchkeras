@@ -3,7 +3,6 @@ from torch import nn
 from torch import nn,Tensor 
 import torch.nn.functional as F 
 
-from omegaconf import DictConfig
 from typing import Dict,Any
 from ..base_model import BaseModel
 
@@ -93,7 +92,7 @@ class FMLayer(nn.Module):
 
 
 class FMBackbone(nn.Module):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__()
         self.hparams = config
         d_numerical = self.hparams.continuous_dim
@@ -138,7 +137,7 @@ class FMBackbone(nn.Module):
 
 
 class FMModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

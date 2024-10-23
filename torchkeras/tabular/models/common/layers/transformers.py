@@ -1,10 +1,7 @@
-# W605
-import math
 from typing import Optional
-
+import math
 import torch
-from torch import einsum, nn
-
+from torch import nn
 from torchkeras.tabular.utils import _initialize_kaiming
 
 from .gated_units import GEGLU, PositionWiseFeedForward, ReGLU, SwiGLU
@@ -43,6 +40,7 @@ class MultiHeadedAttention(nn.Module):
         assert input_dim % num_heads == 0, "'input_dim' must be multiples of 'num_heads'"
         inner_dim = head_dim * num_heads
         self.n_heads = num_heads
+        self.head_dim = head_dim
         self.scale = head_dim**-0.5
         self.keep_attn = keep_attn
 
@@ -52,18 +50,29 @@ class MultiHeadedAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
-        from einops import rearrange
+        
+        b = x.size(0)
         h = self.n_heads
+        d = self.head_dim 
+        
         q, k, v = self.to_qkv(x).chunk(3, dim=-1)
-        q, k, v = (rearrange(t, "b n (h d) -> b h n d", h=h) for t in (q, k, v))
-        sim = einsum("b h i d, b h j d -> b h i j", q, k) * self.scale
 
+        q, k, v = [t.view(b, -1, h, d).transpose(1, 2) for t in (q,k,v)]
+        sim = q@k.transpose(-2,-1)*self.scale
+        #from einops import rearrange
+        #q, k, v = (rearrange(t, "b n (h d) -> b h n d", h=h) for t in (q, k, v))
+        #sim = torch.einsum("b h i d, b h j d -> b h i j", q, k) * self.scale
+        
         attn = sim.softmax(dim=-1)
         attn = self.dropout(attn)
         if self.keep_attn:
             self.attn_weights = attn
-        out = einsum("b h i j, b h j d -> b h i d", attn, v)
-        out = rearrange(out, "b h n d -> b n (h d)", h=h)
+
+        out = attn@v
+        out = out.transpose(1, 2).contiguous().view(b, -1, h*d)
+        #out = torch.einsum("b h i j, b h j d -> b h i d", attn, v)
+        #out = rearrange(out, "b h n d -> b n (h d)", h=h)
+        
         return self.to_out(out)
 
 

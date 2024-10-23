@@ -17,8 +17,7 @@ from typing import Dict
 
 import torch
 import torch.nn as nn
-from einops import rearrange
-from omegaconf import DictConfig
+
 
 from ..common.layers.batch_norm import BatchNorm1d
 from ..base_model import BaseModel
@@ -26,7 +25,7 @@ from ..common.layers import Embedding2dLayer, TransformerEncoderBlock
 
 
 class TabTransformerBackbone(nn.Module):
-    def __init__(self, config: DictConfig):
+    def __init__(self, config):
         super().__init__()
         assert config.share_embedding_strategy in [
             "add",
@@ -78,7 +77,11 @@ class TabTransformerBackbone(nn.Module):
             for i, block in enumerate(self.transformer_blocks):
                 x_cat = block(x_cat)
             # Flatten (Batch, N_Categorical, Hidden) --> (Batch, N_CategoricalxHidden)
-            x = rearrange(x_cat, "b n h -> b (n h)")
+            #from einops import rearrange
+            #x = rearrange(x_cat, "b n h -> b (n h)")
+            b = x_cat.size(0)
+            x = x_cat.view(b,-1)
+        
         if self.hparams.continuous_dim > 0:
             if self.hparams.batch_norm_continuous_input:
                 x_cont = self.normalizing_batch_norm(x_cont)
@@ -90,7 +93,7 @@ class TabTransformerBackbone(nn.Module):
 
 
 class TabTransformerModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     @property

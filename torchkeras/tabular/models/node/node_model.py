@@ -5,7 +5,6 @@ import warnings
 
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from ..base_model import BaseModel
 from ..common import activations
@@ -14,7 +13,7 @@ from ..common.layers import Embedding1dLayer
 from .architecture_blocks import DenseODSTBlock
 
 class NODEBackbone(nn.Module):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__()
         self.hparams = config
         # self.hparams.output_dim = (0 if self.hparams.output_dim is None else self.hparams.output_dim)
@@ -56,7 +55,7 @@ class NODEBackbone(nn.Module):
 
 
 class NODEModel(BaseModel):
-    def __init__(self, config: DictConfig, **kwargs):
+    def __init__(self, config, **kwargs):
         super().__init__(config, **kwargs)
 
     def subset(self, x):

@@ -3,15 +3,11 @@ import math
 from typing import Optional
 
 import torch
-from einops import rearrange
 from torch import einsum, nn
 
 from torchkeras.tabular.utils import _initialize_kaiming
 
 from .gated_units import GEGLU, PositionWiseFeedForward, ReGLU, SwiGLU
-
-# from . import activations
-
 
 GATED_UNITS = {"GEGLU": GEGLU, "ReGLU": ReGLU, "SwiGLU": SwiGLU}
 
@@ -56,6 +52,7 @@ class MultiHeadedAttention(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
+        from einops import rearrange
         h = self.n_heads
         q, k, v = self.to_qkv(x).chunk(3, dim=-1)
         q, k, v = (rearrange(t, "b n (h d) -> b h n d", h=h) for t in (q, k, v))

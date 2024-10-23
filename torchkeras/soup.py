@@ -69,19 +69,74 @@ def greedy_soup(model, ckpt_path_list, num_models=120, num_warmup=0, saved_ckpt_
     Returns:
         float: Evaluation score
     """
-    dfckpt = pd.DataFrame({'ckpt_path': ckpt_path_list})
+    dfckpt = pd.DataFrame({'ckpt_path':ckpt_path_list})
 
     scores = []
     printlog('step1: sort ckpt_path by metric...')
-
+    
     loop = tqdm(dfckpt['ckpt_path'])
     for ckpt_path in loop:
         model.load_ckpt(ckpt_path)
-        score = model.evaluate(model.val_data, quiet=True)[model.monitor]
+        score = model.evaluate(model.val_data,quiet=True)[model.monitor]
         scores.append(score)
-        loop.set_postfix(**{model.monitor: score})
+        loop.set_postfix(**{model.monitor:score})
 
-    dfckpt['score'] = score
+    dfckpt['score'] = scores
+    dfckpt = dfckpt.sort_values('score',ascending= True if model.mode=='min' else False) 
+    prettydf(dfckpt,str_len=50,show=True)
+    
+    dfckpt['weights'] = [0 for _ in dfckpt['ckpt_path']]
+    
+    loop = tqdm(range(num_models),total = num_models)
+    
+    printlog('step2: start greedy merge...')
+    
+    for i in loop:
+        
+        if i==0:
+            cur_state = torch.load(dfckpt['ckpt_path'].iloc[0])
+            cur_score = dfckpt['score'].iloc[0]
+            dfckpt['weights'].iloc[0] = 1
+            loop.set_postfix(**{'i':i,'score':cur_score})
+
+        elif i+1<=num_warmup:
+            state_i = torch.load(dfckpt['ckpt_path'].iloc[i])
+            cur_state = merge_state(state_list = [cur_state, state_i],
+                                    weights =[i,1])
+            dfckpt['weights'].iloc[i] = dfckpt['weights'].iloc[i]+1 
+            model.net.load_state_dict(cur_state)
+            cur_score = model.evaluate(model.val_data,quiet=True)[model.monitor]
+            
+        else:
+            for j in range(len(dfckpt)):
+                state_j = torch.load(dfckpt['ckpt_path'].iloc[j])
+                maybe_state = merge_state(state_list = [cur_state,state_j],
+                                          weights = [i,1]
+                                         )
+                model.net.load_state_dict(maybe_state)
+                maybe_score = model.evaluate(model.val_data,quiet=True)[model.monitor]
+                if (model.mode=='max' and maybe_score>cur_score) or (
+                    model.mode=='min' and maybe_score<cur_score):
+                    
+                    cur_state = maybe_state
+                    cur_score = maybe_score
+                    dfckpt['weights'].iloc[j] = dfckpt['weights'].iloc[j]+1
+                    loop.set_postfix(**{'i':i,'score':cur_score})
+                    break
+            else:
+                loop.set_postfix(**{'i':i,'score':cur_score})
+                loop.close()
+                print('could not get better score, early stopping...')
+                break 
+ 
+    printlog('step3: save result...')
+    model.net.load_state_dict(cur_state)
+    torch.save(model.net.state_dict(),saved_ckpt_path)
+    prettydf(dfckpt,str_len=50,show=True)
+    print('best_score = ', cur_score)
+    print('greedy soup ckpt saved at path: '+saved_ckpt_path)
+    
+    return cur_score
 
 
 def optuna_soup(model,

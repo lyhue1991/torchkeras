@@ -30,6 +30,7 @@ class TabularDataset(Dataset):
         self.task = task
         self.n = data.shape[0]
         self.target = target
+        self.start_id = start_id 
         self.ids = np.arange(start_id,start_id+self.n)
         if target:
             self.y = data[target].astype(np.float32).values
@@ -82,10 +83,13 @@ class TabularDataset(Dataset):
             "id": torch.tensor(self.ids[idx],dtype=torch.long),
         }
     def get_batch(self, batch_ids):
+        batch_idxes = batch_ids - self.start_id
         batch = {
-            "target": torch.tensor(self.y[batch_ids]),
-            "continuous": (torch.tensor(self.continuous_X[batch_ids]) if self.continuous_cols else torch.Tensor()),
-            "categorical": (torch.tensor(self.categorical_X[batch_ids]) if self.categorical_cols else torch.Tensor()),
-            "id": torch.tensor(self.ids[batch_ids],dtype=torch.long),
+            "target": torch.tensor(self.y[batch_idxes]),
+            "continuous": (torch.tensor(self.continuous_X[batch_idxes]) if self.continuous_cols else torch.Tensor()),
+            "categorical": (torch.tensor(self.categorical_X[batch_idxes]) if self.categorical_cols else torch.Tensor()),
+            "id": torch.tensor(self.ids[batch_idxes],dtype=torch.long),
         }
         return batch 
+        
+

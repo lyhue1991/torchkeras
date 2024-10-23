@@ -10,7 +10,9 @@ from . import (
     tabnet,
     fm,
     deepfm,
-    deepcross
+    deepcross,
+    pemlp,
+    deepknn
 )
 
 from .autoint import AutoIntConfig, AutoIntModel
@@ -25,8 +27,9 @@ from .tab_transformer import TabTransformerConfig, TabTransformerModel
 from .tabnet import TabNetModel, TabNetModelConfig
 from .fm import FMModel, FMConfig
 from .deepfm import DeepFMModel, DeepFMConfig
-from .deepcross import DeepCrossModel, DeepCrossConfig 
-
+from .deepcross import DeepCrossModel, DeepCrossConfig
+from .pemlp import PeMLPModel, PeMLPConfig
+from .deepknn import DeepKNNModel, DeepKNNConfig
 
 __all__ = [
     "BaseModel",
@@ -78,5 +81,15 @@ __all__ = [
 
     "DeepCrossConfig",
     "DeepCrossModel",
-    "deepcross"
+    "deepcross",
+
+    "PeMLPConfig",
+    "PeMLPModel",
+    "pemlp",
+
+    "DeepKNNConfig",
+    "DeepKNNModel",
+    "deepknn",
+
+    
 ]

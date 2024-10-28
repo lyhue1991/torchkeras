@@ -181,8 +181,6 @@ class DeepFMBackbone(nn.Module):
         #deep部分
         x = x + self.deep(x_embedding.view(-1,self.deep_in))
         
-        if self.n_classes==1:
-            x = x.squeeze(-1)
         return x
         
 

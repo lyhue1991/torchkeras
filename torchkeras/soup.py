@@ -1,12 +1,16 @@
 import pandas as pd
-from tqdm import tqdm
 import torch
-from .utils import printlog, prettydf
+import datetime 
+from tqdm.auto  import tqdm 
 
-"""
-@author : lyhue1991
-@description : keras soup code
-"""
+def printlog(info: str) -> None:
+    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print("\n" + "==========" * 8 + "%s" % now_time)
+    print(info + '...\n\n')
+
+def prettydf(df):
+    from tabulate import tabulate
+    return tabulate(df,headers=df.columns, tablefmt="pretty")
 
 def merge_state(state_list, weights=None):
     """
@@ -53,9 +57,14 @@ def uniform_soup(model, ckpt_path_list, saved_ckpt_path='checkpoint_uniform_soup
     model.net.load_state_dict(state)
     score = model.evaluate(model.val_data, quiet=True)[model.monitor]
     torch.save(model.net.state_dict(), saved_ckpt_path)
+    
+    print(f'saved uniform soup state_dict at {saved_ckpt_path}')
+    
     return score
 
-def greedy_soup(model, ckpt_path_list, num_models=120, num_warmup=0, saved_ckpt_path='checkpoint_greedy_soup.pt'):
+def greedy_soup(model, ckpt_path_list, 
+                num_models=None, num_warmup=None, 
+                saved_ckpt_path='checkpoint_greedy_soup.pt'):
     """
     Greedily merges states from multiple checkpoints and evaluates the model
 
@@ -69,6 +78,12 @@ def greedy_soup(model, ckpt_path_list, num_models=120, num_warmup=0, saved_ckpt_
     Returns:
         float: Evaluation score
     """
+    if num_models is None:
+        num_models = len(ckpt_path_list)*100 
+    if num_warmup is None:
+        num_warmup = len(ckpt_path_list)*5
+
+    
     dfckpt = pd.DataFrame({'ckpt_path':ckpt_path_list})
 
     scores = []
@@ -100,10 +115,13 @@ def greedy_soup(model, ckpt_path_list, num_models=120, num_warmup=0, saved_ckpt_
             loop.set_postfix(**{'i':i,'score':cur_score})
 
         elif i+1<=num_warmup:
-            state_i = torch.load(dfckpt['ckpt_path'].iloc[i])
+            k = i%(len(ckpt_path_list))
+            dfckpt.loc[k,'weights'] = 1 + dfckpt['weights'].loc[k]
+            
+            state_i = torch.load(dfckpt['ckpt_path'].iloc[k])
             cur_state = merge_state(state_list = [cur_state, state_i],
                                     weights =[i,1])
-            dfckpt['weights'].iloc[i] = dfckpt['weights'].iloc[i]+1 
+            
             model.net.load_state_dict(cur_state)
             cur_score = model.evaluate(model.val_data,quiet=True)[model.monitor]
             
@@ -141,10 +159,9 @@ def greedy_soup(model, ckpt_path_list, num_models=120, num_warmup=0, saved_ckpt_
 
 def optuna_soup(model,
                  ckpt_path_list,
-                 n_trials=50,
+                 n_trials=100,
                  timeout=1200,
-                 saved_ckpt_path='checkpoint_optuna_soup.pt',
-                 plot=True):
+                 saved_ckpt_path='checkpoint_optuna_soup.pt'):
     """
     Perform an Optuna search to find optimal weights for checkpoint ensemble
 
@@ -154,7 +171,6 @@ def optuna_soup(model,
         n_trials (int): Number of optimization trials
         timeout (int): Timeout for the optimization in seconds
         saved_ckpt_path (str): Path to save the final checkpoint
-        plot (bool): Whether to plot the optimization analysis
 
     Returns:
         float: Best evaluation score
@@ -167,12 +183,12 @@ def optuna_soup(model,
         state = merge_state(ckpt_path_list, weights=[weights_dict[name] for name in ckpt_path_list])
         model.net.load_state_dict(state)
         score = model.evaluate(model.val_data, quiet=True)[model.monitor]
-        print(score)
         return score
 
     study = optuna.create_study(
         direction="maximize" if model.mode == 'max' else "minimize",
-        study_name="optuna_ensemble"
+        study_name="optuna_ensemble",
+        
     )
 
     printlog('step1: start Optuna search...')
@@ -189,11 +205,7 @@ def optuna_soup(model,
     print(f"best_score = {best_score}")
     print("best_weights:")
     print(best_weights)
-    print(f'Optuna soup ckpt saved at path: {saved_ckpt_path}')
-
-    if plot:
-        printlog('step3: plot Optuna analysis...')
-        optuna.visualization.plot_optimization_history(study).show()
-        optuna.visualization.plot_parallel_coordinate(study).show()
+    print(f'optuna soup ckpt saved at path: {saved_ckpt_path}')
 
     return best_score
+

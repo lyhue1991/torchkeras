@@ -53,5 +53,9 @@ class DeepKNNConfig(ModelConfig):
             default=0.013675285379929491,
             metadata={"help": "The frequency_scale of the PLREmbedding. Defaults to 0.013675285379929491"},
     )
+    _module_src: str = field(default="models.deepknn")
+    _model_name: str = field(default="DeepKNNModel")
+    _backbone_name: str = field(default="None")
+    _config_name: str = field(default="DeepKNNConfig")
     
     

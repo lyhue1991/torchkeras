@@ -11,7 +11,6 @@ import numpy as np
 import pandas as pd 
 import torch
 import torch.nn as nn
-from omegaconf import DictConfig
 
 from torch import Tensor
 from torch.optim import Optimizer
@@ -23,13 +22,13 @@ from torchkeras.tabular.utils import reset_all_weights
 class BaseModel(nn.Module,metaclass=ABCMeta):
     def __init__(
         self,
-        config: DictConfig,
+        config,
         **kwargs,
     ):
         """Base Model for PyTorch Tabular.
 
         Args:
-            config (DictConfig): The configuration for the model.
+            config (dataclass): The configuration for the model.
             kwargs (Dict, optional): Additional keyword arguments.
 
         """

@@ -208,9 +208,6 @@ class DeepCrossBackbone(nn.Module):
             x_deep = self.mlp(x_total)
             x_deep_cross = torch.cat([x_deep,x_cross],axis = 1)
             x_out = self.last_linear(x_deep_cross)
-            
-        if self.n_classes==1:
-            x_out = x_out.squeeze(-1)
         
         return x_out 
 

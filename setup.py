@@ -12,7 +12,6 @@ def get_version():
     file = PARENT/'torchkeras/__init__.py'
     return re.search(r'__version__="(.*)"', file.read_text(encoding="utf-8"),re.M)[1]
 
-
 setup(
     name="torchkeras",
     version=get_version(),
@@ -32,11 +31,13 @@ setup(
     url="https://github.com/lyhue1991/torchkeras",
     packages=find_namespace_packages(exclude=['torchkeras.assets','data']),
     include_package_data=True,
+    license="MIT",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
     keywords="vlog, deep-learning, DL, pytorch, torch, keras",
-    python_requires='>=3.5'
+    python_requires='>=3.5',
+    # 确保没有使用 license_file 或 metadata_version 参数
 )

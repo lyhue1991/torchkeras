@@ -192,7 +192,7 @@ def optuna_soup(model,
     )
 
     printlog('step1: start Optuna search...')
-    study.optimize(objective, n_trials=n_trials, timeout=timeout)
+    study.optimize(objective, n_trials=n_trials, timeout=timeout, show_progress_bar=True)
 
     printlog('step2: save result...')
     best_weights = study.best_params

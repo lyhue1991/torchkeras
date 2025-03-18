@@ -5,7 +5,8 @@ class ChatLLM:
                  max_chat_rounds=20,
                  max_new_tokens=512,
                  stream=True,
-                 history=None
+                 history=None,
+                 system='You are a helpful assistant.',
                 ):
         self.model = model
         self.tokenizer = tokenizer
@@ -14,6 +15,7 @@ class ChatLLM:
         self.history = [] if history is None else history
         self.max_chat_rounds = max_chat_rounds
         self.stream = stream
+        self.system = system
         
         try:
             self.register_magic() 
@@ -77,7 +79,7 @@ class ChatLLM:
         len_his = len(self.history)
         if len_his>=self.max_chat_rounds+1:
             self.history = self.history[len_his-self.max_chat_rounds:]
-        messages = self.build_messages(query=query,history=self.history)
+        messages = self.build_messages(query=query,history=self.history,system=self.system)
         response = self.chat(messages,stream=self.stream)
         self.history.append((query,response))
         

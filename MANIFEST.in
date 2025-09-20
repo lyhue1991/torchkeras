@@ -1,0 +1,10 @@
+include torchkeras/*.ttf
+include setup.py
+graft torchkeras/assets
+prune torchkeras/assets/*checkpoint*
+recursive-include torchkeras *.ttf
+recursive-include torchkeras/assets *.jpg
+recursive-include torchkeras/assets *.png
+recursive-include torchkeras/assets *.jpeg
+recursive-exclude torchkeras/__pycache__ *
+recursive-exclude torchkeras/.ipynb_checkpoints *

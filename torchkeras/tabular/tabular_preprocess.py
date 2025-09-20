@@ -12,6 +12,7 @@ class NumericPreprocessor(BaseEstimator, TransformerMixin):
         self.numeric_features = numeric_features
 
     def fit(self, X, y=None):
+        self.fitted_ = True 
         return self
 
     def transform(self, X, y=None):
@@ -30,6 +31,7 @@ class BoolPreprocessor(BaseEstimator, TransformerMixin):
         
         self.ordinary_encoders = OrdinalEncoder(handle_unknown='use_encoded_value',unknown_value = np.nan)
         self.ordinary_encoders.fit(X[self.bool_features])
+        self.fitted_ = True 
         return self
 
     def transform(self, X, y=None):
@@ -61,6 +63,7 @@ class OneHotPreprocessor(BaseEstimator, TransformerMixin):
         for k, v in self.labels.items():
             for f in k + '_' + v[0]:
                 self._feature_names.append(f)
+        self.fitted_ = True 
                 
         return self
 
@@ -87,7 +90,7 @@ class EmbeddingPreprocessor(BaseEstimator, TransformerMixin):
             Xcol = self._fillna(X[col])
             self.trans_dics[col] = self._get_trans_dic(Xcol)
             self.trans_max[col] = max(list(self.trans_dics[col].values()))
-        
+        self.fitted_ = True 
         return self
 
     def transform(self, X, y=None):
@@ -214,9 +217,9 @@ class TabularPreprocessor(BaseEstimator, TransformerMixin):
         self.feature_names = []
         for pipe in transformer_list:
             self.feature_names.extend(pipe[-1][0].get_feature_names())
-            
-        self.is_fitted = True
-            
+
+        self.fitted_ = True
+
         return self
 
     def transform(self, X: pd.DataFrame, y = None) -> pd.DataFrame:

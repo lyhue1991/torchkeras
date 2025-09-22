@@ -21,7 +21,6 @@ setup(
     long_description=README,
     install_requires=[  
         'tabm',
-        'accelerate>=0.20.3'
          #'accelerate>=0.20.3',
          #'tqdm',
          #'torch',

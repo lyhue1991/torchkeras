@@ -18,7 +18,7 @@ Detailed documentation and user guides are available at
 https://github.com/lyhue1991/torchkeras.
 """
 
-__version__="4.0.5"
+__version__="4.0.6"
 
 from torchkeras.vlog import VLog
 
@@ -28,14 +28,9 @@ try:
     from torchkeras.utils import seed_everything,printlog,colorful,delete_object
 except Exception as err:
     print(err)
-
+    
 try:
     from torchkeras import tabular
 except Exception as err:
     print(err)
-    
-try:
-    from .hugmodel import HugModel
-except Exception:
-    pass
 

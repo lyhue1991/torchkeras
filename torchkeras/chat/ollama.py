@@ -53,6 +53,9 @@ class Ollama:
         
         
     def __call__(self,query):
+        if isinstance(query,str) and query.strip()=="/init":
+            self.history = []
+            return "history cleared."
         from IPython.display import display,clear_output 
         len_his = len(self.history)
         if len_his>=self.max_chat_rounds+1:

@@ -81,7 +81,7 @@ class ChatGPT(object):
             return err
     
     def __call__(self,prompt):
-        if isinstance(prompt,str) and prompt.strip() == "/init":
+        if isinstance(prompt, str) and prompt.strip() == "/init":
             self.messages = [self.messages[0]]
             return "History cleared."
         if len(self.messages)>=2*self.max_chat_rounds+1:

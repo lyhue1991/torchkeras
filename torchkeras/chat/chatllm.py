@@ -75,6 +75,9 @@ class ChatLLM:
         
 
     def __call__(self,query):
+        if isinstance(query, str) and query.strip() == "/init":
+            self.history = []
+            return "History cleared."
         
         len_his = len(self.history)
         if len_his>=self.max_chat_rounds+1:

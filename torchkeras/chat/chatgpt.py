@@ -81,6 +81,9 @@ class ChatGPT(object):
             return err
     
     def __call__(self,prompt):
+        if isinstance(prompt, str) and prompt.strip() == "/init":
+            self.messages = self.messages[:1]
+            return "History cleared."
         if len(self.messages)>=2*self.max_chat_rounds+1:
             self.messages = [self.messages[0]]+self.messages[3:]
         self.messages.append({'role':'user','content':prompt})

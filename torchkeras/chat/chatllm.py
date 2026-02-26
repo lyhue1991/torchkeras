@@ -75,7 +75,7 @@ class ChatLLM:
         
 
     def __call__(self,query):
-        if isinstance(query,str) and query.strip()=="/init":
+        if isinstance(query,str) and query.strip() == "/init":
             self.history = []
             return "history cleared."
         

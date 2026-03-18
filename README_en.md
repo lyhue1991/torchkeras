@@ -125,6 +125,10 @@ Versions when these features are introduced and the libraries which they used  o
 
 ```
 
+Optional integrations such as lightgbm, catboost, transformers, ultralytics, and causalml live in `torchkeras.tools`.
+Install the matching library first (for causalml use `pip install causalml`) and import `torchkeras.tools.calsualml`
+to access the upstream package with a clearer missing-dependency error.
+
 ### 3, Basic Examples 
 
 You can follow these full examples to get started with torchkeras.
@@ -195,4 +199,3 @@ Any other questions, you can contact the author form the wechat official account
 
 
 ![](https://tva1.sinaimg.cn/large/e6c9d24egy1h41m2zugguj20k00b9q46.jpg)
-

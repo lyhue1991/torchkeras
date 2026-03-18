@@ -193,6 +193,10 @@ torchkeras 支持以下这些功能特性，稳定支持这些功能的起始版
 
 ```
 
+可选的外部库集成（lightgbm、catboost、transformers、ultralytics、causalml 等）位于 `torchkeras.tools` 中。
+使用前请先安装对应库（如 causalml 需执行 `pip install causalml`），通过 `torchkeras.tools.calsualml`
+访问上游包时会给出更清晰的缺失依赖提示。
+
 ## 5，基本范例 🌰🌰
 
 
